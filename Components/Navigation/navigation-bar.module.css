@@ -31,3 +31,8 @@
   padding: 0;
   cursor: pointer;
 }
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
