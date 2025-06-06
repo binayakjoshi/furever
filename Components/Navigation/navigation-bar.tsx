@@ -1,10 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FaUserCircle } from "react-icons/fa";
 import NavLink from "./nav-link";
-import Button from "../UI/button";
 import logoImage from "@/assets/logo.png";
 import classes from "./navigation-bar.module.css";
+import NavActions from "./nav-actions";
 
 const NavigationBar = () => {
   return (
@@ -21,11 +20,8 @@ const NavigationBar = () => {
         <li className={classes.navItem}>
           <NavLink href="/about">About Us</NavLink>
         </li>
-
         <li className={`${classes.navItem} ${classes.iconItem}`}>
-          <Button className={classes.buttonWrapper}>
-            <FaUserCircle size={30} color="#333" />
-          </Button>
+          <NavActions />
         </li>
       </ul>
     </nav>
