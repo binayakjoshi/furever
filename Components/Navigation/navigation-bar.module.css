@@ -18,19 +18,13 @@
 }
 
 .iconItem {
-  margin-left: auto; 
+  margin-left: auto;
 }
 
 .navItem:last-of-type {
   margin-right: 0;
 }
 
-.buttonWrapper {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
 .logo {
   display: flex;
   align-items: center;
