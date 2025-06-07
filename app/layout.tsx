@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import NavigationBar from "@/Components/Navigation/navigation-bar";
+import { AuthProvider } from "@/context/auth-context";
+
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +27,10 @@ const RootLayout = ({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NavigationBar />
-        {children}
+        <AuthProvider>
+          <NavigationBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
