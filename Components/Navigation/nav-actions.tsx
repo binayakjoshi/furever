@@ -2,13 +2,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
+import NavLink from "./nav-link";
+import { useAuth } from "../../context/auth-context";
 import SideDrawer from "./side-drawer";
 import Button from "../UI/button";
 import classes from "./nav-actions.module.css";
 
 const NavActions = () => {
+  const { isLoggedIn } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const toggleDrawer = () => setDrawerOpen((p) => !p);
+
+  if (!isLoggedIn) return <NavLink href="/authenticate">Authenticate</NavLink>;
 
   return (
     <>
@@ -19,7 +24,6 @@ const NavActions = () => {
       >
         <FaUserCircle size={30} color="#333" />
       </Button>
-
       <SideDrawer isOpen={drawerOpen} onClose={toggleDrawer}>
         <nav className={classes.nav}>
           <ul>
