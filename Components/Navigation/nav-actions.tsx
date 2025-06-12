@@ -13,7 +13,13 @@ const NavActions = () => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const toggleDrawer = () => setDrawerOpen((p) => !p);
 
-  if (!isLoggedIn) return <NavLink href="/authenticate">Authenticate</NavLink>;
+  if (!isLoggedIn)
+    return (
+      <>
+        <NavLink href="/login">Login</NavLink>
+        <NavLink href="/signup">Sign Up</NavLink>
+      </>
+    );
 
   return (
     <>
