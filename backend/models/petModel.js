@@ -18,14 +18,6 @@ const petSchema = new mongoose.Schema({
         required: true,
         trim: true,
       },
-      diagnosedDate: {
-        type: Date,
-        default: Date.now,
-      },
-      treatment: {
-        type: String,
-        trim: true,
-      },
     },
   ],
   vaccination: [
