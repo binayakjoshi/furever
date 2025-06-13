@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./auth-footer.module.css";
 
-const Footer = () => {
+const AuthFooter = () => {
   return (
     <div className={styles.footer}>
       <p>By signing in, you agree to our</p>
@@ -17,4 +17,4 @@ const Footer = () => {
     </div>
   );
 };
-export default Footer;
+export default AuthFooter;
