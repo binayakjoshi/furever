@@ -16,10 +16,21 @@ exports.createPet = async (req, res) => {
   }
 }
 
-// Get all pets
+//get pets for a user (a user can have multiple pets)
 exports.getAllPets = async (req, res) => {
   try {
-    const pets = await Pet.find()
+    
+    const userId = req.query.userId || req.params.userId
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required to fetch pets",
+      })
+    }
+
+    const pets = await Pet.find({ user: userId })
+
     res.status(200).json({
       success: true,
       count: pets.length,
@@ -32,7 +43,6 @@ exports.getAllPets = async (req, res) => {
     })
   }
 }
-
 // Get a single pet by ID
 exports.getPetById = async (req, res) => {
   try {
