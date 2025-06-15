@@ -1,9 +1,15 @@
 const Pet = require("../models/petModel")
+const User = require("../models/userModel") // Make sure this line exists
 
 // Create a new pet
 exports.createPet = async (req, res) => {
   try {
+    // Create the pet
     const newPet = await Pet.create(req.body)
+
+    // Add pet to user's pets array
+    await User.findByIdAndUpdate(req.body.user, { $push: { pets: newPet._id } }, { new: true })
+
     res.status(201).json({
       success: true,
       data: newPet,
@@ -16,20 +22,21 @@ exports.createPet = async (req, res) => {
   }
 }
 
-//get pets for a user (a user can have multiple pets)
+// Get all pets for a specific user OR all pets
 exports.getAllPets = async (req, res) => {
   try {
-    
+    // Get userId from request query or params
     const userId = req.query.userId || req.params.userId
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is required to fetch pets",
-      })
-    }
+    let pets
 
-    const pets = await Pet.find({ user: userId })
+    if (userId) {
+      // Get pets for specific user
+      pets = await Pet.find({ user: userId })
+    } else {
+      // Get all pets if no userId provided
+      pets = await Pet.find()
+    }
 
     res.status(200).json({
       success: true,
@@ -43,6 +50,7 @@ exports.getAllPets = async (req, res) => {
     })
   }
 }
+
 // Get a single pet by ID
 exports.getPetById = async (req, res) => {
   try {
@@ -105,6 +113,9 @@ exports.deletePet = async (req, res) => {
         message: "Pet not found",
       })
     }
+
+    // Remove pet from user's pets array
+    await User.findByIdAndUpdate(pet.user, { $pull: { pets: req.params.id } }, { new: true })
 
     res.status(200).json({
       success: true,
