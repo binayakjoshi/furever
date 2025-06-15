@@ -41,21 +41,13 @@ const petSchema = new mongoose.Schema({
     },
     dueDate: Date,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  user:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  }
 })
 
-// Update the updatedAt field before saving
-petSchema.pre("save", function (next) {
-  this.updatedAt = Date.now()
-  next()
-})
 
 const Pet = mongoose.model("Pet", petSchema)
 

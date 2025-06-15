@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pet",
-      required: true,
     },
   ],
   phone: {
@@ -33,7 +32,11 @@ const userSchema = new mongoose.Schema({
   address: {
     type: String,
     trim: true,
-  }
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 })
 
 const User = mongoose.model("User", userSchema)
