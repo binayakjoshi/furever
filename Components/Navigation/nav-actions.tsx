@@ -5,7 +5,7 @@ import { FaUserCircle } from "react-icons/fa";
 import NavLink from "./nav-link";
 import { useAuth } from "../../context/auth-context";
 import SideDrawer from "./side-drawer";
-import Button from "../UI/button";
+import Button from "../CustomElements/button";
 import classes from "./nav-actions.module.css";
 
 const NavActions = () => {
@@ -40,8 +40,13 @@ const NavActions = () => {
               </Link>
             </li>
             <li>
-              <Link href="/pets/" onClick={toggleDrawer}>
+              <Link href="/user/1/pet" onClick={toggleDrawer}>
                 Your Pet Profile
+              </Link>
+            </li>
+            <li>
+              <Link href="/addpet" onClick={toggleDrawer}>
+                Add Pet
               </Link>
             </li>
           </ul>
