@@ -1,0 +1,24 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.empty {
+  text-align: center;
+  padding: 24px;
+}
+
+.empty h2 {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+}
+
+.empty :global(a),
+.empty button {
+  /* Assuming Button renders an <a> or <button>; ensure it looks centered */
+  display: inline-block;
+}
