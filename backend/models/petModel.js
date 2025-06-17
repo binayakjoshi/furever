@@ -45,7 +45,19 @@ const petSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }
+  },
+
+  image:{
+    type: String,
+    required: [true, "Pet image is required"],
+    trim: true,
+  },
+  images:[
+    {
+    type: String,
+    trim:true,
+    }
+  ]
 })
 
 
