@@ -1,191 +1,237 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-  FaExclamationCircle,
-} from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import type React from "react";
+import { useState, useCallback } from "react";
+import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
+
+import Input from "@/Components/CustomElements/input";
+import Button from "../CustomElements/button";
 import { useForm } from "@/lib/use-form";
-import { Values } from "@/lib/validate";
+import {
+  VALIDATOR_EMAIL,
+  VALIDATOR_REQUIRE,
+  VALIDATOR_MINLENGTH,
+} from "@/lib/validators";
+
 import styles from "./signup-form.module.css";
 
-type SignupFormProps = {
-  onSubmit: (values: {
-    email: string;
-    name: string;
-    password: string;
-    confirmPassword: string;
-  }) => void;
-};
+interface SignupFormProps {
+  onSubmit?: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<void> | void;
+  isLoading?: boolean;
+}
 
-const SignupForm = ({ onSubmit }: SignupFormProps) => {
-  const router = useRouter();
+const SignupForm: React.FC<SignupFormProps> = ({
+  onSubmit,
+  isLoading = false,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState("");
 
-  const {
-    values,
-    errors,
-    touched,
-    isSubmitting,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-  } = useForm<Values>(
-    { email: "", name: "", password: "", confirmPassword: "" },
-    (vals) => {
-      //onSubmit(vals);
-      router.push("/");
-    }
+  const [formState, inputHandler] = useForm(
+    {
+      name: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+      email: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+      password: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+      confirmPassword: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+    },
+    false
   );
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const password = formState.inputs.password.value;
+    const confirmPassword = formState.inputs.confirmPassword.value;
+
+    if (password !== confirmPassword) {
+      setPasswordMatchError("Passwords do not match");
+      return;
+    }
+
+    setPasswordMatchError("");
+
+    if (!formState.isValid || isSubmitting || isLoading) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (onSubmit) {
+        await onSubmit(
+          formState.inputs.name.value,
+          formState.inputs.email.value,
+          formState.inputs.password.value
+        );
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
+  // Custom input handler=
+  const customInputHandler = useCallback(
+    (id: string, value: string, isValid: boolean) => {
+      inputHandler(id, value, isValid);
+
+      // Clear password match error when either password field changes
+      if (id === "password" || id === "confirmPassword") {
+        setPasswordMatchError("");
+      }
+    },
+    [inputHandler]
+  );
+
+  const passwordsMatch =
+    formState.inputs.password.value === formState.inputs.confirmPassword.value;
+  const showPasswordMatchError =
+    passwordMatchError ||
+    (formState.inputs.confirmPassword.touched &&
+      formState.inputs.confirmPassword.value &&
+      !passwordsMatch);
 
   return (
     <form onSubmit={handleSubmit} className={styles.form} noValidate>
-      {/* Name */}
       <div className={styles.fieldGroup}>
-        <label htmlFor="name" className={styles.label}>
-          Name
-        </label>
-        <input
+        <Input
           id="name"
-          name="name"
+          element="input"
           type="text"
-          placeholder="Your name"
-          value={values.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className={`${styles.input} ${
-            touched.name && errors.name ? styles.error : ""
-          }`}
+          label="Full Name"
+          placeholder="Enter your full name"
+          validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(2)]}
+          errorText="Name must be at least 2 characters long"
+          onInput={customInputHandler}
+          className={styles.inputField}
         />
-        {touched.name && errors.name && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} /> {errors.name}
-          </div>
-        )}
       </div>
 
-      {/* Email */}
       <div className={styles.fieldGroup}>
-        <label htmlFor="email" className={styles.label}>
-          Email address
-        </label>
-        <input
+        <Input
           id="email"
-          name="email"
+          element="input"
           type="email"
+          label="Email address"
           placeholder="you@domain.com"
-          value={values.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className={`${styles.input} ${
-            touched.email && errors.email ? styles.error : ""
-          }`}
+          validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+          errorText="Please enter a valid email address"
+          onInput={customInputHandler}
+          className={styles.inputField}
         />
-        {touched.email && errors.email && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} /> {errors.email}
-          </div>
-        )}
       </div>
 
-      {/* Password */}
       <div className={styles.fieldGroup}>
-        <label htmlFor="password" className={styles.label}>
-          Password
-        </label>
         <div className={styles.passwordContainer}>
-          <input
+          <Input
             id="password"
-            name="password"
+            element="input"
             type={showPassword ? "text" : "password"}
+            label="Password"
             placeholder="Enter your password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className={`${styles.passwordInput} ${
-              touched.password && errors.password ? styles.error : ""
-            }`}
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+            errorText="Password must be at least 8 characters long"
+            onInput={customInputHandler}
+            className={styles.passwordField}
           />
-          <button
+          <Button
             type="button"
-            onClick={() => setShowPassword((v) => !v)}
+            onClick={togglePasswordVisibility}
             className={styles.passwordToggle}
-            aria-label="Toggle password visibility"
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
+            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          </Button>
         </div>
-        {touched.password && errors.password && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} />{" "}
-            {errors.password}
-          </div>
-        )}
       </div>
 
-      {/* Confirm Password */}
       <div className={styles.fieldGroup}>
-        <label htmlFor="confirmPassword" className={styles.label}>
-          Confirm Password
-        </label>
         <div className={styles.passwordContainer}>
-          <input
+          <Input
             id="confirmPassword"
-            name="confirmPassword"
+            element="input"
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Re-enter your password"
-            value={values.confirmPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className={`${styles.passwordInput} ${
-              touched.confirmPassword && errors.confirmPassword
-                ? styles.error
-                : ""
-            }`}
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+            errorText="Please confirm your password"
+            onInput={customInputHandler}
+            className={styles.passwordField}
           />
-          <button
+          <Button
             type="button"
-            onClick={() => setShowConfirmPassword((v) => !v)}
+            onClick={toggleConfirmPasswordVisibility}
             className={styles.passwordToggle}
-            aria-label="Toggle confirm password visibility"
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
           >
-            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
+            {showConfirmPassword ? (
+              <FaEyeSlash size={20} />
+            ) : (
+              <FaEye size={20} />
+            )}
+          </Button>
         </div>
-        {touched.confirmPassword && errors.confirmPassword && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} />{" "}
-            {errors.confirmPassword}
-          </div>
+        {showPasswordMatchError && (
+          <p className={styles.errorText}>
+            {passwordMatchError || "Passwords do not match"}
+          </p>
         )}
       </div>
 
-      {/* Submit Button */}
-      <button
+      <Button
         type="submit"
         className={styles.submitButton}
         disabled={
           isSubmitting ||
-          !values.email ||
-          !values.name ||
-          !values.password ||
-          !values.confirmPassword ||
-          !!errors.email ||
-          !!errors.name ||
-          !!errors.password ||
-          !!errors.confirmPassword
+          isLoading ||
+          !formState.isValid ||
+          !formState.inputs.name.value ||
+          !formState.inputs.email.value ||
+          !formState.inputs.password.value ||
+          !formState.inputs.confirmPassword.value ||
+          !passwordsMatch
         }
       >
-        {isSubmitting ? (
-          <FaSpinner className={styles.loadingIcon} />
+        {isSubmitting || isLoading ? (
+          <>
+            <FaSpinner className={styles.loadingIcon} size={20} />
+            Creating account...
+          </>
         ) : (
-          "Sign up"
+          "Create account"
         )}
-      </button>
+      </Button>
     </form>
   );
 };

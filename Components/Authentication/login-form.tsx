@@ -1,114 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-  FaExclamationCircle,
-} from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import type React from "react";
+import { useState } from "react";
+
+import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import Input from "@/Components/CustomElements/input";
+import Button from "../CustomElements/button";
 import { useForm } from "@/lib/use-form";
-import { Values } from "@/lib/validate";
+import {
+  VALIDATOR_EMAIL,
+  VALIDATOR_REQUIRE,
+  VALIDATOR_MINLENGTH,
+} from "@/lib/validators";
 import styles from "./login-form.module.css";
 
 interface LoginFormProps {
-  onSubmit: (values: { email: string; password: string }) => void;
+  onSubmit?: (email: string, password: string) => Promise<void> | void;
+  isLoading?: boolean;
 }
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
-  const router = useRouter();
+const LoginForm: React.FC<LoginFormProps> = ({
+  onSubmit,
+  isLoading = false,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const {
-    values,
-    errors,
-    touched,
-    isSubmitting,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-  } = useForm<Values>({ email: "", password: "" }, (vals) => {
-    onSubmit(vals);
-    router.push("/dashboard");
-  });
+  const [formState, inputHandler] = useForm(
+    {
+      email: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+      password: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+    },
+    false
+  );
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!formState.isValid || isSubmitting || isLoading) {
+      return;
+    }
+    //needs to be implemented later on once backend is ready
+    setIsSubmitting(true);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   return (
     <form onSubmit={handleSubmit} className={styles.form} noValidate>
       <div className={styles.fieldGroup}>
-        <label htmlFor="email" className={styles.label}>
-          Email address
-        </label>
-        <input
+        <Input
           id="email"
-          name="email"
+          element="input"
           type="email"
+          label="Email address"
           placeholder="you@domain.com"
-          value={values.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className={`${styles.input} ${
-            touched.email && errors.email ? styles.error : ""
-          }`}
+          validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+          errorText="Please enter a valid email address"
+          onInput={inputHandler}
+          className={styles.inputField}
         />
-        {touched.email && errors.email && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} /> {errors.email}
-          </div>
-        )}
       </div>
 
       <div className={styles.fieldGroup}>
-        <label htmlFor="password" className={styles.label}>
-          Password
-        </label>
         <div className={styles.passwordContainer}>
-          <input
+          <Input
             id="password"
-            name="password"
+            element="input"
             type={showPassword ? "text" : "password"}
+            label="Password"
             placeholder="Enter your password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className={`${styles.passwordInput} ${
-              touched.password && errors.password ? styles.error : ""
-            }`}
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(6)]}
+            errorText="Password must be at least 6 characters long"
+            onInput={inputHandler}
+            className={styles.passwordField}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
+          <Button
+            type="Button"
+            onClick={togglePasswordVisibility}
             className={styles.passwordToggle}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
+            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          </Button>
         </div>
-        {touched.password && errors.password && (
-          <div className={styles.errorMessage}>
-            <FaExclamationCircle className={styles.errorIcon} />{" "}
-            {errors.password}
-          </div>
-        )}
       </div>
 
-      <button
+      <Button
         type="submit"
         className={styles.submitButton}
         disabled={
           isSubmitting ||
-          !values.email ||
-          !values.password ||
-          !!errors.email ||
-          !!errors.password
+          isLoading ||
+          !formState.isValid ||
+          !formState.inputs.email.value ||
+          !formState.inputs.password.value
         }
       >
-        {isSubmitting ? (
-          <FaSpinner className={styles.loadingIcon} />
+        {isSubmitting || isLoading ? (
+          <>
+            <FaSpinner className={styles.loadingIcon} size={20} />
+            Signing in...
+          </>
         ) : (
           "Sign in"
         )}
-      </button>
+      </Button>
     </form>
   );
-}
+};
+
+export default LoginForm;
