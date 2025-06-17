@@ -10,4 +10,10 @@ router.get("/:id", petController.getPetById)
 router.put("/:id", petController.updatePet)
 router.delete("/:id", petController.deletePet)
 
+
+// Image upload routes
+router.post("/:petId/upload-image", imageController.uploadPetImage)
+router.post("/:petId/upload-images", imageController.uploadPetImages)
+router.delete("/:petId/delete-image", imageController.deletePetImage)
+
 module.exports = router
