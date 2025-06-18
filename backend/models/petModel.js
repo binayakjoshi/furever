@@ -11,6 +11,16 @@ const petSchema = new mongoose.Schema({
     required: [true, "Pet description is required"],
     trim: true,
   },
+   dob: {
+      type: Date,
+      required: [true, "Pet date of birth is required"],
+      validate: {
+        validator: (value) => {
+          return value <= new Date() 
+        },
+        message: "invalid dob",
+      },
+    },
   diseases: [
     {
       name: {
@@ -48,14 +58,13 @@ const petSchema = new mongoose.Schema({
   },
 
   image:{
-    type: String,
-    required: [true, "Pet image is required"],
-    trim: true,
+    url:String,
+    publicId:String,
   },
   images:[
     {
-    type: String,
-    trim:true,
+      url:String,
+      publicId:String,
     }
   ]
 })
