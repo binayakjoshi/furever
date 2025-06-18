@@ -262,30 +262,30 @@ exports.deletePetImage = async (req, res) => {
 //   }
 // }
 
-// // Get image upload status/info
-// exports.getImageInfo = async (req, res) => {
-//   try {
-//     const { publicId } = req.params
+// Get image upload status/info
+exports.getImageInfo = async (req, res) => {
+  try {
+    const { publicId } = req.params
 
-//     // Get image info from Cloudinary
-//     const result = await cloudinary.api.resource(publicId)
+    // Get image info from Cloudinary
+    const result = await cloudinary.api.resource(publicId)
 
-//     res.status(200).json({
-//       success: true,
-//       data: {
-//         publicId: result.public_id,
-//         url: result.secure_url,
-//         format: result.format,
-//         width: result.width,
-//         height: result.height,
-//         size: result.bytes,
-//         createdAt: result.created_at,
-//       },
-//     })
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     })
-//   }
-// }
+    res.status(200).json({
+      success: true,
+      data: {
+        publicId: result.public_id,
+        url: result.secure_url,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        size: result.bytes,
+        createdAt: result.created_at,
+      },
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    })
+  }
+}

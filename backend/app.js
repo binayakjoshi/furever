@@ -7,6 +7,8 @@ const petRoutes = require("./routes/petRoutes")
 
 const userRoutes=require("./routes/userRoutes")
 
+const imageRoutes=require("./routes/imageRoutes")
+
 const app = express()
 const PORT = process.env.PORT || 5000
 
@@ -27,7 +29,7 @@ app.use(express.json())
 
 
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((err) => console.error("MongoDB connection error:", err))
 

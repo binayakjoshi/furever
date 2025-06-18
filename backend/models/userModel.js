@@ -33,11 +33,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  profileImage:{
-    type:String,
-    trim:true,
+  // profileImage:{
+  //   url:String,
+  //   publicID:String,
 
-  },
+  // },
   createdAt: {
     type: Date,
     default: Date.now,
