@@ -37,20 +37,17 @@ const petSchema = new mongoose.Schema({
         required: true,
         trim: true,
       },
-      date: {
+      vaccDate: {
         type: Date,
         required: true,
       },
-      validUntil: Date,
+      nextVaccDate:{
+        type: Date,
+        required :true,
+      } 
     },
   ],
-  nextVaccination: {
-    name: {
-      type: String,
-      trim: true,
-    },
-    dueDate: Date,
-  },
+  
   user:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -61,15 +58,12 @@ const petSchema = new mongoose.Schema({
     url:String,
     publicId:String,
   },
-  images:[
-    {
-      url:String,
-      publicId:String,
-    }
-  ]
+  
 })
 
 
 const Pet = mongoose.model("Pet", petSchema)
 
 module.exports = Pet
+
+
