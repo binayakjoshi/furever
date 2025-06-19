@@ -47,6 +47,11 @@ const petSchema = new mongoose.Schema({
       } 
     },
   ],
+  breed: {
+    type: String,
+    required: [true, "Pet breed is required"],
+    trim: true,
+  },
   
   user:{
     type: mongoose.Schema.Types.ObjectId,
