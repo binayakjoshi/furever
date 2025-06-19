@@ -8,40 +8,20 @@ cloudinary.config({
 })
 
 
-const uploadToCloudinary = async (base64String, folder = "pets") => {
-  try {
-    const result = await cloudinary.uploader.upload(base64String, {
-      folder: folder,
-      resource_type: "auto", 
-      quality: "auto", 
-      fetch_format: "auto", 
-    })
-
-    return {
-      url: result.secure_url,
-      publicId: result.public_id,
-      width: result.width,
-      height: result.height,
-      format: result.format,
-      size: result.bytes,
-    }
-  } catch (error) {
-    throw new Error(`Cloudinary upload failed: ${error.message}`)
-  }
-}
-
-
-const deleteFromCloudinary = async (publicId) => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId)
-    return result
-  } catch (error) {
-    throw new Error(`Cloudinary delete failed: ${error.message}`)
-  }
-}
+const uploadImage = async (image) => {
+  const imageData = await image.arrayBuffer();
+  const mime = image.type;
+  const encoding = "base64";
+  const base64Data = Buffer.from(imageData).toString("base64");
+  const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+  const result = await cloudinary.uploader.upload(fileUri, {
+    folder: "pets",
+  });
+  return result.secure_url;
+};
 
 module.exports = {
   cloudinary,
-  uploadToCloudinary,
-  deleteFromCloudinary,
-}
+  uploadImage,
+};
+// module.exports = { cloudinary, uploadImage }
