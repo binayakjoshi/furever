@@ -22,23 +22,22 @@ app.use(
   }),
 )
 
-// Increase payload limit for base64 images
-app.use(express.json({ limit: "10mb" }))
-app.use(express.urlencoded({ limit: "10mb", extended: true }))
 app.use(express.json())
 
 
-mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.error("MongoDB connection error:", err))
 
 app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
-app.use("/api/images", imageRoutes)
 
 
-app.get("/", (req, res) => {
+app.use((req,res,next) => {
+  const error=new Error("couldn't find the route",404)
+  next(error);
+
+});
+
+
+app.get("/", (req, res,next) => {
   res.json({
     message: "Pet Information API with Cloudinary Integration",
     endpoints: {
@@ -64,6 +63,10 @@ app.get("/", (req, res) => {
 })
 
 
-app.listen(PORT, () => {
+
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(app.listen(PORT, () => {
   console.log(`Server is running on : http://localhost:${PORT}`)
-})
+}))
+  .catch((err) => console.error("MongoDB connection error:", err))
