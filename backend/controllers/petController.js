@@ -1,71 +1,90 @@
 const Pet = require("../models/petModel")
 const User = require("../models/userModel")
-const { uploadToCloudinary, deleteFromCloudinary } = require("../config/cloudinary")
+const { deleteFromCloudinary } = require("../config/cloudinary")
+const { validationResult } = require("express-validator")
 
-// Create a new pet 
-exports.createPet = async (req, res) => {
+// Create a new pet with multer-cloudinary upload
+exports.createPet = async (req, res, next) => {
   try {
-    const { image, ...petData } = req.body
+    console.log("=== DETAILED DEBUG INFO ===")
+    console.log("req.body:", req.body)
+    console.log("req.file:", req.file)
+    console.log("diseases type:", typeof req.body.diseases)
+    console.log("vaccination type:", typeof req.body.vaccination)
+    console.log("============================")
 
-    
-    if (!image) {
+    // ✅ Check validation errors
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      console.log("Validation errors:", errors.array())
       return res.status(400).json({
         success: false,
-        message: "Pet image is required. Cannot create pet without an image.",
+        message: "Validation failed",
+        errors: errors.array(),
       })
     }
 
-    // Validate required fields
-    if (!petData.name) {
+    // ✅ Check if image was uploaded
+    if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Pet name is required.",
+        message: "Pet image is required",
       })
     }
 
-    if (!petData.description || petData.description.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Pet description is required and must be at least 6 characters long.",
+    // ✅ Get image URL from multer-cloudinary
+    const imageUrl = req.file.path
+    const imagePublicId = req.file.filename
+
+    // ✅ Get pet data from form
+    const petData = req.body
+
+    // ✅ FIXED: Handle diseases - check if already array or needs parsing
+    let diseases = []
+    if (Array.isArray(petData.diseases)) {
+      // Already an array (from JSON or proper form parsing)
+      diseases = petData.diseases.filter((d) => d && d.name)
+      console.log("Diseases already array:", diseases)
+    } else {
+      // Parse from form fields (fallback)
+      console.log("Parsing diseases from form fields...")
+      Object.keys(petData).forEach((key) => {
+        if (key.startsWith("diseases[") && key.includes("][name]")) {
+          const indexMatch = key.match(/diseases\[(\d+)\]/)
+          if (indexMatch) {
+            const index = Number.parseInt(indexMatch[1])
+            if (!diseases[index]) diseases[index] = {}
+            diseases[index].name = petData[key]
+          }
+        }
       })
+      diseases = diseases.filter((d) => d && d.name)
     }
 
-    if (!petData.breed) {
-      return res.status(400).json({
-        success: false,
-        message: "Pet breed is required.",
+    // ✅ FIXED: Handle vaccination - check if already array or needs parsing
+    let vaccination = []
+    if (Array.isArray(petData.vaccination)) {
+      // Already an array (from JSON or proper form parsing)
+      vaccination = petData.vaccination.filter((v) => v && v.name)
+      console.log("Vaccination already array:", vaccination)
+    } else {
+      // Parse from form fields (fallback)
+      console.log("Parsing vaccination from form fields...")
+      Object.keys(petData).forEach((key) => {
+        if (key.startsWith("vaccination[")) {
+          const match = key.match(/vaccination\[(\d+)\]\[(\w+)\]/)
+          if (match) {
+            const index = Number.parseInt(match[1])
+            const field = match[2]
+            if (!vaccination[index]) vaccination[index] = {}
+            vaccination[index][field] = petData[key]
+          }
+        }
       })
+      vaccination = vaccination.filter((v) => v && v.name)
     }
 
-    if (!petData.dob) {
-      return res.status(400).json({
-        success: false,
-        message: "Pet date of birth is required.",
-      })
-    }
-
-    if (!petData.user) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID is required.",
-      })
-    }
-
-    if (!petData.nextVaccination || !petData.nextVaccination.name) {
-      return res.status(400).json({
-        success: false,
-        message: "Next vaccination name is required.",
-      })
-    }
-
-    if (!petData.nextVaccination || !petData.nextVaccination.dueDate) {
-      return res.status(400).json({
-        success: false,
-        message: "Next vaccination due date is required.",
-      })
-    }
-
-    // Validate DOB is not in future
+    // ✅ Validate DOB is not in future
     const dobDate = new Date(petData.dob)
     if (dobDate > new Date()) {
       return res.status(400).json({
@@ -74,33 +93,22 @@ exports.createPet = async (req, res) => {
       })
     }
 
-    // Validate base64 image format
-    if (!image.startsWith("data:image/")) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid image format. Please provide a valid base64 image.",
-      })
-    }
-
-    // Upload image to Cloudinary
-    let uploadResult
-    try {
-      uploadResult = await uploadToCloudinary(image, "furever/pets")
-    } catch (imageError) {
-      return res.status(400).json({
-        success: false,
-        message: `Image upload failed: ${imageError.message}`,
-      })
-    }
-
-    // Prepare pet data with image
+    // ✅ Prepare clean pet data
     const newPetData = {
-      ...petData,
+      name: petData.name,
+      description: petData.description,
+      breed: petData.breed,
+      dob: petData.dob,
+      user: petData.user,
+      diseases: diseases, // ✅ Now properly populated
+      vaccination: vaccination, // ✅ Now properly populated
       image: {
-        url: uploadResult.url,
-        publicId: uploadResult.publicId,
+        url: imageUrl,
+        publicId: imagePublicId,
       },
     }
+
+    console.log("Final pet data being saved:", JSON.stringify(newPetData, null, 2))
 
     // Create the pet
     const newPet = await Pet.create(newPetData)
@@ -114,6 +122,7 @@ exports.createPet = async (req, res) => {
       data: newPet,
     })
   } catch (error) {
+    console.error("Create pet error:", error)
     res.status(400).json({
       success: false,
       message: error.message,
@@ -121,11 +130,10 @@ exports.createPet = async (req, res) => {
   }
 }
 
-// Get all pets for a specific user OR all pets
+// ... rest of the methods remain the same
 exports.getAllPets = async (req, res) => {
   try {
     const userId = req.params.userId || req.query.userId
-
     let pets
 
     if (userId) {
@@ -147,7 +155,6 @@ exports.getAllPets = async (req, res) => {
   }
 }
 
-// Get a single pet by ID
 exports.getPetById = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id).populate("user", "name email phone")
@@ -171,13 +178,11 @@ exports.getPetById = async (req, res) => {
   }
 }
 
-// Update a pet (with optional image update)
 exports.updatePet = async (req, res) => {
   try {
-    const { image, ...updateData } = req.body
-
-    // Find the existing pet
+    const petData = req.body
     const existingPet = await Pet.findById(req.params.id)
+
     if (!existingPet) {
       return res.status(404).json({
         success: false,
@@ -185,51 +190,79 @@ exports.updatePet = async (req, res) => {
       })
     }
 
-    // Validate DOB if being updated
+    // ✅ FIXED: Handle arrays properly in update too
+    let diseases = []
+    let vaccination = []
+
+    if (Array.isArray(petData.diseases)) {
+      diseases = petData.diseases.filter((d) => d && d.name)
+    } else {
+      Object.keys(petData).forEach((key) => {
+        if (key.startsWith("diseases[") && key.includes("][name]")) {
+          const indexMatch = key.match(/diseases\[(\d+)\]/)
+          if (indexMatch) {
+            const index = Number.parseInt(indexMatch[1])
+            if (!diseases[index]) diseases[index] = {}
+            diseases[index].name = petData[key]
+          }
+        }
+      })
+      diseases = diseases.filter((d) => d && d.name)
+    }
+
+    if (Array.isArray(petData.vaccination)) {
+      vaccination = petData.vaccination.filter((v) => v && v.name)
+    } else {
+      Object.keys(petData).forEach((key) => {
+        if (key.startsWith("vaccination[")) {
+          const match = key.match(/vaccination\[(\d+)\]\[(\w+)\]/)
+          if (match) {
+            const index = Number.parseInt(match[1])
+            const field = match[2]
+            if (!vaccination[index]) vaccination[index] = {}
+            vaccination[index][field] = petData[key]
+          }
+        }
+      })
+      vaccination = vaccination.filter((v) => v && v.name)
+    }
+
+    const updateData = {
+      name: petData.name || existingPet.name,
+      description: petData.description || existingPet.description,
+      breed: petData.breed || existingPet.breed,
+      dob: petData.dob || existingPet.dob,
+      user: petData.user || existingPet.user,
+    }
+
+    if (diseases.length > 0) {
+      updateData.diseases = diseases
+    }
+    if (vaccination.length > 0) {
+      updateData.vaccination = vaccination
+    }
+
+    if (req.file) {
+      if (existingPet.image && existingPet.image.publicId) {
+        try {
+          await deleteFromCloudinary(existingPet.image.publicId)
+        } catch (error) {
+          console.log("Warning: Could not delete old image:", error.message)
+        }
+      }
+
+      updateData.image = {
+        url: req.file.path,
+        publicId: req.file.filename,
+      }
+    }
+
     if (updateData.dob) {
       const dobDate = new Date(updateData.dob)
       if (dobDate > new Date()) {
         return res.status(400).json({
           success: false,
           message: "Pet date of birth cannot be in the future.",
-        })
-      }
-    }
-
-    
-    if (updateData.description && updateData.description.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Description must be at least 6 characters long.",
-      })
-    }
-
-    // Handle image update if provided
-    if (image) {
-      // Validate base64 image format
-      if (!image.startsWith("data:image/")) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid image format. Please provide a valid base64 image.",
-        })
-      }
-
-      try {
-        // Delete old image from Cloudinary
-        if (existingPet.image && existingPet.image.publicId) {
-          await deleteFromCloudinary(existingPet.image.publicId)
-        }
-
-        // Upload new image
-        const uploadResult = await uploadToCloudinary(image, "furever/pets")
-        updateData.image = {
-          url: uploadResult.url,
-          publicId: uploadResult.publicId,
-        }
-      } catch (imageError) {
-        return res.status(400).json({
-          success: false,
-          message: `Image upload failed: ${imageError.message}`,
         })
       }
     }
@@ -252,7 +285,6 @@ exports.updatePet = async (req, res) => {
   }
 }
 
-// Delete a pet (and its image)
 exports.deletePet = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id)
@@ -264,7 +296,6 @@ exports.deletePet = async (req, res) => {
       })
     }
 
-    // Delete image from Cloudinary
     if (pet.image && pet.image.publicId) {
       try {
         await deleteFromCloudinary(pet.image.publicId)
@@ -273,10 +304,7 @@ exports.deletePet = async (req, res) => {
       }
     }
 
-    // Delete pet from database
     await Pet.findByIdAndDelete(req.params.id)
-
-    // Remove pet from user's pets array
     await User.findByIdAndUpdate(pet.user, { $pull: { pets: req.params.id } }, { new: true })
 
     res.status(200).json({
@@ -291,5 +319,3 @@ exports.deletePet = async (req, res) => {
     })
   }
 }
-
-
