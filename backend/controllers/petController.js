@@ -3,17 +3,8 @@ const User = require("../models/userModel")
 const { deleteFromCloudinary } = require("../config/cloudinary")
 const { validationResult } = require("express-validator")
 
-// Create a new pet with multer-cloudinary upload
 exports.createPet = async (req, res, next) => {
   try {
-    console.log("=== DETAILED DEBUG INFO ===")
-    console.log("req.body:", req.body)
-    console.log("req.file:", req.file)
-    console.log("diseases type:", typeof req.body.diseases)
-    console.log("vaccination type:", typeof req.body.vaccination)
-    console.log("============================")
-
-    // ✅ Check validation errors
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       console.log("Validation errors:", errors.array())
@@ -24,7 +15,6 @@ exports.createPet = async (req, res, next) => {
       })
     }
 
-    // ✅ Check if image was uploaded
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -32,21 +22,15 @@ exports.createPet = async (req, res, next) => {
       })
     }
 
-    // ✅ Get image URL from multer-cloudinary
     const imageUrl = req.file.path
     const imagePublicId = req.file.filename
-
-    // ✅ Get pet data from form
     const petData = req.body
 
-    // ✅ FIXED: Handle diseases - check if already array or needs parsing
     let diseases = []
     if (Array.isArray(petData.diseases)) {
-      // Already an array (from JSON or proper form parsing)
       diseases = petData.diseases.filter((d) => d && d.name)
       console.log("Diseases already array:", diseases)
     } else {
-      // Parse from form fields (fallback)
       console.log("Parsing diseases from form fields...")
       Object.keys(petData).forEach((key) => {
         if (key.startsWith("diseases[") && key.includes("][name]")) {
@@ -61,14 +45,11 @@ exports.createPet = async (req, res, next) => {
       diseases = diseases.filter((d) => d && d.name)
     }
 
-    // ✅ FIXED: Handle vaccination - check if already array or needs parsing
     let vaccination = []
     if (Array.isArray(petData.vaccination)) {
-      // Already an array (from JSON or proper form parsing)
       vaccination = petData.vaccination.filter((v) => v && v.name)
       console.log("Vaccination already array:", vaccination)
     } else {
-      // Parse from form fields (fallback)
       console.log("Parsing vaccination from form fields...")
       Object.keys(petData).forEach((key) => {
         if (key.startsWith("vaccination[")) {
@@ -84,7 +65,6 @@ exports.createPet = async (req, res, next) => {
       vaccination = vaccination.filter((v) => v && v.name)
     }
 
-    // ✅ Validate DOB is not in future
     const dobDate = new Date(petData.dob)
     if (dobDate > new Date()) {
       return res.status(400).json({
@@ -93,15 +73,15 @@ exports.createPet = async (req, res, next) => {
       })
     }
 
-    // ✅ Prepare clean pet data
+    
     const newPetData = {
       name: petData.name,
       description: petData.description,
       breed: petData.breed,
       dob: petData.dob,
-      user: petData.user,
-      diseases: diseases, // ✅ Now properly populated
-      vaccination: vaccination, // ✅ Now properly populated
+      user: "60d0fe4f5311236168a109ca",
+      diseases: diseases, 
+      vaccination: vaccination,
       image: {
         url: imageUrl,
         publicId: imagePublicId,
@@ -110,10 +90,10 @@ exports.createPet = async (req, res, next) => {
 
     console.log("Final pet data being saved:", JSON.stringify(newPetData, null, 2))
 
-    // Create the pet
+   
     const newPet = await Pet.create(newPetData)
 
-    // Add pet to user's pets array
+    
     await User.findByIdAndUpdate(petData.user, { $push: { pets: newPet._id } }, { new: true })
 
     res.status(201).json({
@@ -130,8 +110,7 @@ exports.createPet = async (req, res, next) => {
   }
 }
 
-// ... rest of the methods remain the same
-exports.getAllPets = async (req, res) => {
+exports.getPetsByUserId = async (req, res) => {
   try {
     const userId = req.params.userId || req.query.userId
     let pets
@@ -190,7 +169,6 @@ exports.updatePet = async (req, res) => {
       })
     }
 
-    // ✅ FIXED: Handle arrays properly in update too
     let diseases = []
     let vaccination = []
 
