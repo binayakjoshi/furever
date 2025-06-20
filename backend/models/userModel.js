@@ -14,10 +14,17 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
   },
-  password: {
+   password: {
     type: String,
-    required: [true, "Password is required"],
-    minlength: 6,
+    minlength: [6, "Password must be at least 6 characters"],
+    required: ()=> {
+      return !this.googleId
+    },
+  },
+   googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   pets: [
     {
@@ -33,6 +40,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+
   // profileImage:{
   //   url:String,
   //   publicID:String,
