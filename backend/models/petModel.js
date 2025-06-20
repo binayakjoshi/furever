@@ -23,14 +23,11 @@ const petSchema = new mongoose.Schema({
     },
   diseases: [
     {
-      name: {
-        type: String,
-        required: true,
-        trim: true,
-      },
+      type:String,
+      required : true
     },
   ],
-  vaccination: [
+  vaccinations: [
     {
       name: {
         type: String,
