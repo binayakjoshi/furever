@@ -1,10 +1,8 @@
-const express = require("express")
-const router = express.Router()
-const userController = require("../controllers/userController")
-const { body } = require("express-validator")
-const HttpError = require("../models/http-error")
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
+const express = require("express");
+const router = express.Router();
+const userController = require("../controllers/userController");
+const authenticate = require("../middleware/authentication"); // adjust path if needed
+const { body } = require("express-validator");
 
 router.post(
   "/signup",
@@ -15,7 +13,7 @@ router.post(
     body("role").optional().isIn(["user", "vet"]).withMessage("Role must be either user or vet"),
   ],
   userController.signup,
-)
+);
 
 router.post(
   "/login",
@@ -24,18 +22,8 @@ router.post(
     body("password").not().isEmpty().withMessage("Password is required"),
   ],
   userController.login,
-)
+);
+router.post("/logout", authenticate, userController.logout);
+router.get("/me", authenticate, userController.getCurrentUser);
 
-// CRUD routes
-router.post(
-    "/signup", userController.createUser)
-router.get("/", userController.getAllUsers)
-router.get("/:id", userController.getUserById)
-router.put("/:id", userController.updateUser)
-router.delete("/:id", userController.deleteUser)
-
-// Profile image routes
-// router.post("/:userId/upload-profile-image", imageController.uploadUserImage)
-// router.delete("/:userId/delete-profile-image", imageController.deleteUserImage)
-
-module.exports = router
+module.exports = router;
