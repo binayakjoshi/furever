@@ -26,4 +26,13 @@ router.post(
 router.post("/logout", authenticate, userController.logout);
 router.get("/me", authenticate, userController.getCurrentUser);
 
+<<<<<<< HEAD
 module.exports = router;
+=======
+router.get("/:id", userController.getUserById)
+router.put("/:id", userController.updateUser)
+router.delete("/:id", userController.deleteUser)
+
+
+module.exports = router
+>>>>>>> db9e84567c3230b989223497b1aca12ab61df3fd
