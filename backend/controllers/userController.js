@@ -22,14 +22,11 @@ const sendTokenCookie = (res, payload) => {
 
 const signup = async (req, res, next) => {
   try {
-   
-    const error = validationResult(req);
-    if(!error.isEmpty()){
-      return next(new HttpError("Invalid Data Passed"),400)
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next(new HttpError("Invalid data passed", 400));
     }
-   
-    const { name, email, password, role = "user" } = req.body
+    const { name, email, password, role = "user" } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -75,13 +72,11 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const error = validationResult(req);
-    if(!error.isEmpty()) return next(new HttpError("Invalid Data Passed"),400)
-
-    const { email, password } = req.body
-
-    const existingUser = await User.findOne({ email: email })
-   
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next(new HttpError("Invalid data passed", 400));
+    }
+    const { email, password } = req.body;
 
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
