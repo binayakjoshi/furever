@@ -8,7 +8,11 @@ const bcrypt = require("bcryptjs")
 const signup = async (req, res, next) => {
   try {
    
-    const errors = validationResult(req)
+    const error = validationResult(req);
+    if(!error.isEmpty()){
+      return next(new HttpError("Invalid Data Passed"),400)
+
+    }
    
     const { name, email, password, role = "user" } = req.body
 
@@ -63,7 +67,8 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
- 
+    const error = validationResult(req);
+    if(!error.isEmpty()) return next(new HttpError("Invalid Data Passed"),400)
 
     const { email, password } = req.body
 
