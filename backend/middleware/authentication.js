@@ -1,23 +1,23 @@
-const jwt = require ('jsonwebtoken');
+const jwt = require("jsonwebtoken");
+const HttpError = require("../models/http-error");
 
-const HttpError= require('../models/http-error');
-
-const authenticate= (req, res,next)=>{
-    try{
-        const token = req.headers.authentication;
-
-        if(!token || !token.startsWith('Bearer')){
-            return next(new HttpError('Authentication failed, token not found', 401));
-        }
-
-        if (!token){
-            return next(new HttpError('Authentication failed, token not found', 401));
+const authenticate = (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return next(new HttpError("Please login or create account to visit this route", 401));
     }
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData={userId:decodedToken.userId}
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return next(new HttpError("Invalid or expired token, please login again", 401));
+    }
+    req.userData = { userId: decodedToken.userId, email: decodedToken.email };
     next();
-}
-    catch(error){
-        return next(new HttpError('Authentication failed, token not found', 401));
-    }
-}
+  } catch (error) {
+    return next(new HttpError("Authentication failed", 401));
+  }
+};
+
+module.exports = authenticate;
