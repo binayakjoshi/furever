@@ -1,0 +1,86 @@
+.container {
+	max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+.introSection{
+  text-align: center;
+	margin-bottom: 4rem;
+}
+.introTitle{
+	font-size: 3rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+.introContent{
+	font-size: 1rem;
+  color: #6b7280;
+  max-width: 48rem;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.gridContent{
+	display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+@media (min-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.contactInfo {
+  background-color: #f9fafb;
+  padding: 2rem;
+  border-radius: 1rem;
+  height: fit-content;
+}
+
+.contactTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.contactIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: #dbeafe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.contactDetails h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.contactDetails p {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.contactDetails a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.contactDetails a:hover {
+  text-decoration: underline;
+}
