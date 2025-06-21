@@ -14,17 +14,17 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
   },
-   password: {
+  password: {
     type: String,
-    minlength: [6, "Password must be at least 6 characters"],
-    required: ()=> {
-      return !this.googleId
-    },
+    required: [true, "Password is required"],
+    minlength: 6,
   },
-   googleId: {
+  // ✅ Added role field for user/vet distinction
+  role: {
     type: String,
-    unique: true,
-    sparse: true,
+    enum: ["user", "vet"],
+    default: "user",
+    required: true,
   },
   pets: [
     {
@@ -40,12 +40,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-
-  // profileImage:{
-  //   url:String,
-  //   publicID:String,
-
-  // },
+  profileImage: {
+    url: String,
+    publicId: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
