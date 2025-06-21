@@ -26,16 +26,9 @@ router.post(
   userController.login,
 )
 
-// CRUD routes
-router.post(
-    "/signup", userController.createUser)
-router.get("/", userController.getAllUsers)
 router.get("/:id", userController.getUserById)
 router.put("/:id", userController.updateUser)
 router.delete("/:id", userController.deleteUser)
 
-// Profile image routes
-// router.post("/:userId/upload-profile-image", imageController.uploadUserImage)
-// router.delete("/:userId/delete-profile-image", imageController.deleteUserImage)
 
 module.exports = router
