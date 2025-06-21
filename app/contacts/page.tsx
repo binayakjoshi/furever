@@ -41,9 +41,7 @@ const ContactPage = () => {
                 </a>
                 <br />
                 Adoption:{" "}
-                <a href="mailto:bhatta.abhaya14@gmail.com">
-                  bhatta.abhaya14@gmail.com
-                </a>
+                <a href="pahadipragyan@gmail.com">pahadipragyan@gmail.com</a>
               </p>
             </div>
           </div>
