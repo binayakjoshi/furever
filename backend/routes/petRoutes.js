@@ -1,10 +1,14 @@
 const express = require("express")
-const router = express.Router()
-const petController = require("../controllers/petController")
-const imageUpload = require("../middleware/imageUpload")
 const { body } = require("express-validator") 
 
+const authenticate = require("../middleware/authentication"); // adjust path if needed
 
+const petController = require("../controllers/petController")
+const imageUpload = require("../middleware/imageUpload")
+
+const router = express.Router()
+
+router.use(authenticate);
 router.post(
   "/",
   imageUpload.single("image"), [
