@@ -6,10 +6,6 @@ import LoginForm from "@/Components/Authentication/login-form";
 import styles from "./login.module.css";
 
 const LoginPage = () => {
-  const handleLogin = (data: { email: string; password: string }) => {
-    console.log("Logging in with", data);
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
@@ -21,7 +17,7 @@ const LoginPage = () => {
             </p>
           </div>
           <div className={styles.cardContent}>
-            <LoginForm onSubmit={handleLogin} />
+            <LoginForm />
 
             <div className={styles.linksContainer}>
               <Link href="/forgot-password" className={styles.forgotLink}>
