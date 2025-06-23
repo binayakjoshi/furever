@@ -109,7 +109,7 @@ exports.createPet = async (req, res, next) => {
       description: petData.description,
       breed: petData.breed,
       dob: dobDate,
-      user: "60d0fe4f5311236168a109ca",
+      user: req.userData.userId,
       diseases,
       vaccinations,
       image: {
@@ -240,7 +240,7 @@ exports.updatePet = async (req, res) => {
       description: petData.description || existingPet.description,
       breed: petData.breed || existingPet.breed,
       dob: petData.dob || existingPet.dob,
-      user: petData.user || existingPet.user,
+      user:req.userData.userId ,
     }
 
     if (diseases.length > 0) {
@@ -304,6 +304,13 @@ exports.deletePet = async (req, res) => {
       })
     }
 
+    if(pet.user.toString() !== req.userData.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to delete this pet",
+      })
+    }
+    
     if (pet.image && pet.image.publicId) {
       try {
         await deleteFromCloudinary(pet.image.publicId)
