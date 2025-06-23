@@ -1,10 +1,18 @@
 const express = require("express")
-const router = express.Router()
+const { body } = require("express-validator") 
+<<<<<<< HEAD
+const authenticate = require("../middleware/authentication") 
+=======
+
+const authenticate = require("../middleware/authentication"); // adjust path if needed
+>>>>>>> 13d572ae06fca3d344c26d035fb01f9e1465fb4d
+
 const petController = require("../controllers/petController")
 const imageUpload = require("../middleware/imageUpload")
-const { body } = require("express-validator") 
-const authenticate = require("../middleware/authentication") 
 
+const router = express.Router()
+
+router.use(authenticate);
 router.post(
   "/",
   authenticate, // Ensure user is authenticated

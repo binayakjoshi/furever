@@ -28,7 +28,7 @@ export default function ChatWidget() {
             width="100%"
             height="100%"
             style={{ border: 'none' }}
-            src="https://console.dialogflow.com/api-client/demo/embedded/furever-lylo"
+            src="https://console.dialogflow.com/api-client/demo/embedded/a1b99b2b-2948-4a22-b081-994372afc190"
           />
         </div>
       )}

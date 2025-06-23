@@ -5,38 +5,33 @@ import { FaHeart } from "react-icons/fa";
 import SignupForm from "@/Components/Authentication/signup-form";
 import styles from "./signup.module.css";
 
-const LoginPage = () => {
-  const handleLogin = (data: { email: string; password: string }) => {
-    console.log("Logging in with", data);
-  };
-
+const SignupPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Sign in to your account</h2>
+            <h2 className={styles.cardTitle}>Signup to create a new account</h2>
             <p className={styles.cardDescription}>
-              Enter your credentials to access your Furever account
+              Enter your credentials to create your Furever account
             </p>
           </div>
           <div className={styles.cardContent}>
-            <SignupForm onSubmit={handleLogin} />
+            <SignupForm />
 
             <div className={styles.linksContainer}>
-              <Link href="/forgot-password" className={styles.forgotLink}>
-                Forgot your password?
-              </Link>
-
               <div className={styles.divider}>
                 <div className={styles.dividerLine}>
                   <span className={styles.dividerBorder} />
                 </div>
-                <div className={styles.dividerText}>New to Furever?</div>
+                <div className={styles.dividerText}>
+                  Already have an Account?
+                </div>
               </div>
 
-              <Link href="/signup" className={styles.signupButton}>
-                <FaHeart className={styles.signupIcon} /> Create an account
+              <Link href="/login" className={styles.loginButton}>
+                Login
+                <FaHeart className={styles.loginIcon} />
               </Link>
             </div>
           </div>
@@ -45,4 +40,4 @@ const LoginPage = () => {
     </div>
   );
 };
-export default LoginPage;
+export default SignupPage;
