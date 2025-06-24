@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import AuthHeader from "@/Components/Authentication/auth-header";
-import AuthFooter from "@/Components/Authentication/auth-footer";
+import AuthHeader from "@/components/authentication/auth-header";
+import AuthFooter from "@/components/authentication/auth-footer";
 type AuthenticateLayoutProps = {
   children: ReactNode;
 };

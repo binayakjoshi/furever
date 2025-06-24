@@ -5,9 +5,9 @@ import { useForm } from "@/lib/use-form";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 //import { revalidatePath } from "next/cache";
-import Input from "@/Components/CustomElements/input";
+import Input from "@/components/custom-elements/input";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
-import ImageUpload from "@/Components/CustomElements/image-upload";
+import ImageUpload from "@/components/custom-elements/image-upload";
 
 import styles from "./page.module.css";
 

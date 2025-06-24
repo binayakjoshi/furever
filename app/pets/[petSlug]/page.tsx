@@ -10,8 +10,8 @@ import {
   FaSyringe,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import PetDetailAction from "@/Components/Pets/pet-detail-actions";
-import { Pet } from "@/Components/Pets/pet-type";
+import PetDetailAction from "@/components/pets/pet-detail-actions";
+import { Pet } from "@/components/pets/pet-type";
 import styles from "./page.module.css";
 
 type PetDetailPageProps = { params: Promise<{ petSlug: string }> };
@@ -30,13 +30,17 @@ const PetDetailPage = async ({ params }: PetDetailPageProps) => {
       redirect("/login");
     }
     if (!res.ok) {
-      throw new Error("Could not get the pet details");
+      throw new Error(
+        "Could not get the pet details for the moment. Please try again"
+      );
     }
     const json = await res.json();
     pet = json.data;
   } catch (error) {
-    console.error("Error fetching pet:", error);
-    throw new Error("Error fetching data");
+    console.error(error);
+    throw new Error(
+      "Couldn't fetch the pet details for the pet Id. Please check and try again"
+    );
   }
 
   if (!pet) notFound();

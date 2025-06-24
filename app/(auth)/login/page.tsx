@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FaHeart } from "react-icons/fa";
-import LoginForm from "@/Components/Authentication/login-form";
+import LoginForm from "@/components/authentication/login-form";
 import styles from "./login.module.css";
 
 const LoginPage = () => {

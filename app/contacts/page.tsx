@@ -5,7 +5,7 @@ import {
   FaRobot,
   FaQuestionCircle,
 } from "react-icons/fa";
-import ContactForm from "@/Components/Forms/contact-form";
+import ContactForm from "@/components/forms/contact-form";
 import styles from "./page.module.css";
 const ContactPage = () => {
   const handleSubmit = async (event: FormEvent) => {

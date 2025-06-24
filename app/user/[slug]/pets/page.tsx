@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import PetList from "@/Components/Pets/pet-list";
+import PetList from "@/components/pets/pet-list";
 
 type YourPetPageProps = {
   params: Promise<{ slug?: string }>;
@@ -20,12 +20,16 @@ const YourPetPage = async ({ params }: YourPetPageProps) => {
       }
     );
     if (!response.ok) {
-      throw new Error("Failed to fetch pets");
+      throw new Error(
+        "Failed to fetch pets for some reason plese try again later"
+      );
     }
     pets = await response.json();
   } catch (error) {
     console.log("Error:", error);
-    throw new Error("Cannot get the pet list");
+    throw new Error(
+      "Cannot get the pet list for the given id. Please check the link and try again."
+    );
   }
 
   return (

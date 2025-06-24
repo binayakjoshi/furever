@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-import Modal from "@/Components/UI/modal";
-import Button from "@/Components/CustomElements/button";
+import Modal from "@/components/ui/modal";
+import Button from "@/components/custom-elements/button";
 import { FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import styles from "./page.module.css";
 
@@ -29,12 +29,13 @@ const PetDeletePage = () => {
     <>
       <Modal>
         <div className={styles.deleteCard}>
-          <div className={styles.iconContainer}>
-            <FaExclamationTriangle className={styles.warningIcon} />
-          </div>
-
           <div className={styles.content}>
-            <h3 className={styles.title}>Delete Pet</h3>
+            <h3 className={styles.title}>
+              <div className={styles.iconContainer}>
+                <FaExclamationTriangle className={styles.warningIcon} />
+              </div>
+              Delete Pet
+            </h3>
             <p className={styles.message}>
               Are you sure you want to remove this pet? This action cannot be
               undone and all pet data will be permanently deleted.

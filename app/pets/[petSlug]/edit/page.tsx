@@ -1,5 +1,5 @@
-import EditPetForm from "@/Components/Forms/edit-pet-form";
-import Modal from "@/Components/UI/modal";
+import EditPetForm from "@/components/forms/edit-pet-form";
+import Modal from "@/components/ui/modal";
 
 const EditPetPage = async () => {
   return (
