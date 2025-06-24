@@ -41,6 +41,33 @@ export interface FormAction {
   vaccinationValue?: string;
 }
 
+// Helper function to validate vaccinations
+const validateVaccinations = (vaccinations: VaccinationRecord[]): boolean => {
+  // If no vaccinations, it's valid (vaccinations are optional)
+  if (vaccinations.length === 0) {
+    return true;
+  }
+
+  // If there are vaccinations, all must have all fields filled
+  return vaccinations.every(
+    (vacc) => vacc.name.trim() && vacc.VaccDate && vacc.nextVaccDate
+  );
+};
+
+// Helper function to calculate overall form validity
+const calculateFormValidity = (
+  inputs: Record<string, InputState>,
+  vaccinations: VaccinationRecord[]
+): boolean => {
+  // Check if all regular inputs are valid
+  const inputsValid = Object.values(inputs).every((input) => input.isValid);
+
+  // Check if vaccinations are valid
+  const vaccinationsValid = validateVaccinations(vaccinations);
+
+  return inputsValid && vaccinationsValid;
+};
+
 // Reducer
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
@@ -49,35 +76,20 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
       if (!inputId || isValid === undefined) {
         return state;
       }
-      let formIsValid = true;
-      for (const key in state.inputs) {
-        const inputState = state.inputs[key];
-        if (!inputState) continue;
-        if (key === inputId) {
-          formIsValid = formIsValid && isValid;
-        } else {
-          formIsValid = formIsValid && inputState.isValid;
-        }
-      }
 
-      // Check if vaccinations are valid (at least one vaccination with all fields filled)
-      const hasValidVaccination =
-        state.vaccinations.length > 0 &&
-        state.vaccinations.every(
-          (vacc) => vacc.name.trim() && vacc.VaccDate && vacc.nextVaccDate
-        );
+      const updatedInputs = {
+        ...state.inputs,
+        [inputId]: {
+          value: value,
+          isValid,
+          touched: true,
+        },
+      };
 
       return {
         ...state,
-        inputs: {
-          ...state.inputs,
-          [inputId]: {
-            value: value,
-            isValid,
-            touched: true,
-          },
-        },
-        isValid: formIsValid && hasValidVaccination,
+        inputs: updatedInputs,
+        isValid: calculateFormValidity(updatedInputs, state.vaccinations),
       };
     }
     case "SET_TOUCHED": {
@@ -114,36 +126,26 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         VaccDate: "",
         nextVaccDate: "",
       };
+      const updatedVaccinations = [...state.vaccinations, newVaccination];
+
       return {
         ...state,
-        vaccinations: [...state.vaccinations, newVaccination],
+        vaccinations: updatedVaccinations,
+        isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
     case "REMOVE_VACCINATION": {
       const { vaccinationId } = action;
       if (!vaccinationId) return state;
+
       const updatedVaccinations = state.vaccinations.filter(
         (vacc) => vacc.id !== vaccinationId
       );
 
-      // Recalculate form validity
-      let formIsValid = true;
-      for (const key in state.inputs) {
-        const inputState = state.inputs[key];
-        if (inputState) {
-          formIsValid = formIsValid && inputState.isValid;
-        }
-      }
-      const hasValidVaccination =
-        updatedVaccinations.length > 0 &&
-        updatedVaccinations.every(
-          (vacc) => vacc.name.trim() && vacc.VaccDate && vacc.nextVaccDate
-        );
-
       return {
         ...state,
         vaccinations: updatedVaccinations,
-        isValid: formIsValid && hasValidVaccination,
+        isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
     case "UPDATE_VACCINATION": {
@@ -157,24 +159,10 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
           : vacc
       );
 
-      // Recalculate form validity
-      let formIsValid = true;
-      for (const key in state.inputs) {
-        const inputState = state.inputs[key];
-        if (inputState) {
-          formIsValid = formIsValid && inputState.isValid;
-        }
-      }
-      const hasValidVaccination =
-        updatedVaccinations.length > 0 &&
-        updatedVaccinations.every(
-          (vacc) => vacc.name.trim() && vacc.VaccDate && vacc.nextVaccDate
-        );
-
       return {
         ...state,
         vaccinations: updatedVaccinations,
-        isValid: formIsValid && hasValidVaccination,
+        isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
     default:
