@@ -5,18 +5,18 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
-  // public (unprotected) routes
-  const publicPaths = ["/login", "/signup", "/contacts", "/about"];
+  const isPublicPath = ["/login", "/signup", "/contacts", "/about"].some(
+    (path) => pathname === path || pathname.startsWith(path + "/")
+  );
 
-  if (
-    publicPaths.some(
-      (path) => pathname === path || pathname.startsWith(path + "/")
-    )
-  ) {
+  if (token && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (isPublicPath) {
     return NextResponse.next();
   }
 
-  // all other paths are protected
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
