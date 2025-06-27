@@ -35,11 +35,11 @@
 
 /* Size variations */
 .small {
-  --size: 24px;
+  --size: 20px;
   --thickness: 2px;
   --dot-size: 6px;
   --bar-width: 2px;
-  --bar-height: 16px;
+  --bar-height: 12px;
 }
 
 .medium {
