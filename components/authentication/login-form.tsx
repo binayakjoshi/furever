@@ -1,5 +1,4 @@
 "use client";
-import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
@@ -7,6 +6,7 @@ import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
 import { useForm } from "@/lib/use-form";
 import { useAuth } from "@/context/auth-context";
+import { useHttp } from "@/lib/request-hook";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_REQUIRE,
@@ -14,59 +14,50 @@ import {
 } from "@/lib/validators";
 import styles from "./login-form.module.css";
 
+type LoginResponse = {
+  success: boolean;
+  message: string;
+  data?: { userId: string; name: string; role: string; email: string };
+};
+
 const LoginForm = () => {
   const { setUser } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { isLoading, error, sendRequest, clearError } =
+    useHttp<LoginResponse>();
 
   const [formState, inputHandler] = useForm(
     {
-      email: {
-        value: "",
-        isValid: false,
-        touched: false,
-      },
-      password: {
-        value: "",
-        isValid: false,
-        touched: false,
-      },
+      email: { value: "", isValid: false, touched: false },
+      password: { value: "", isValid: false, touched: false },
     },
     false
   );
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!formState.isValid || isLoading) return;
 
-    if (!formState.isValid || isSubmitting) return;
-
-    setIsSubmitting(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await sendRequest(
+        "/api/auth/login",
+        "POST",
+        JSON.stringify({
           email: formState.inputs.email.value,
           password: formState.inputs.password.value,
         }),
-      });
-      const resData = await res.json();
+        { "Content-Type": "application/json" }
+      );
 
-      if (!res.ok) {
-        throw new Error("Login Failed Please try again later");
+      if (response.success && response.data) {
+        setUser(response.data);
+        router.push("/");
       }
-      setIsSubmitting(false);
-      setUser(resData.data);
-      router.push("/");
-    } catch (err) {
-      setIsSubmitting(false);
-      throw new Error("error while submitting data");
+    } catch (_) {
+      // error is already set by the hook
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -99,8 +90,8 @@ const LoginForm = () => {
             className={styles.passwordField}
           />
           <Button
-            type="Button"
-            onClick={togglePasswordVisibility}
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
             className={styles.passwordToggle}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
@@ -109,17 +100,26 @@ const LoginForm = () => {
         </div>
       </div>
 
+      {error && (
+        <div className={styles.error}>
+          {error.title && <strong>{error.title}</strong>} {error.message}
+          <button onClick={clearError} className={styles.errorClose}>
+            ✕
+          </button>
+        </div>
+      )}
+
       <Button
         type="submit"
         className={styles.submitButton}
         disabled={
-          isSubmitting ||
+          isLoading ||
           !formState.isValid ||
           !formState.inputs.email.value ||
           !formState.inputs.password.value
         }
       >
-        {isSubmitting ? (
+        {isLoading ? (
           <>
             <FaSpinner className={styles.loadingIcon} size={20} />
             Signing in...
