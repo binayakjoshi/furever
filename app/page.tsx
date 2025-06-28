@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 const Home = async () => {
   const token = (await cookies()).get("token")?.value;
 
-  const res = await fetch("http://localhost:3000/api/auth/me", {
+  const res = await fetch(`${process.env.NEXT_ROUTE_URL}/api/auth/me`, {
     headers: {
       Cookie: `token=${token}`,
     },

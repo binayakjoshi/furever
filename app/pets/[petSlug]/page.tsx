@@ -22,10 +22,13 @@ const PetDetailPage = async ({ params }: PetDetailPageProps) => {
 
   try {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`http://localhost:3000/api/pets/${petSlug}`, {
-      headers: { Cookie: cookieHeader },
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${process.env.NEXT_ROUTE_URL}/api/pets/${petSlug}`,
+      {
+        headers: { Cookie: cookieHeader },
+        cache: "no-store",
+      }
+    );
     if (res.status === 401) {
       redirect("/login");
     }

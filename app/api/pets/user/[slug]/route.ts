@@ -10,7 +10,7 @@ export const GET = async (request: NextRequest, { params }: YourPetProps) => {
     const cookieHeader = request.headers.get("cookie") || "";
 
     const backendRes = await fetch(
-      `http://localhost:5000/api/pets/user/${slug}`,
+      `${process.env.BACKEND_URL}/api/pets/user/${slug}`,
       {
         headers: {
           Cookie: cookieHeader,

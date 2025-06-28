@@ -13,6 +13,7 @@ import {
   VALIDATOR_MINLENGTH,
 } from "@/lib/validators";
 import styles from "./login-form.module.css";
+import ErrorModal from "../ui/error";
 
 type LoginResponse = {
   success: boolean;
@@ -55,9 +56,7 @@ const LoginForm = () => {
         setUser(response.data);
         router.push("/");
       }
-    } catch (_) {
-      // error is already set by the hook
-    }
+    } catch (_) {}
   };
 
   return (
@@ -100,14 +99,7 @@ const LoginForm = () => {
         </div>
       </div>
 
-      {error && (
-        <div className={styles.error}>
-          {error.title && <strong>{error.title}</strong>} {error.message}
-          <button onClick={clearError} className={styles.errorClose}>
-            ✕
-          </button>
-        </div>
-      )}
+      {error && <ErrorModal error={error} clearError={clearError} />}
 
       <Button
         type="submit"

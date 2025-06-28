@@ -11,7 +11,7 @@ const YourPetPage = async ({ params }: YourPetPageProps) => {
   let pets = [];
   try {
     const response = await fetch(
-      `http://localhost:3000/api/pets/user/${slug}`,
+      `${process.env.NEXT_ROUTE_URL}/api/pets/user/${slug}`,
       {
         headers: {
           Cookie: cookieHeader,

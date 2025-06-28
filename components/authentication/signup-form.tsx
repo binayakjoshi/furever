@@ -9,6 +9,8 @@ import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
 import { useForm } from "@/lib/use-form";
+import { useAuth } from "@/context/auth-context";
+import { useHttp } from "@/lib/request-hook";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_REQUIRE,
@@ -16,13 +18,22 @@ import {
 } from "@/lib/validators";
 
 import styles from "./signup-form.module.css";
+import ErrorModal from "../ui/error";
 
+type SignupResponse = {
+  success: boolean;
+  message: string;
+  data?: { userId: string; email: string; name: string; role: string };
+};
 const SignupForm = () => {
+  const { setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState("");
   const router = useRouter();
+  const { isLoading, error, sendRequest, clearError } =
+    useHttp<SignupResponse>();
+
   const [formState, inputHandler] = useForm(
     {
       name: {
@@ -60,32 +71,27 @@ const SignupForm = () => {
       return;
     }
     setPasswordMatchError("");
-    if (!formState.isValid || isSubmitting) {
+    if (!formState.isValid || isLoading) {
       return;
     }
-    setIsSubmitting(true);
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const res = await sendRequest(
+        "/api/auth/signup",
+        "POST",
+        JSON.stringify({
           name: formState.inputs.name.value,
           email: formState.inputs.email.value,
           password: formState.inputs.password.value,
           role: "user",
         }),
-      });
-      const data = await res.json();
-      console.log(data);
-      if (!res.ok) {
-        throw new Error("Login Failed Please try again later");
+        { "Content-Type": "application/json" }
+      );
+      if (res.success && res.data) {
+        setUser(res.data);
+        router.push("/");
+        router.push("/");
       }
-      setIsSubmitting(false);
-      router.push("/");
-    } catch (err) {
-      setIsSubmitting(false);
-      throw new Error("error while submitting data");
-    }
+    } catch (_) {}
   };
 
   const togglePasswordVisibility = () => {
@@ -116,115 +122,120 @@ const SignupForm = () => {
       !passwordsMatch);
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form} noValidate>
-      <div className={styles.fieldGroup}>
-        <Input
-          id="name"
-          element="input"
-          type="text"
-          label="Full Name"
-          placeholder="Enter your full name"
-          validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(2)]}
-          errorText="Name must be at least 2 characters long"
-          onInput={customInputHandler}
-          className={styles.inputField}
-        />
-      </div>
-
-      <div className={styles.fieldGroup}>
-        <Input
-          id="email"
-          element="input"
-          type="email"
-          label="Email address"
-          placeholder="you@domain.com"
-          validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
-          errorText="Please enter a valid email address"
-          onInput={customInputHandler}
-          className={styles.inputField}
-        />
-      </div>
-
-      <div className={styles.fieldGroup}>
-        <div className={styles.passwordContainer}>
+    <>
+      {error && <ErrorModal clearError={clearError} error={error} />}
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
+        <div className={styles.fieldGroup}>
           <Input
-            id="password"
+            id="name"
             element="input"
-            type={showPassword ? "text" : "password"}
-            label="Password"
-            placeholder="Enter your password"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
-            errorText="Password must be at least 8 characters long"
+            type="text"
+            label="Full Name"
+            placeholder="Enter your full name"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(2)]}
+            errorText="Name must be at least 2 characters long"
             onInput={customInputHandler}
-            className={styles.passwordField}
+            className={styles.inputField}
           />
-          <Button
-            type="button"
-            onClick={togglePasswordVisibility}
-            className={styles.passwordToggle}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-          </Button>
         </div>
-      </div>
 
-      <div className={styles.fieldGroup}>
-        <div className={styles.passwordContainer}>
+        <div className={styles.fieldGroup}>
           <Input
-            id="confirmPassword"
+            id="email"
             element="input"
-            type={showConfirmPassword ? "text" : "password"}
-            label="Confirm Password"
-            placeholder="Confirm your password"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
-            errorText="Please confirm your password"
+            type="email"
+            label="Email address"
+            placeholder="you@domain.com"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+            errorText="Please enter a valid email address"
             onInput={customInputHandler}
-            className={styles.passwordField}
+            className={styles.inputField}
           />
-          <Button
-            type="button"
-            onClick={toggleConfirmPasswordVisibility}
-            className={styles.passwordToggle}
-            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-          >
-            {showConfirmPassword ? (
-              <FaEyeSlash size={20} />
-            ) : (
-              <FaEye size={20} />
-            )}
-          </Button>
         </div>
-        {showPasswordMatchError && (
-          <p className={styles.errorText}>
-            {passwordMatchError || "Passwords do not match"}
-          </p>
-        )}
-      </div>
 
-      <Button
-        type="submit"
-        className={styles.submitButton}
-        disabled={
-          isSubmitting ||
-          !formState.isValid ||
-          !formState.inputs.name.value ||
-          !formState.inputs.email.value ||
-          !formState.inputs.password.value ||
-          !formState.inputs.confirmPassword.value ||
-          !passwordsMatch
-        }
-      >
-        {isSubmitting ? (
-          <>
-            <FaSpinner className={styles.loadingIcon} size={20} />
-            Creating account...
-          </>
-        ) : (
-          "Create account"
-        )}
-      </Button>
-    </form>
+        <div className={styles.fieldGroup}>
+          <div className={styles.passwordContainer}>
+            <Input
+              id="password"
+              element="input"
+              type={showPassword ? "text" : "password"}
+              label="Password"
+              placeholder="Enter your password"
+              validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+              errorText="Password must be at least 8 characters long"
+              onInput={customInputHandler}
+              className={styles.passwordField}
+            />
+            <Button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className={styles.passwordToggle}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            </Button>
+          </div>
+        </div>
+
+        <div className={styles.fieldGroup}>
+          <div className={styles.passwordContainer}>
+            <Input
+              id="confirmPassword"
+              element="input"
+              type={showConfirmPassword ? "text" : "password"}
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+              errorText="Please confirm your password"
+              onInput={customInputHandler}
+              className={styles.passwordField}
+            />
+            <Button
+              type="button"
+              onClick={toggleConfirmPasswordVisibility}
+              className={styles.passwordToggle}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+            >
+              {showConfirmPassword ? (
+                <FaEyeSlash size={20} />
+              ) : (
+                <FaEye size={20} />
+              )}
+            </Button>
+          </div>
+          {showPasswordMatchError && (
+            <p className={styles.errorText}>
+              {passwordMatchError || "Passwords do not match"}
+            </p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          className={styles.submitButton}
+          disabled={
+            isLoading ||
+            !formState.isValid ||
+            !formState.inputs.name.value ||
+            !formState.inputs.email.value ||
+            !formState.inputs.password.value ||
+            !formState.inputs.confirmPassword.value ||
+            !passwordsMatch
+          }
+        >
+          {isLoading ? (
+            <>
+              <FaSpinner className={styles.loadingIcon} size={20} />
+              Creating account...
+            </>
+          ) : (
+            "Create account"
+          )}
+        </Button>
+      </form>
+    </>
   );
 };
 
