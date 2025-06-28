@@ -1,0 +1,141 @@
+.intro{
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+}
+.introTitle{
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.origin{ 
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+
+}
+.originTitle{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 1rem;
+
+}
+.paragraphContent{
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+    padding-left: 1rem;
+    padding-right: 1rem; 
+
+}
+.features{
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+.featuresTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .featuresGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.featureCard {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+
+ .featureIcon {
+  width: 4rem;
+  height: 4rem;
+  background-color: #dbeafe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: #3b82f6;
+} 
+ .featureTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+} 
+
+ .featureDescription {
+  color: #6b7280;
+  line-height: 1.6;
+} 
+.cta {
+  background: white;
+  padding: 4rem 2rem;
+  border-radius: 1rem;
+  text-align: center;
+ 
+}
+
+.ctaTitle {
+    color: black;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.ctaText {
+  color:#6b7280;
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.ctaButton {
+  background-color: white;
+  color: #6b7280;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  border: 1px solid #6b7280;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+

@@ -1,0 +1,32 @@
+.navbar {
+  width: 100%;
+  background-color: #f9f9f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navList {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 1rem 2rem;
+  justify-content: flex-start; 
+}
+
+.navItem {
+  margin-right: 1.5rem;
+}
+
+.iconItem {
+  margin-left: auto;
+}
+
+.navItem:last-of-type {
+  margin-right: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
