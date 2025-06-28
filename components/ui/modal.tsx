@@ -6,9 +6,10 @@ import styles from "./modal.module.css";
 
 interface ModalProps {
   children: React.ReactNode;
+  zIndex?: number;
 }
 
-const Modal = ({ children }: ModalProps) => {
+const Modal = ({ children, zIndex }: ModalProps) => {
   const router = useRouter();
 
   useEffect(() => {
@@ -39,7 +40,11 @@ const Modal = ({ children }: ModalProps) => {
   }, [handleKeyDown]);
 
   return (
-    <div className={styles.modalOverlay} onClick={handleBackdropClick}>
+    <div
+      className={styles.modalOverlay}
+      onClick={handleBackdropClick}
+      style={{ zIndex: zIndex ? zIndex : 1000 }}
+    >
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
