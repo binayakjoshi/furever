@@ -1,10 +1,16 @@
 .buttonWrapper {
   background: none;
   border: none;
-  padding: 0;
+  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  width: 44px;
+  height: 44px;
 }
 .nav ul {
   list-style: none;
