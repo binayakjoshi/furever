@@ -44,3 +44,86 @@ a {
     color-scheme: dark;
   }
 }
+/* Use :root for global selectors */
+/* CSS Custom Properties for Light/Dark Mode */
+:root {
+  --form-bg: #ffffff;
+  --form-border: #e5e7eb;
+  --form-shadow: rgba(0, 0, 0, 0.1);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-border-focus: #3b82f6;
+  --input-border-error: #ef4444;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-disabled: #9ca3af;
+  --error-bg: #fef2f2;
+  --error-text: #dc2626;
+  --error-border: #fecaca;
+  --success-color: #10b981;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --form-bg: #1f2937;
+    --form-border: #374151;
+    --form-shadow: rgba(0, 0, 0, 0.3);
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --input-bg: #374151;
+    --input-border: #4b5563;
+    --input-border-focus: #60a5fa;
+    --input-border-error: #f87171;
+    --button-primary: #3b82f6;
+    --button-primary-hover: #2563eb;
+    --button-disabled: #6b7280;
+    --error-bg: #7f1d1d;
+    --error-text: #fca5a5;
+    --error-border: #991b1b;
+    --success-color: #34d399;
+  }
+}
+
+[data-theme="dark"] {
+  --form-bg: #1f2937;
+  --form-border: #374151;
+  --form-shadow: rgba(0, 0, 0, 0.3);
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --input-bg: #374151;
+  --input-border: #4b5563;
+  --input-border-focus: #60a5fa;
+  --input-border-error: #f87171;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-disabled: #6b7280;
+  --error-bg: #7f1d1d;
+  --error-text: #fca5a5;
+  --error-border: #991b1b;
+  --success-color: #34d399;
+}
+
+[data-theme="light"] {
+  --form-bg: #ffffff;
+  --form-border: #e5e7eb;
+  --form-shadow: rgba(0, 0, 0, 0.1);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-border-focus: #3b82f6;
+  --input-border-error: #ef4444;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-disabled: #9ca3af;
+  --error-bg: #fef2f2;
+  --error-text: #dc2626;
+  --error-border: #fecaca;
+  --success-color: #10b981;
+}
