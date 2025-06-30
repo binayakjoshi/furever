@@ -1,59 +1,14 @@
-.formContainer {
-  background: var(--form-bg);
-  border: 1px solid var(--form-border);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 10px 25px -5px var(--form-shadow), 0 4px 6px -2px var(--form-shadow);
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  transition: all 0.3s ease;
-}
-
-.formContainer:hover {
-  box-shadow: 0 20px 40px -10px var(--form-shadow), 0 8px 12px -4px var(--form-shadow);
-}
-
 .form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
 }
-
-.formHeader {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.formTitle {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.025em;
-}
-
-.formSubtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin: 0;
-  font-weight: 400;
-}
-
 .fieldGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   position: relative;
-}
-
-.label {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-  transition: color 0.2s ease;
 }
 
 .inputField {
@@ -64,7 +19,6 @@
 .inputField input {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   background-color: var(--input-bg);
@@ -74,7 +28,6 @@
 }
 
 .inputField input:focus {
-  border-color: var(--input-border-focus);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   transform: translateY(-1px);
 }
@@ -93,7 +46,7 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-.passwordContainer {
+ .passwordContainer {
   position: relative;
   display: block;
 }
@@ -106,7 +59,6 @@
 .passwordField input {
   width: 100%;
   padding: 0.875rem 3rem 0.875rem 1rem !important;
-  border: 2px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   background-color: var(--input-bg);
@@ -128,7 +80,7 @@
 .passwordField input::placeholder {
   color: var(--text-muted);
   font-weight: 400;
-}
+} 
 
 .passwordToggle {
   position: absolute;
@@ -159,10 +111,9 @@
 .passwordToggle:active {
   transform: translateY(-50%) scale(0.95);
 }
-
 .submitButton {
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, var(--button-primary) 0%, var(--button-primary-hover) 100%);
+  background: #000000;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -174,7 +125,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -191,9 +142,9 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--button-primary-hover) 0%, #1d4ed8 100%);
+  background: #111111;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .submitButton:hover:not(:disabled)::before {
@@ -202,11 +153,11 @@
 
 .submitButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .submitButton:disabled {
-  background: var(--button-disabled);
+  background: #9ca3af;
   color: #ffffff;
   cursor: not-allowed;
   transform: none;
@@ -230,19 +181,6 @@
   }
 }
 
-.errorMessage {
-  background-color: var(--error-bg);
-  color: var(--error-text);
-  border: 1px solid var(--error-border);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  animation: slideIn 0.3s ease-out;
-}
 
 @keyframes slideIn {
   from {
@@ -294,7 +232,6 @@
   text-decoration: underline;
 }
 
-/* Responsive Design */
 @media (max-width: 640px) {
   .formContainer {
     padding: 1.5rem;
@@ -333,14 +270,12 @@
   }
 }
 
-/* Focus visible for accessibility */
 .submitButton:focus-visible,
 .passwordToggle:focus-visible {
   outline: 2px solid var(--input-border-focus);
   outline-offset: 2px;
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .inputField input,
   .passwordField input {
