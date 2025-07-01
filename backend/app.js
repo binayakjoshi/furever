@@ -6,7 +6,8 @@ require("dotenv").config()
 
 const petRoutes = require("./routes/petRoutes")
 const userRoutes = require("./routes/userRoutes")
-const adoptionRoutes = require("./routes/adoptionRoutes") // New adoption routes
+const adoptionRoutes = require("./routes/adoptionRoutes")
+const vetRoutes = require("./routes/vetRoutes") // Fixed vet routes
 const HttpError = require("./models/http-error")
 
 const app = express()
@@ -49,13 +50,27 @@ app.get("/", (req, res) => {
         getInterestedUsers: "GET /api/adoptions/:id/interested-users",
         myPosts: "GET /api/adoptions/my-posts",
       },
+      veterinarians: {
+        base: "/api/vets",
+        createProfile: "POST /api/vets/profile",
+        getAll: "GET /api/vets",
+        getById: "GET /api/vets/:id",
+        getMyProfile: "GET /api/vets/my-profile",
+        updateProfile: "PUT /api/vets/profile",
+        deleteProfile: "DELETE /api/vets/profile",
+        getBySpecialization: "GET /api/vets/specialization/:specialization",
+        searchByLocation: "GET /api/vets/search/location",
+        contact: "POST /api/vets/:id/contact",
+        updateStatus: "PATCH /api/vets/:id/status",
+      },
     },
   })
 })
 
 app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
-app.use("/api/adoptions", adoptionRoutes) 
+app.use("/api/adoptions", adoptionRoutes)
+app.use("/api/vets", vetRoutes)
 
 app.use((req, res, next) => {
   const error = new HttpError(`Route ${req.originalUrl} not found`, 404)
