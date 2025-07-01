@@ -11,7 +11,7 @@ export interface InputState {
 export interface VaccinationRecord {
   id: string;
   name: string;
-  VaccDate: string;
+  vaccDate: string;
   nextVaccDate: string;
 }
 
@@ -28,7 +28,8 @@ export interface FormAction {
     | "SET_TOUCHED"
     | "ADD_VACCINATION"
     | "REMOVE_VACCINATION"
-    | "UPDATE_VACCINATION";
+    | "UPDATE_VACCINATION"
+    | "SET_VACCINATIONS";
   inputId?: string;
   value?: string | File | undefined;
   isValid?: boolean;
@@ -39,18 +40,16 @@ export interface FormAction {
   vaccinationId?: string;
   vaccinationField?: keyof Omit<VaccinationRecord, "id">;
   vaccinationValue?: string;
+  vaccinations?: VaccinationRecord[];
 }
 
-// Helper function to validate vaccinations
 const validateVaccinations = (vaccinations: VaccinationRecord[]): boolean => {
-  // If no vaccinations, it's valid (vaccinations are optional)
   if (vaccinations.length === 0) {
     return true;
   }
 
-  // If there are vaccinations, all must have all fields filled
   return vaccinations.every(
-    (vacc) => vacc.name.trim() && vacc.VaccDate && vacc.nextVaccDate
+    (vacc) => vacc.name.trim() && vacc.vaccDate && vacc.nextVaccDate
   );
 };
 
@@ -92,11 +91,14 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         isValid: calculateFormValidity(updatedInputs, state.vaccinations),
       };
     }
+
     case "SET_TOUCHED": {
       const { inputId } = action;
       if (!inputId) return state;
+
       const prev = state.inputs[inputId];
       if (!prev) return state;
+
       return {
         ...state,
         inputs: {
@@ -108,24 +110,39 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         },
       };
     }
+
     case "SET_DATA": {
       const { inputs, formIsValid } = action;
       if (!inputs || formIsValid === undefined) {
         return state;
       }
+
       return {
         ...state,
         inputs,
         isValid: formIsValid,
       };
     }
+
+    case "SET_VACCINATIONS": {
+      const { vaccinations } = action;
+      if (!vaccinations) return state;
+
+      return {
+        ...state,
+        vaccinations,
+        isValid: calculateFormValidity(state.inputs, vaccinations),
+      };
+    }
+
     case "ADD_VACCINATION": {
       const newVaccination: VaccinationRecord = {
         id: Date.now().toString(),
         name: "",
-        VaccDate: "",
+        vaccDate: "",
         nextVaccDate: "",
       };
+
       const updatedVaccinations = [...state.vaccinations, newVaccination];
 
       return {
@@ -134,6 +151,7 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
+
     case "REMOVE_VACCINATION": {
       const { vaccinationId } = action;
       if (!vaccinationId) return state;
@@ -148,6 +166,7 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
+
     case "UPDATE_VACCINATION": {
       const { vaccinationId, vaccinationField, vaccinationValue } = action;
       if (!vaccinationId || !vaccinationField || vaccinationValue === undefined)
@@ -165,6 +184,7 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         isValid: calculateFormValidity(state.inputs, updatedVaccinations),
       };
     }
+
     default:
       return state;
   }
@@ -185,7 +205,8 @@ export const useForm = (
     id: string,
     field: keyof Omit<VaccinationRecord, "id">,
     value: string
-  ) => void
+  ) => void,
+  (vaccinations: VaccinationRecord[]) => void // Added setVaccinations function
 ] => {
   const [formState, dispatch] = useReducer(formReducer, {
     inputs: initialInputs,
@@ -246,6 +267,13 @@ export const useForm = (
     []
   );
 
+  const setVaccinations = useCallback((vaccinations: VaccinationRecord[]) => {
+    dispatch({
+      type: "SET_VACCINATIONS",
+      vaccinations,
+    });
+  }, []);
+
   return [
     formState,
     inputHandler,
@@ -254,5 +282,6 @@ export const useForm = (
     addVaccination,
     removeVaccination,
     updateVaccination,
+    setVaccinations,
   ];
 };
