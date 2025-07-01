@@ -2,7 +2,7 @@ const express = require("express")
 const { body } = require("express-validator")
 const authenticate = require("../middleware/authentication")
 const imageUpload = require("../middleware/imageUpload")
-const veterinarianController = require("../controllers/veterinarianController")
+const veterinarianController = require("../controllers/vetController")
 
 const {
   createVeterinarianValidation,
@@ -14,7 +14,7 @@ const router = express.Router()
 
 router.get("/", veterinarianController.getAllVeterinarians)
 
-/
+
 router.get("/:id", veterinarianController.getVeterinarianById)
 
 // Get veterinarians by specialization
@@ -31,7 +31,7 @@ router.post(
   "/profile",
   imageUpload.single("profileImage"),
   createVeterinarianValidation,
-  veterinarianController.createVeterinarianProfile,
+   veterinarianController.createVeterinarianProfile,
 )
 
 router.get("/my-profile", veterinarianController.getMyVeterinarianProfile)
@@ -41,7 +41,7 @@ router.put(
   "/profile",
   imageUpload.single("profileImage"),
   updateVeterinarianValidation,
-  veterinarianController.updateVeterinarianProfile,
+   veterinarianController.updateVeterinarianProfile,
 )
 
 
