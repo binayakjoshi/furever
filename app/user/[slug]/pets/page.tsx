@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import PetList from "@/components/pets/pet-list";
+import styles from "./page.module.css";
 
 type YourPetPageProps = {
   params: Promise<{ slug?: string }>;
@@ -33,9 +34,11 @@ const YourPetPage = async ({ params }: YourPetPageProps) => {
   }
 
   return (
-    <div style={{ padding: "16px" }}>
-      <h1>Your Pets</h1>
-      <PetList pets={pets.data} />
+    <div>
+      <h1 className={styles.pageTitle}>Your Pets</h1>
+      <div className={styles.listContainer}>
+        <PetList pets={pets.data} />
+      </div>
     </div>
   );
 };
