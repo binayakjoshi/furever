@@ -107,6 +107,7 @@ exports.createPet = async (req, res, next) => {
     const newPetData = {
       name: petData.name,
       description: petData.description,
+      petType: petData.petType || "Dog", //we set default to Dog incase not provided by the user
       breed: petData.breed,
       dob: dobDate,
       user: req.userData.userId,
@@ -187,6 +188,7 @@ exports.getPetById = async (req, res) => {
   }
 }
 
+
 exports.updatePet = async (req, res) => {
   try {
     const petData = req.body
@@ -235,9 +237,12 @@ exports.updatePet = async (req, res) => {
       vaccinations = vaccinations.filter((v) => v && v.name)
     }
 
+    //added petType to updateData
+
     const updateData = {
       name: petData.name || existingPet.name,
       description: petData.description || existingPet.description,
+      petType: petData.petType || existingPet.petType || "Dog", // Default to Dog if not provided
       breed: petData.breed || existingPet.breed,
       dob: petData.dob || existingPet.dob,
       user:req.userData.userId ,
