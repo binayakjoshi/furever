@@ -113,7 +113,7 @@
 }
 .submitButton {
   padding: 0.875rem 1.5rem;
-  background: #000000;
+  background: #664982;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -142,7 +142,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #111111;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
