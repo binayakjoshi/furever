@@ -1,4 +1,5 @@
 export type vaccination = {
+  id?: number;
   name: string;
   vaccDate: string;
   nextVaccDate: string;

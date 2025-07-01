@@ -1,49 +1,164 @@
 "use client";
+
 import type React from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useForm } from "@/lib/use-form";
+import { useHttp } from "@/lib/request-hook";
 import Input from "../custom-elements/input";
 import Button from "../custom-elements/button";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
+import ErrorModal from "../ui/error";
+import LoadingSpinner from "../ui/loading-spinner";
+import type { Pet } from "../pets/pet-type";
 import styles from "./edit-pet-form.module.css";
+
+const useUniqueKey = (deps: unknown[]) => {
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    setKey((prev) => prev + 1);
+  }, deps);
+  return key;
+};
+
+type PetDetailResponse = {
+  success: boolean;
+  message: string;
+  data: Pet;
+};
 
 const EditPetForm = () => {
   const router = useRouter();
+  const { petSlug } = useParams();
+  const [fetchedPet, setFetchedPet] = useState<Pet | null>(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  const formKey = useUniqueKey([fetchedPet, isDataLoaded]);
+
   const [
     formState,
     inputHandler,
-    ,
+    setFormData,
     ,
     addVaccination,
     removeVaccination,
     updateVaccination,
+    setVaccinations,
   ] = useForm(
     {
       name: { value: "", isValid: false, touched: false },
       type: { value: "", isValid: false, touched: false },
       breed: { value: "", isValid: false, touched: false },
-      dateOfBirth: { value: "", isValid: false, touched: false },
+      dob: { value: "", isValid: false, touched: false },
       description: { value: "", isValid: false, touched: false },
+      diseases: { value: "", isValid: false, touched: false },
     },
     false
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { isLoading, sendRequest, clearError, error } =
+    useHttp<PetDetailResponse>();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await sendRequest(`/api/pets/${petSlug}`);
+        res.data.dob = res.data.dob.split("T")[0];
+        setFetchedPet(res.data);
+        setIsDataLoaded(true);
+      } catch (_) {}
+    })();
+  }, [sendRequest, petSlug]);
+
+  useEffect(() => {
+    if (!fetchedPet || !isDataLoaded) return;
+
+    const timer = setTimeout(() => {
+      setFormData(
+        {
+          name: { value: fetchedPet.name, isValid: true, touched: true },
+          type: { value: fetchedPet.petType, isValid: true, touched: true },
+          breed: { value: fetchedPet.breed, isValid: true, touched: true },
+          dob: { value: fetchedPet.dob, isValid: true, touched: true },
+          description: {
+            value: fetchedPet.description,
+            isValid: true,
+            touched: true,
+          },
+          diseases: {
+            value: Array.isArray(fetchedPet.diseases)
+              ? fetchedPet.diseases.join(",")
+              : fetchedPet.diseases || "",
+            isValid: true,
+            touched: true,
+          },
+        },
+        false
+      );
+
+      if (fetchedPet.vaccinations && fetchedPet.vaccinations.length > 0) {
+        const formattedVaccinations = fetchedPet.vaccinations.map(
+          (vacc, index) => ({
+            id: vacc.id?.toString() || `${Date.now()}-${index}`,
+            name: vacc.name || "",
+            vaccDate: vacc.vaccDate ? vacc.vaccDate.split("T")[0] : "",
+            nextVaccDate: vacc.nextVaccDate
+              ? vacc.nextVaccDate.split("T")[0]
+              : "",
+          })
+        );
+
+        setVaccinations(formattedVaccinations);
+      }
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [fetchedPet, setFormData, setVaccinations, isDataLoaded]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.isValid) return;
-    console.log("Submitting...");
-    router.back();
+    try {
+      const requestData = new FormData();
+      const diseasesString = formState.inputs.diseases.value as string;
+      const diseasesArray = diseasesString.split(",").map((d) => d.trim());
+
+      diseasesArray.forEach((d) => requestData.append("diseases", d));
+      if (formState.vaccinations && formState.vaccinations.length) {
+        const vaccArray = formState.vaccinations.map((v) => ({
+          name: v.name,
+          vaccDate: v.vaccDate,
+          nextVaccDate: v.nextVaccDate,
+        }));
+        requestData.append("vaccinations", JSON.stringify(vaccArray));
+      }
+      requestData.append("name", formState.inputs.name.value as string);
+      requestData.append(
+        "description",
+        formState.inputs.description.value as string
+      );
+      requestData.append("dob", formState.inputs.dob.value as string);
+      requestData.append("breed", formState.inputs.breed.value as string);
+      console.log("clicking before submitting");
+
+      await sendRequest(`/api/pets/${petSlug}/edit`, "PUT", requestData);
+      router.push(`/pets/${petSlug}`);
+    } catch (_) {}
   };
+
   const handleVaccinationChange = (
-    vaccinationId: string,
+    id: string,
     field: keyof Omit<import("@/lib/use-form").VaccinationRecord, "id">,
     value: string
-  ) => {
-    updateVaccination(vaccinationId, field, value);
-  };
+  ) => updateVaccination(id, field, value);
+
+  if (!fetchedPet || !isDataLoaded)
+    return <LoadingSpinner text="Loading Pet Info..." />;
+
   return (
     <div className={styles.formContainer}>
+      {error && <ErrorModal error={error} clearError={clearError} />}
       <div className={styles.header}>
         <h1 className={styles.title}>Edit your Pet data</h1>
         <Button
@@ -55,17 +170,24 @@ const EditPetForm = () => {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className={styles.form} noValidate>
+      <form
+        key={formKey}
+        onSubmit={handleSubmit}
+        className={styles.form}
+        noValidate
+      >
         <div className={styles.formGroup}>
           <Input
             id="name"
             element="input"
-            type="tex"
+            type="text"
             label="Name"
             validators={[VALIDATOR_REQUIRE()]}
             errorText="Name is Required"
             onInput={inputHandler}
             className={styles.Input}
+            initialValue={fetchedPet?.name || ""}
+            initialValid={true}
           />
         </div>
 
@@ -74,20 +196,22 @@ const EditPetForm = () => {
             id="type"
             element="radio"
             label="Please pick an option:"
-            errorText="Please select one option"
             options={[
               { label: "Cat", value: "cat" },
               { label: "Dog", value: "dog" },
             ]}
-            onInput={inputHandler}
             validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please select one option"
+            onInput={inputHandler}
+            initialValue={fetchedPet?.petType || ""}
+            initialValid={true}
           />
         </div>
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <Input
-              id="dateOfBirth"
+              id="dob"
               element="input"
               type="date"
               label="Date of Birth"
@@ -95,9 +219,12 @@ const EditPetForm = () => {
               errorText="DOB is Required"
               onInput={inputHandler}
               className={styles.Input}
+              initialValue={fetchedPet?.dob || ""}
+              initialValid={true}
             />
           </div>
         </div>
+
         <div className={styles.formGroup}>
           <Input
             id="description"
@@ -108,8 +235,11 @@ const EditPetForm = () => {
             errorText="Description is required & must not be more than 50 characters"
             onInput={inputHandler}
             validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(50)]}
+            initialValue={fetchedPet?.description || ""}
+            initialValid={true}
           />
         </div>
+
         <div className={styles.formGroup}>
           <Input
             id="breed"
@@ -120,6 +250,26 @@ const EditPetForm = () => {
             errorText="Breed is required"
             onInput={inputHandler}
             validators={[VALIDATOR_REQUIRE()]}
+            initialValue={fetchedPet?.breed || ""}
+            initialValid={true}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <Input
+            id="diseases"
+            element="input"
+            type="text"
+            label="Diseases"
+            placeholder="Enter diseases seperated by comma  (or enter None)"
+            errorText="Diseases is required or Enter None"
+            onInput={inputHandler}
+            validators={[VALIDATOR_REQUIRE()]}
+            initialValue={
+              Array.isArray(fetchedPet?.diseases)
+                ? fetchedPet.diseases.join(",")
+                : fetchedPet?.diseases || ""
+            }
+            initialValid={true}
           />
         </div>
         <div className={styles.vaccinationSection}>
@@ -130,8 +280,7 @@ const EditPetForm = () => {
               onClick={addVaccination}
               className={styles.addButton}
             >
-              <FaPlus size={16} />
-              Add Vaccination
+              <FaPlus size={16} /> Add Vaccination
             </button>
           </div>
 
@@ -142,8 +291,8 @@ const EditPetForm = () => {
           )}
 
           <div className={styles.vaccinationsList}>
-            {(formState.vaccinations || []).map((vaccination) => (
-              <div key={vaccination.id} className={styles.vaccinationRecord}>
+            {formState.vaccinations?.map((vac) => (
+              <div key={vac.id} className={styles.vaccinationRecord}>
                 <div className={styles.vaccinationContent}>
                   <div className={styles.vaccinationFields}>
                     <div className={styles.vaccinationField}>
@@ -152,10 +301,10 @@ const EditPetForm = () => {
                       </label>
                       <input
                         type="text"
-                        value={vaccination.name}
+                        value={vac.name}
                         onChange={(e) =>
                           handleVaccinationChange(
-                            vaccination.id,
+                            vac.id,
                             "name",
                             e.target.value
                           )
@@ -164,33 +313,35 @@ const EditPetForm = () => {
                         className={styles.vaccinationInput}
                       />
                     </div>
+
                     <div className={styles.vaccinationField}>
                       <label className={styles.vaccinationLabel}>
                         Vaccination Date
                       </label>
                       <input
                         type="date"
-                        value={vaccination.VaccDate}
+                        value={vac.vaccDate}
                         onChange={(e) =>
                           handleVaccinationChange(
-                            vaccination.id,
-                            "VaccDate",
+                            vac.id,
+                            "vaccDate",
                             e.target.value
                           )
                         }
                         className={styles.vaccinationInput}
                       />
                     </div>
+
                     <div className={styles.vaccinationField}>
                       <label className={styles.vaccinationLabel}>
                         Next Vaccination Date
                       </label>
                       <input
                         type="date"
-                        value={vaccination.nextVaccDate}
+                        value={vac.nextVaccDate}
                         onChange={(e) =>
                           handleVaccinationChange(
-                            vaccination.id,
+                            vac.id,
                             "nextVaccDate",
                             e.target.value
                           )
@@ -199,9 +350,10 @@ const EditPetForm = () => {
                       />
                     </div>
                   </div>
+
                   <button
                     type="button"
-                    onClick={() => removeVaccination(vaccination.id)}
+                    onClick={() => removeVaccination(vac.id)}
                     className={styles.removeButton}
                     title="Remove vaccination"
                   >
@@ -221,13 +373,17 @@ const EditPetForm = () => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={!formState.isValid}
-            className={styles.saveButton}
-          >
-            Save Changes
-          </Button>
+          {isLoading ? (
+            <LoadingSpinner text="Updating..." />
+          ) : (
+            <Button
+              type="submit"
+              // disabled={!formState.isValid}
+              className={styles.saveButton}
+            >
+              Save Changes
+            </Button>
+          )}
         </div>
       </form>
     </div>
