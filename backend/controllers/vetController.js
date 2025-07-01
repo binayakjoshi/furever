@@ -1,4 +1,4 @@
-const Veterinarian = require("../models/veterinarianModel")
+const Veterinarian = require("../models/vetModel")
 const User = require("../models/userModel")
 const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
