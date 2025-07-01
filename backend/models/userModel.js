@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: 6,
   },
-  // ✅ Added role field for user/vet distinction
+  //added roles for login signup function
   role: {
     type: String,
     enum: ["user", "vet"],
@@ -53,4 +53,3 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema)
 
 module.exports = User
-//new feature
