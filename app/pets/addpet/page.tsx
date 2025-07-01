@@ -58,7 +58,7 @@ const AddPetPage: React.FC = () => {
       if (formState.vaccinations && formState.vaccinations.length) {
         const vaccArray = formState.vaccinations.map((v) => ({
           name: v.name,
-          vaccDate: v.VaccDate,
+          vaccDate: v.vaccDate,
           nextVaccDate: v.nextVaccDate,
         }));
         requestData.append("vaccinations", JSON.stringify(vaccArray));
@@ -224,11 +224,11 @@ const AddPetPage: React.FC = () => {
                           </label>
                           <input
                             type="date"
-                            value={vaccination.VaccDate}
+                            value={vaccination.vaccDate}
                             onChange={(e) =>
                               handleVaccinationChange(
                                 vaccination.id,
-                                "VaccDate",
+                                "vaccDate",
                                 e.target.value
                               )
                             }
