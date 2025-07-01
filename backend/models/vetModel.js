@@ -1,12 +1,7 @@
 const mongoose = require("mongoose")
 
 const veterinarianSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: [true, "User reference is required"],
-    unique: true, // One vet profile per user
-  },
+  
   name: {
     type: String,
     required: [true, "Veterinarian name is required"],
@@ -16,6 +11,7 @@ const veterinarianSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Email is required"],
+    unique: true, 
     trim: true,
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
@@ -46,7 +42,7 @@ const veterinarianSchema = new mongoose.Schema({
       message: "Date of birth cannot be in the future",
     },
   },
-  specialization: {
+ specialization: {
     type: [String],
     default: [],
     validate: {
@@ -67,7 +63,7 @@ const veterinarianSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true,
-    match: [/^\+?[\d\s\-$$$$]+$/, "Please provide a valid phone number"],
+    match: [/^\+?[\d\s\-()]+$/, "Please provide a valid phone number"],
   },
   licenseNumber: {
     type: String,
@@ -97,8 +93,8 @@ const veterinarianSchema = new mongoose.Schema({
       },
     ],
     hours: {
-      start: String, // Format: "09:00"
-      end: String, // Format: "17:00"
+      start: String, // example: "09:00"
+      end: String, 
     },
   },
   consultationFee: {
@@ -121,14 +117,13 @@ const veterinarianSchema = new mongoose.Schema({
   },
 })
 
-// Index for better query performance
-veterinarianSchema.index({ user: 1 })
+//query helpers
 veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
 veterinarianSchema.index({ specialization: 1 })
 veterinarianSchema.index({ status: 1, isVerified: 1 })
 
-// Update the updatedAt field before saving
+
 veterinarianSchema.pre("save", function (next) {
   this.updatedAt = Date.now()
   next()
