@@ -1,25 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { FaUserCircle, FaPaw, FaPlus, FaSignOutAlt } from "react-icons/fa"
-import { useAuth } from "../../context/auth-context"
-import SideDrawer from "./side-drawer"
-import Button from "../custom-elements/button"
-import classes from "./nav-actions.module.css"
+import { useState } from "react";
+import Link from "next/link";
+import { FaUserCircle, FaPaw, FaPlus, FaSignOutAlt } from "react-icons/fa";
+import { useAuth } from "../../context/auth-context";
+import SideDrawer from "./side-drawer";
+import Button from "../custom-elements/button";
+import LoadingSpinner from "../ui/loading-spinner";
+import classes from "./nav-actions.module.css";
 
 const NavActions = () => {
-  const { user, logout, loading } = useAuth()
-  const [drawerOpen, setDrawerOpen] = useState<boolean>(false)
+  const { user, logout, loading } = useAuth();
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
-  const toggleDrawer = () => setDrawerOpen((p) => !p)
+  const toggleDrawer = () => setDrawerOpen((p) => !p);
 
   if (loading) {
-    return (
-      <div className={classes.loadingSpinner}>
-        <div className={classes.spinner}></div>
-      </div>
-    )
+    return <LoadingSpinner variant="bars" size="small" text="" />;
   }
 
   if (!user) {
@@ -32,7 +29,7 @@ const NavActions = () => {
           Sign Up
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -62,19 +59,31 @@ const NavActions = () => {
         <nav className={classes.nav}>
           <ul>
             <li>
-              <Link href={`/user/${user.userId}`} onClick={toggleDrawer} title="View your profile">
+              <Link
+                href={`/user/${user.userId}`}
+                onClick={toggleDrawer}
+                title="View your profile"
+              >
                 <FaUserCircle size={16} />
                 Your Profile
               </Link>
             </li>
             <li>
-              <Link href={`/user/${user.userId}/pets`} onClick={toggleDrawer} title="Manage your pets">
+              <Link
+                href={`/user/${user.userId}/pets`}
+                onClick={toggleDrawer}
+                title="Manage your pets"
+              >
                 <FaPaw size={16} />
                 Your Pet Profile
               </Link>
             </li>
             <li>
-              <Link href="/pets/addpet" onClick={toggleDrawer} title="Add a new pet">
+              <Link
+                href="/pets/addpet"
+                onClick={toggleDrawer}
+                title="Add a new pet"
+              >
                 <FaPlus size={16} />
                 Add Pet
               </Link>
@@ -87,8 +96,8 @@ const NavActions = () => {
         <button
           className={classes.logoutButton}
           onClick={() => {
-            logout()
-            toggleDrawer()
+            logout();
+            toggleDrawer();
           }}
           title="Sign out of your account"
         >
@@ -97,7 +106,7 @@ const NavActions = () => {
         </button>
       </SideDrawer>
     </>
-  )
-}
+  );
+};
 
-export default NavActions
+export default NavActions;
