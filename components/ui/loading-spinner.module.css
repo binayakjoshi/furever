@@ -33,7 +33,6 @@
   letter-spacing: 0.025em;
 }
 
-/* Size variations */
 .small {
   --size: 20px;
   --thickness: 2px;
@@ -58,7 +57,6 @@
   --bar-height: 32px;
 }
 
-/* Primary Double Ring Spinner */
 .spinnerPrimary {
   width: var(--size);
   height: var(--size);
@@ -83,7 +81,6 @@
 }
 
 
-/* Pulse Spinner */
 .spinnerPulse {
   width: var(--size);
   height: var(--size);
@@ -107,7 +104,6 @@
   animation-delay: 0.75s;
 }
 
-/* Dots Spinner */
 .spinnerDots {
   display: flex;
   gap: calc(var(--dot-size) * 0.6);
@@ -126,7 +122,6 @@
 .spinnerDots .dot:nth-child(2) { animation-delay: -0.16s; }
 .spinnerDots .dot:nth-child(3) { animation-delay: 0; }
 
-/* Bars Spinner */
 .spinnerBars {
   display: flex;
   gap: calc(var(--bar-width) * 0.8);
@@ -147,7 +142,6 @@
 .spinnerBars .bar:nth-child(4) { animation-delay: -0.1s; }
 .spinnerBars .bar:nth-child(5) { animation-delay: 0s; }
 
-/* Orbit Spinner */
 .spinnerOrbit {
   width: var(--size);
   height: var(--size);
@@ -183,7 +177,6 @@
 
 
 
-/* Keyframes */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -213,7 +206,6 @@
   100% { transform: rotate(360deg) translateY(calc(var(--size) * -0.4)) rotate(-360deg); }
 }
 
-/* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .fullScreen {
     background: rgba(0, 0, 0, 0.8);
