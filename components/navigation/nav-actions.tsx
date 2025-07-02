@@ -16,7 +16,7 @@ const NavActions = () => {
   const toggleDrawer = () => setDrawerOpen((p) => !p);
 
   if (loading) {
-    return <LoadingSpinner variant="bars" size="small" text="" />;
+    return <LoadingSpinner inline variant="bars" size="small" text="" />;
   }
 
   if (!user) {
