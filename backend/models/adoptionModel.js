@@ -23,6 +23,29 @@ const adoptionSchema = new mongoose.Schema({
     trim: true,
     maxlength: [1000, "Description cannot exceed 1000 characters"],
   },
+   breed: {
+    type: String,
+    required: [true, "Pet breed is required"],
+    trim: true,
+  },
+  petAge: {
+    type: Number,
+    min: [0, "Pet age cannot be negative"],
+  },
+  image: {
+    url: {
+      type: String,
+      required: [true, "Pet image URL is required"],
+    },
+    publicId: {
+      type: String,
+      required: [true, "Pet image public ID is required"],
+    },
+  },
+  dob: {
+    type: Date,
+    required: [true, "Pet date of birth is required"],
+  },
   location: {
     type: String,
     required: [true, "Location is required"],
