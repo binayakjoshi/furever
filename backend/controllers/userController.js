@@ -32,7 +32,7 @@ const signup = async (req, res, next) => {
     if (existingUser) {
       return res.status(422).json({
         success: false,
-        message: "User exists already, please login instead",
+        message: "User exists already, please log in instead",
       });
     }
 
@@ -82,14 +82,14 @@ const login = async (req, res, next) => {
     if (!existingUser) {
       return res.status(403).json({
         success: false,
-        message: "Invalid credentials, could not log you in.",
+        message: "User already exists , please login instead.",
       });
     }
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
       return res.status(403).json({
         success: false,
-        message: "Invalid credentials, could not log you in.",
+        message: "Invalid password, please recheck and try again.",
       });
     }
 
