@@ -1,4 +1,3 @@
-// Loading.tsx
 import React from "react";
 import styles from "./loading-spinner.module.css";
 
@@ -8,9 +7,11 @@ interface LoadingSpinnerProps {
   color?: string;
   text?: string;
   fullScreen?: boolean;
+  inline?: boolean;
 }
 
 const LoadingSpinner = ({
+  inline = false,
   size = "medium",
   variant = "primary",
   color,
@@ -18,8 +19,11 @@ const LoadingSpinner = ({
   fullScreen = false,
 }: LoadingSpinnerProps) => {
   const sizeClass = styles[size];
-  const containerClass = fullScreen ? styles.fullScreen : styles.container;
-
+  const containerClass = inline
+    ? styles.inlineContainer
+    : fullScreen
+    ? styles.fullScreen
+    : styles.container;
   const renderSpinner = () => {
     switch (variant) {
       case "pulse":
