@@ -34,4 +34,3 @@ module.exports = {
   uploadImage,
   deleteFromCloudinary,     
 };
-// module.exports = { cloudinary, uploadImage }
