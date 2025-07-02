@@ -1,36 +1,208 @@
-
+/* Modern Button Group Styling */
 .buttonGroup {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  align-items: center;
 }
-.editButton {
-  background-color: #28a745;
-  padding: 8px 16px;
-  color: white;
+
+/* Base button styles */
+.editButton,
+.removeButton {
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit button - Modern green */
+.editButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: 1px solid transparent;
 }
 
 .editButton:hover {
-  background-color: #218838;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
 }
 
-.removeButton {
-  background-color: #dc3545;
-  padding: 8px 16px;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+.editButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
 
+.editButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Remove button - Modern red */
+.removeButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: 1px solid transparent;
 }
 
 .removeButton:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
 }
+
+.removeButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.removeButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Alternative outlined button styles */
+.editButton.outlined {
+  background: transparent;
+  color: #10b981;
+  border: 2px solid #10b981;
+  box-shadow: none;
+}
+
+.editButton.outlined:hover {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.removeButton.outlined {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  box-shadow: none;
+}
+
+.removeButton.outlined:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Small button variant */
+.editButton.small,
+.removeButton.small {
+  padding: 8px 16px;
+  font-size: 12px;
+  min-width: 80px;
+  border-radius: 6px;
+}
+
+/* Large button variant */
+.editButton.large,
+.removeButton.large {
+  padding: 16px 32px;
+  font-size: 16px;
+  min-width: 140px;
+  border-radius: 10px;
+}
+
+/* Disabled state */
+.editButton:disabled,
+.removeButton:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.editButton:disabled:hover,
+.removeButton:disabled:hover {
+  background: #e5e7eb;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading state */
+.editButton.loading,
+.removeButton.loading {
+  position: relative;
+  color: transparent;
+}
+
+.editButton.loading::after,
+.removeButton.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  color: white;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .buttonGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .editButton,
+  .removeButton {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Dark mode support */
+/* @media (prefers-color-scheme: dark) {
+  .editButton.outlined {
+    color: #34d399;
+    border-color: #34d399;
+  }
+  
+  .removeButton.outlined {
+    color: #f87171;
+    border-color: #f87171;
+  }
+} */
+
+/* Icon support */
+/* .editButton .icon,
+.removeButton .icon {
+  margin-right: 8px;
+  font-size: 16px;
+} */
+
+/* .editButton.icon-only,
+.removeButton.icon-only {
+  min-width: unset;
+  width: 44px;
+  padding: 12px;
+}
+
+.editButton.icon-only .icon,
+.removeButton.icon-only .icon {
+  margin: 0;
+} */
