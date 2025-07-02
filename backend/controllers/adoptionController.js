@@ -42,16 +42,20 @@ exports.createAdoptionPost = async (req, res, next) => {
 
     const { petId, title, description, location, contactInfo, requirements } = req.body
 
-    const creatorId = req.userData.userId
+  
 
    
     const pet = await checkCases(petId, creatorId)
 
     const adoptionPost = new Adoption({
       pet: petId,
-      creator: creatorId,
+      creator: req.userData.userId,
       title,
       description,
+      breed: pet.breed,
+      petAge: Math.floor((new Date() - new Date(pet.dob)) / (365.25 * 24 * 60 * 60 * 1000)), // Calculate age from DOB
+      image: pet.image,
+      dob: pet.dob,
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
