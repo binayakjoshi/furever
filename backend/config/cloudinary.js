@@ -20,8 +20,18 @@ const uploadImage = async (image) => {
   return result.secure_url;
 };
 
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {     
+console.error("Error deleting image from Cloudinary:", error.message);
+    throw new Error("Failed to delete image from Cloudinary");
+  }
+};
+
 module.exports = {
   cloudinary,
   uploadImage,
+  deleteFromCloudinary,     
 };
 // module.exports = { cloudinary, uploadImage }
