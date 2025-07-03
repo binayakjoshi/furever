@@ -82,13 +82,19 @@
 
 .saveButton {
   padding: 0.75rem 1.5rem;
-  background-color: black;
+  background-color: #664982;
+  
   color: white;
-  border: 1px solid black;
+  border: 1px solid #664982;
   border-radius: 0.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+.saveButton:Enabled:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .saveButton:disabled{
