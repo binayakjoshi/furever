@@ -138,3 +138,10 @@
   transition: background-color 0.2s;
   margin-top: 1.5rem;
 }
+.removeButton:hover {
+  background-color: #dc2626;
+}
+
+.imageSection {
+  padding-top: 1rem;
+}
