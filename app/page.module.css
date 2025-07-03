@@ -1,5 +1,16 @@
-.header{
-  padding: 0.5rem 1rem;
-  font-size: 2rem;
-  align-items:center;
+.container {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
 }
