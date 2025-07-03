@@ -14,3 +14,30 @@
   color: #1f2937;
   margin-bottom: 1.5rem;
 }
+.formControls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fieldWrapper {
+  margin-bottom: 1rem;
+}
+
+.vaccinationSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.vaccinationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.vaccinationTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
