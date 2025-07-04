@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaUserCircle, FaPaw, FaPlus, FaSignOutAlt } from "react-icons/fa";
 import { useAuth } from "../../context/auth-context";
 import SideDrawer from "./side-drawer";
@@ -40,13 +41,33 @@ const NavActions = () => {
         aria-label="Open user menu"
         title="Open user menu"
       >
-        <FaUserCircle size={24} color="#374151" />
+        {user.profileImage ? (
+          <Image
+            src={user.profileImage.url}
+            alt="profile Picture"
+            width={40}
+            height={40}
+            className={classes.avatarImg}
+          />
+        ) : (
+          <FaUserCircle size={24} color="#374151" />
+        )}
       </Button>
 
       <SideDrawer isOpen={drawerOpen} onClose={toggleDrawer}>
         <div className={classes.userInfo}>
           <div className={classes.userAvatar}>
-            <FaUserCircle size={32} color="#6b7280" />
+            {user.profileImage ? (
+              <Image
+                src={user.profileImage.url}
+                alt="profile Picture"
+                width={40}
+                height={40}
+                className={classes.avatarImg}
+              />
+            ) : (
+              <FaUserCircle size={24} color="#374151" />
+            )}
           </div>
           <div className={classes.userDetails}>
             <h3>{user.name || "User"}</h3>
