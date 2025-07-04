@@ -8,7 +8,7 @@ import { useForm } from "@/lib/use-form";
 import { useHttp } from "@/lib/request-hook";
 import Input from "../custom-elements/input";
 import Button from "../custom-elements/button";
-import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
+import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "../ui/error";
 import LoadingSpinner from "../ui/loading-spinner";
 import type { Pet } from "../pets/pet-type";
@@ -48,7 +48,7 @@ const EditPetForm = () => {
   ] = useForm(
     {
       name: { value: "", isValid: false, touched: false },
-      type: { value: "", isValid: false, touched: false },
+      petType: { value: "", isValid: false, touched: false },
       breed: { value: "", isValid: false, touched: false },
       dob: { value: "", isValid: false, touched: false },
       description: { value: "", isValid: false, touched: false },
@@ -78,7 +78,7 @@ const EditPetForm = () => {
       setFormData(
         {
           name: { value: fetchedPet.name, isValid: true, touched: true },
-          type: { value: fetchedPet.petType, isValid: true, touched: true },
+          petType: { value: fetchedPet.petType, isValid: true, touched: true },
           breed: { value: fetchedPet.breed, isValid: true, touched: true },
           dob: { value: fetchedPet.dob, isValid: true, touched: true },
           description: {
@@ -193,12 +193,12 @@ const EditPetForm = () => {
 
         <div className={styles.formGroup}>
           <Input
-            id="type"
+            id="petType"
             element="radio"
             label="Please pick an option:"
             options={[
-              { label: "Cat", value: "cat" },
-              { label: "Dog", value: "dog" },
+              { label: "Cat", value: "Cat" },
+              { label: "Dog", value: "Dog" },
             ]}
             validators={[VALIDATOR_REQUIRE()]}
             errorText="Please select one option"
@@ -232,9 +232,9 @@ const EditPetForm = () => {
             type="text"
             label="Description"
             placeholder="What describes your pet"
-            errorText="Description is required & must not be more than 50 characters"
+            errorText="Description is required"
             onInput={inputHandler}
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(50)]}
+            validators={[VALIDATOR_REQUIRE()]}
             initialValue={fetchedPet?.description || ""}
             initialValid={true}
           />
