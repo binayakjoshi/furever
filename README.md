@@ -147,17 +147,19 @@
 
 ```
 furever/
+├── app/                   # Next.js pages and routes
+├── assets/                  # Static assets
 ├── backend/                 # Express server, models, routes, controllers
 │   ├── controllers/
 │   ├── models/
 │   ├── routes/
 │   ├── middleware/
-│   └── find-app.js
+│   └── app.js
 ├── components/              # Reusable React components
-├── pages/                   # Next.js pages
-├── public/                  # Static assets
-├── styles/                  # CSS/SCSS files
-├── utils/                   # Frontend helper functions
+│   ├── authentication/
+│   ├── custom-elements/      # reusable custom components
+│   ├── navigation/           # Navigation bar, navlinks and button
+├── lib/                   # Frontend helper functions and hooks
 ├── .env                     # Frontend environment vars
 ├── next.config.js
 └── package.json
