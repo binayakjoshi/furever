@@ -20,6 +20,9 @@ const NavigationBar = () => {
         <li className={classes.navItem}>
           <NavLink href="/about">About Us</NavLink>
         </li>
+        <li className={classes.navItem}>
+          <NavLink href="/adoption">Adoption</NavLink>
+        </li>
         <li className={`${classes.navItem} ${classes.iconItem}`}>
           <NavActions />
         </li>
