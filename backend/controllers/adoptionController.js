@@ -201,68 +201,6 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
   }
 }
 
-// Update adoption post
-exports.updateAdoptionPost = async (req, res) => {
-  try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
-
-    const adoptionPost = await Adoption.findById(req.params.id)
-
-    if (!adoptionPost) {
-      return res.status(404).json({
-        success: false,
-        message: "Adoption post not found",
-      })
-    }
-
-    // Only creator can update the post
-    if (adoptionPost.creator.toString() !== req.userData.userId) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only update your own adoption posts",
-      })
-    }
-
-  
-    const allowedUpdates = ["title", "description", "location", "contactInfo", "requirements", "status"]
-
-    const updates = {}
-    allowedUpdates.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field]
-      }
-    })
-
-    const updatedPost = await Adoption.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-      runValidators: true,
-    }).populate([
-      { path: "pet", select: "name breed image description" },
-      { path: "creator", select: "name email phone" },
-      { path: "interestedUsers.user", select: "name email" },
-    ])
-
-    res.status(200).json({
-      success: true,
-      message: "Adoption post updated successfully",
-      data: updatedPost,
-    })
-  } catch (error) {
-    console.error("Update adoption post error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update adoption post",
-    })
-  }
-}
-
 // Delete adoption post
 exports.deleteAdoptionPost = async (req, res) => {
   try {
@@ -461,3 +399,137 @@ exports.getInterestedUsers = async (req, res) => {
     })
   }
 }
+
+//update the post
+exports.updateAdoptionPost = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors.array(),
+      });
+    }
+
+    const adoptionPostId = req.params.id;
+    const userId = req.userData.userId;
+    const { title, description, location, contactInfo, requirements, status, image } = req.body;
+
+    // Find the adoption 
+    const adoptionPost = await Adoption.findById(adoptionPostId);
+    if (!adoptionPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Adoption post not found",
+      });
+    }
+
+    // Only creator can update the post
+    if (adoptionPost.creator.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own adoption posts",
+      });
+    }
+
+   
+    if (adoptionPost.status === "adopted") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update an already adopted pet post",
+      });
+    }
+
+    
+    const updateData = {};
+    
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (location !== undefined) updateData.location = location;
+    if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
+    if (requirements !== undefined) updateData.requirements = requirements;
+    
+    // Handle image update
+    if (image !== undefined) {
+      
+      if (image && typeof image === 'object' && image.url && image.publicId) {
+        updateData.image = {
+          url: image.url,
+          publicId: image.publicId
+        };
+      } else if (image === null || image === '') {
+        // cannot remove image, it must be provided
+        return res.status(400).json({
+          success: false,
+          message: "Image is required. Please provide a valid image with url and publicId",
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid image format. Image must contain url and publicId",
+        });
+      }
+    }
+    
+    // Only allow status updates to specific values
+    if (status !== undefined) {
+      const allowedStatusUpdates = ["active", "pending", "cancelled"];
+      if (allowedStatusUpdates.includes(status)) {
+        updateData.status = status;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status update. Allowed values: active, pending, cancelled",
+        });
+      }
+    }
+
+    // Update the adoption post
+    const updatedAdoptionPost = await Adoption.findByIdAndUpdate(
+      adoptionPostId,
+      updateData,
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    ).populate([
+      { path: "pet", select: "name breed image description dob" },
+      { path: "creator", select: "name email phone" },
+      { path: "interestedUsers.user", select: "name email" },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Adoption post updated successfully",
+      data: updatedAdoptionPost,
+    });
+
+  } catch (error) {
+    console.error("Update adoption post error:", error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: Object.values(error.errors).map(err => ({
+          field: err.path,
+          message: err.message
+        }))
+      });
+    }
+
+    if (error instanceof HttpError) {
+      return res.status(error.code).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update adoption post",
+    });
+  }
+};
