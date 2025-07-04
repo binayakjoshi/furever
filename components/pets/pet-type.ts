@@ -13,6 +13,8 @@ export type Pet = {
   breed: string;
   vaccinations: vaccination[];
   description: string;
-  userId?: string;
+  user?: {
+    _id: string;
+  };
   diseases: string[];
 };
