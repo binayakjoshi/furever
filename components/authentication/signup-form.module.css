@@ -118,7 +118,12 @@
   width: 1rem;
   animation: spin 1s linear infinite;
 }
-
+.errorText{
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin:0;
+  padding: 0;
+}
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

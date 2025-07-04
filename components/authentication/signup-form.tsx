@@ -15,8 +15,9 @@ import {
   VALIDATOR_EMAIL,
   VALIDATOR_REQUIRE,
   VALIDATOR_MINLENGTH,
+  VALIDATOR_NUMBER,
 } from "@/lib/validators";
-
+import ImageUpload from "../custom-elements/image-upload";
 import styles from "./signup-form.module.css";
 import ErrorModal from "../ui/error";
 
@@ -56,6 +57,27 @@ const SignupForm = () => {
         isValid: false,
         touched: false,
       },
+      address: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+      phone: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
+
+      profileImage: {
+        value: undefined,
+        isValid: false,
+        touched: false,
+      },
+      dob: {
+        value: "",
+        isValid: false,
+        touched: false,
+      },
     },
     false
   );
@@ -75,17 +97,19 @@ const SignupForm = () => {
       return;
     }
     try {
-      const res = await sendRequest(
-        "/api/auth/signup",
-        "POST",
-        JSON.stringify({
-          name: formState.inputs.name.value,
-          email: formState.inputs.email.value,
-          password: formState.inputs.password.value,
-          role: "user",
-        }),
-        { "Content-Type": "application/json" }
+      const requestData = new FormData();
+      requestData.append("name", formState.inputs.name.value as string);
+      requestData.append("email", formState.inputs.email.value as string);
+      requestData.append("password", formState.inputs.password.value as string);
+      requestData.append("address", formState.inputs.address.value as string);
+      requestData.append("phone", formState.inputs.phone.value as string);
+      requestData.append("dob", formState.inputs.dob.value as string);
+      requestData.append(
+        "profileImage",
+        formState.inputs.profileImage.value as File
       );
+
+      const res = await sendRequest("/api/auth/signup", "POST", requestData);
       if (res.success && res.data) {
         setUser(res.data);
         router.push("/");
@@ -152,6 +176,49 @@ const SignupForm = () => {
             className={styles.inputField}
           />
         </div>
+        <div className={styles.fieldGroup}>
+          <Input
+            id="phone"
+            element="input"
+            type="number"
+            label="Phone Number"
+            placeholder="Your Phone Number"
+            validators={[
+              VALIDATOR_REQUIRE(),
+              VALIDATOR_NUMBER(),
+              VALIDATOR_MINLENGTH(10),
+            ]}
+            errorText="Please enter a valid phone number"
+            onInput={customInputHandler}
+            className={styles.inputField}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Input
+            id="dob"
+            element="input"
+            type="date"
+            label="Date of Birth"
+            placeholder="date of birth"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please enter a valid date"
+            onInput={customInputHandler}
+            className={styles.inputField}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <Input
+            id="address"
+            element="input"
+            type="text"
+            label="Address"
+            placeholder="Your Address"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Address is required"
+            onInput={customInputHandler}
+            className={styles.inputField}
+          />
+        </div>
 
         <div className={styles.fieldGroup}>
           <div className={styles.passwordContainer}>
@@ -211,7 +278,12 @@ const SignupForm = () => {
             </p>
           )}
         </div>
-
+        <ImageUpload
+          id="profileImage"
+          center
+          errorText="Please provide an image."
+          onInput={inputHandler}
+        />
         <Button
           type="submit"
           className={styles.submitButton}
