@@ -1,13 +1,12 @@
-/* Modern Button Group Styling */
+/* Button Group */
 .buttonGroup {
   display: flex;
   gap: 12px;
   margin-top: 16px;
   flex-wrap: wrap;
-  align-items: center;
 }
 
-/* Base button styles */
+/* Base Button Styles */
 .editButton,
 .removeButton {
   padding: 12px 24px;
@@ -16,128 +15,87 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  letter-spacing: 0.025em;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
   min-width: 120px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Edit button - Modern green */
+/* Edit Button */
 .editButton {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  border: 1px solid transparent;
 }
 
 .editButton:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  transform: translateY(-1px);
 }
 
-.editButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
-.editButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-/* Remove button - Modern red */
+/* Remove Button */
 .removeButton {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
-  border: 1px solid transparent;
 }
 
 .removeButton:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-  transform: translateY(-1px);
 }
 
-.removeButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-}
-
-.removeButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-/* Alternative outlined button styles */
+/* Outlined Variants */
 .editButton.outlined {
   background: transparent;
   color: #10b981;
   border: 2px solid #10b981;
-  box-shadow: none;
 }
 
 .editButton.outlined:hover {
   background: #10b981;
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .removeButton.outlined {
   background: transparent;
   color: #ef4444;
   border: 2px solid #ef4444;
-  box-shadow: none;
 }
 
 .removeButton.outlined:hover {
   background: #ef4444;
   color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-/* Small button variant */
+/* Size Variants */
 .editButton.small,
 .removeButton.small {
   padding: 8px 16px;
   font-size: 12px;
   min-width: 80px;
-  border-radius: 6px;
 }
 
-/* Large button variant */
 .editButton.large,
 .removeButton.large {
   padding: 16px 32px;
   font-size: 16px;
   min-width: 140px;
-  border-radius: 10px;
 }
 
-/* Disabled state */
+/* States */
 .editButton:disabled,
 .removeButton:disabled {
   background: #e5e7eb;
   color: #9ca3af;
   cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.editButton:disabled:hover,
-.removeButton:disabled:hover {
-  background: #e5e7eb;
   transform: none;
   box-shadow: none;
 }
 
-/* Loading state */
 .editButton.loading,
 .removeButton.loading {
-  position: relative;
   color: transparent;
+  position: relative;
 }
 
 .editButton.loading::after,
@@ -150,18 +108,16 @@
   height: 16px;
   margin: -8px 0 0 -8px;
   border: 2px solid transparent;
-  border-top: 2px solid currentColor;
+  border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  color: white;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* Responsive design */
+/* Responsive */
 @media (max-width: 640px) {
   .buttonGroup {
     flex-direction: column;
@@ -174,7 +130,6 @@
     min-width: unset;
   }
 }
-
 /* Dark mode support */
 /* @media (prefers-color-scheme: dark) {
   .editButton.outlined {
