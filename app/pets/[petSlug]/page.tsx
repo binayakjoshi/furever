@@ -190,7 +190,7 @@ const PetDetailPage = async ({ params }: PetDetailPageProps) => {
         </div>
       )}
       <div className={styles.actionsSection}>
-        <PetDetailAction petId={petSlug} />
+        <PetDetailAction pet={pet} />
       </div>
     </div>
   );

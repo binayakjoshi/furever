@@ -31,8 +31,8 @@ const AddPetPage: React.FC = () => {
   ] = useForm(
     {
       name: { value: "", isValid: false, touched: false },
-      type: { value: "", isValid: false, touched: false },
       breed: { value: "", isValid: false, touched: false },
+      petType: { value: "", isValid: false, touched: false },
       dob: { value: "", isValid: false, touched: false },
       description: { value: "", isValid: false, touched: false },
       image: { value: undefined, isValid: false, touched: false },
@@ -71,6 +71,7 @@ const AddPetPage: React.FC = () => {
       requestData.append("dob", formState.inputs.dob.value as string);
       requestData.append("breed", formState.inputs.breed.value as string);
       requestData.append("image", formState.inputs.image.value as File);
+      requestData.append("petType", formState.inputs.petType.value as string);
 
       await sendRequest("/api/pets", "POST", requestData);
       router.push(`/user/${user?.userId}/pets`);
@@ -108,13 +109,13 @@ const AddPetPage: React.FC = () => {
 
             <div className={styles.fieldWrapper}>
               <Input
-                id="type"
+                id="petType"
                 element="radio"
                 label="Please pick an option:"
                 errorText="Please select one option"
                 options={[
-                  { label: "Cat", value: "cat" },
-                  { label: "Dog", value: "dog" },
+                  { label: "Cat", value: "Cat" },
+                  { label: "Dog", value: "Dog" },
                 ]}
                 onInput={inputHandler}
                 validators={[VALIDATOR_REQUIRE()]}
