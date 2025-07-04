@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useState, useEffect } from "react";
 
-type User = { userId: string; email: string; name: string; role: string };
+type User = {
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  profileImage: { url: string };
+};
 
 type AuthContextValue = {
   user: User | null;
