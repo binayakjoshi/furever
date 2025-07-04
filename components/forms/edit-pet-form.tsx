@@ -378,7 +378,7 @@ const EditPetForm = () => {
           ) : (
             <Button
               type="submit"
-              // disabled={!formState.isValid}
+              disabled={!formState.isValid}
               className={styles.saveButton}
             >
               Save Changes
