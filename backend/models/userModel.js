@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema({
       ref: "Pet",
     },
   ],
+  dob:{
+    type: Date,
+  },
   phone: {
     type: String,
     trim: true,

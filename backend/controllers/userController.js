@@ -26,7 +26,7 @@ const signup = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return next(new HttpError("Invalid data passed", 400));
     }
-    const { name, email, password, role = "user" } = req.body;
+    const { name, email, password,address,phone,dob, role = "user" } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -42,7 +42,14 @@ const signup = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
+      dob,
+      address,
+      phone,
       role,
+      profileImage:{
+        url:req.file.path,
+        publicId:req.file.filename,
+      }
     });
     await newUser.save();
 
@@ -145,7 +152,7 @@ const getCurrentUser = async (req, res, next) => {
     }
     res.status(200).json({
       success: true,
-      data: { userId: user.id, email: user.email, name: user.name, role: user.role },
+      data: { userId: user.id, email: user.email, name: user.name,dob:user.dob, role: user.role,phone:user.phone,address:user.address, profileImage:user.profileImage,createdAt:user.createdAt },
     });
   } catch (error) {
     console.error("GetCurrentUser error:", error);
