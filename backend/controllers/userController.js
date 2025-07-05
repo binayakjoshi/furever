@@ -186,33 +186,7 @@ exports.getUserById = async (req, res) => {
   }
 }
 
-exports.updateUser = async (req, res) => {
-  try {
-    const { password, ...updateData } = req.body
 
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-    }).select("-password")
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      })
-    }
-
-    res.status(200).json({
-      success: true,
-      data: user,
-    })
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    })
-  }
-}
 
 exports.deleteUser = async (req, res) => {
   try {
@@ -238,6 +212,112 @@ exports.deleteUser = async (req, res) => {
     })
   }
 }
+
+// Update current user's profile (for authenticated users updating their own profile)
+exports.updateCurrentUser = async (req, res) => {
+  try {
+    const userId = req.userData.userId;
+    const { password, ...updateData } = req.body;
+
+    // Find the user 
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Handle profile image update if file is uploaded
+    if (req.file) {
+      user.profileImage = {
+        url: req.file.path,
+        publicId: req.file.filename,
+      };
+    }
+
+    // Update user fields
+    if (updateData.name) user.name = updateData.name;
+    if (updateData.phone) user.phone = updateData.phone;
+    if (updateData.address) user.address = updateData.address;
+    if (updateData.dob) user.dob = new Date(updateData.dob);
+
+    // Save the updated user
+    await user.save();
+
+    // Return user without password
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: userResponse,
+    });
+  } catch (error) {
+    console.error("Update current user error:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to update profile",
+    });
+  }
+};
+
+// Update user password
+exports.updatePassword = async (req, res) => {
+  try {
+    const userId = req.userData.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long",
+      });
+    }
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Hash new password and update
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Update password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update password",
+    });
+  }
+};
 
 exports.signup = signup
 exports.login = login
