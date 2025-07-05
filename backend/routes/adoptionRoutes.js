@@ -2,13 +2,11 @@ const express = require("express")
 const { body } = require("express-validator")
 const authenticate = require("../middleware/authentication")
 const adoptionController = require("../controllers/adoptionController")
+const { createAdoptionValidation, updateAdoptionValidation } = require("../middleware/adoptionValidation")
 
 const router = express.Router()
 
 router.use(authenticate)
-
-
-
 
 // Routes
 
