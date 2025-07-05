@@ -11,8 +11,8 @@ const router = express.Router()
 router.use(authenticate);
 router.post(
   "/",
-  authenticate, // Ensure user is authenticated
-  imageUpload.single("image"), [
+  imageUpload.single("image"),
+  [
     body("name").not().isEmpty().withMessage("Pet name is required"),
     body("description").not().isEmpty().withMessage("Pet description is required"),
     body("petType").not().isEmpty().withMessage("Pet type is required"),
