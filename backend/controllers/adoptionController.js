@@ -5,27 +5,24 @@ const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
 
 const checkCases = async (petId, creatorId) => {
-  // pet exists or not
-  const pet = await Pet.findById(petId)
-  if (!pet) {
-    throw new HttpError("Pet not found", 404)
-  }
-
+  
+  
+ 
   if (pet.user.toString() !== creatorId) {
     throw new HttpError("You can only create adoption posts for your own pets", 403)
   }
 
   // Check if there's already an active adoption post for this pet
-  const existingAdoption = await Adoption.findOne({
-    pet: petId,
-    status: { $in: ["active", "pending"] },
-  })
+  // const existingAdoption = await Adoption.findOne({
+  //   pet: petId,
+  //   status: { $in: ["active", "pending"] },
+  // })
 
-  if (existingAdoption) {
-    throw new HttpError("An active adoption post already exists for this pet", 409)
-  }
+  // if (existingAdoption) {
+  //   throw new HttpError("An active adoption post already exists for this pet", 409)
+  // }
 
-  return pet
+  // return pet
 }
 
 // Create adoption post
@@ -40,20 +37,19 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-    const { petId, title, description, location, contactInfo, requirements } = req.body
+    const {  name, description, location, contactInfo, requirements } = req.body
 
   
-    const pet = await checkCases(petId, creatorId)
+    
 //add the pet name field for the post for adoption form 
     const adoptionPost = new Adoption({
 
       creator: req.userData.userId,
-      name: pet.name,
-      description: pet.description,
-      breed: pet.breed,
-      petAge: Math.floor((new Date() - new Date(pet.dob)) / (365.25 * 24 * 60 * 60 * 1000)), // Calculate age from DOB
-      image: pet.image,
-      dob: pet.dob,
+      name,
+      description,
+      breed,
+      image,
+      dob,
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
