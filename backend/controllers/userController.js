@@ -227,7 +227,6 @@ exports.updateCurrentUser = async (req, res) => {
         message: "User not found",
       });
     }
-
     // Handle profile image update if file is uploaded
     if (req.file) {
       user.profileImage = {
