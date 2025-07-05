@@ -1,26 +1,23 @@
 const mongoose = require("mongoose")
 
 const adoptionSchema = new mongoose.Schema({
-  pet: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Pet",
-    required: [true, "Pet reference is required"],
+  name: {
+    type: String,
+    required: [true, "Pet name is required"],
+    trim: true,
+    maxlength: [100, "Name cannot exceed 100 characters"],
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: [true, "Creator reference is required"],
   },
-  title: {
-    type: String,
-    required: [true, "Adoption post title is required"],
-    trim: true,
-    maxlength: [100, "Title cannot be more than 100 characters"],
-  },
+ 
   description: {
     type: String,
     required: [true, "Adoption post description is required"],
     trim: true,
+    minlength: [20, "Description must be at least 20 characters"],
     maxlength: [1000, "Description cannot exceed 1000 characters"],
   },
    breed: {
@@ -28,10 +25,7 @@ const adoptionSchema = new mongoose.Schema({
     required: [true, "Pet breed is required"],
     trim: true,
   },
-  petAge: {
-    type: Number,
-    min: [0, "Pet age cannot be negative"],
-  },
+ 
   image: {
     url: {
       type: String,
@@ -42,10 +36,7 @@ const adoptionSchema = new mongoose.Schema({
       required: [true, "Pet image public ID is required"],
     },
   },
-  dob: {
-    type: Date,
-    required: [true, "Pet date of birth is required"],
-  },
+  
   location: {
     type: String,
     required: [true, "Location is required"],
