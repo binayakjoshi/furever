@@ -29,6 +29,10 @@ app.use(cookieParser())
 app.get("/", (req, res) => {
   res.json({
     message: "Pet Information API with JWT Authentication",
+    contact: {
+      phone: "9860909077",
+      support: "For API support and inquiries"
+    },
     endpoints: {
       auth: {
         signup: "POST /api/users/signup",
