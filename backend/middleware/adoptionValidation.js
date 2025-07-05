@@ -2,12 +2,11 @@
 const { body } = require("express-validator")
 
 const createAdoptionValidation = [
-  body("pet").notEmpty().withMessage("Pet reference is required").isMongoId().withMessage("Invalid pet ID format"),
-  body("title")
+  body("name")
     .notEmpty()
-    .withMessage("Adoption post title is required")
-    .isLength({ min: 5, max: 100 })
-    .withMessage("Title must be between 5 and 100 characters"),
+    .withMessage("Pet name is required")
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Pet name must be between 1 and 100 characters"),
   body("description")
     .notEmpty()
     .withMessage("Adoption post description is required")
@@ -18,10 +17,6 @@ const createAdoptionValidation = [
     .withMessage("Pet breed is required")
     .isLength({ min: 1, max: 100 })
     .withMessage("Breed must be between 1 and 100 characters"),
-  body("petAge")
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage("Pet age cannot be negative"),
   body("image.url")
     .notEmpty()
     .withMessage("Pet image URL is required")
@@ -30,11 +25,6 @@ const createAdoptionValidation = [
   body("image.publicId")
     .notEmpty()
     .withMessage("Pet image public ID is required"),
-  body("dob")
-    .notEmpty()
-    .withMessage("Pet date of birth is required")
-    .isISO8601()
-    .withMessage("Invalid date format for date of birth"),
   body("location")
     .notEmpty()
     .withMessage("Location is required")
@@ -53,7 +43,10 @@ const createAdoptionValidation = [
 ]
 
 const updateAdoptionValidation = [
-  body("title").optional().isLength({ min: 5, max: 100 }).withMessage("Title must be between 5 and 100 characters"),
+  body("name")
+    .optional()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Pet name must be between 1 and 100 characters"),
   body("description")
     .optional()
     .isLength({ min: 20, max: 1000 })
@@ -62,10 +55,7 @@ const updateAdoptionValidation = [
     .optional()
     .isLength({ min: 1, max: 100 })
     .withMessage("Breed must be between 1 and 100 characters"),
-  body("petAge")
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage("Pet age cannot be negative"),
+ 
   body("image.url")
     .optional()
     .isURL()
@@ -74,10 +64,7 @@ const updateAdoptionValidation = [
     .optional()
     .isString()
     .withMessage("Image public ID must be a string"),
-  body("dob")
-    .optional()
-    .isISO8601()
-    .withMessage("Invalid date format for date of birth"),
+  
   body("location")
     .optional()
     .isLength({ min: 2, max: 100 })
