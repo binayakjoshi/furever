@@ -4,27 +4,6 @@ const User = require("../models/userModel")
 const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
 
-const checkCases = async (petId, creatorId) => {
-  
-  
- 
-  if (pet.user.toString() !== creatorId) {
-    throw new HttpError("You can only create adoption posts for your own pets", 403)
-  }
-
-  // Check if there's already an active adoption post for this pet
-  // const existingAdoption = await Adoption.findOne({
-  //   pet: petId,
-  //   status: { $in: ["active", "pending"] },
-  // })
-
-  // if (existingAdoption) {
-  //   throw new HttpError("An active adoption post already exists for this pet", 409)
-  // }
-
-  // return pet
-}
-
 // Create adoption post
 exports.createAdoptionPost = async (req, res, next) => {
   try {
@@ -37,19 +16,36 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-    const {  name, description, location, contactInfo, requirements } = req.body
+    const { petId, title, description, location, contactInfo, requirements } = req.body
 
-  
+    // Verify the pet exists and belongs to the user
+    const pet = await Pet.findById(petId)
+    if (!pet) {
+      throw new HttpError("Pet not found", 404)
+    }
+
+    if (pet.user.toString() !== req.userData.userId) {
+      throw new HttpError("You can only create adoption posts for your own pets", 403)
+    }
+
+    // Check if there's already an active adoption post for this pet
+    const existingAdoption = await Adoption.findOne({
+      pet: petId,
+      status: { $in: ["active", "pending"] },
+    })
+
+    if (existingAdoption) {
+      throw new HttpError("An active adoption post already exists for this pet", 409)
+    }
     
-//add the pet name field for the post for adoption form 
     const adoptionPost = new Adoption({
-
+      pet: petId,
       creator: req.userData.userId,
-      name,
+      title,
       description,
-      breed,
-      image,
-      dob,
+      breed: pet.breed,
+      image: pet.image,
+      dob: pet.dob,
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
