@@ -87,9 +87,9 @@ const login = async (req, res, next) => {
 
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
-      return res.status(403).json({
+      return res.status(401).json({
         success: false,
-        message: "User already exists , please login instead.",
+        message: "Invalid credentials, please check your email and password.",
       });
     }
     const validPassword = await bcrypt.compare(password, existingUser.password);
