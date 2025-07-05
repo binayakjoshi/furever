@@ -16,48 +16,49 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-    const { petId, title, description, location, contactInfo, requirements } = req.body
+   const { name, description, breed, image, location, contactInfo, requirements } = req.body
 
-    // Verify the pet exists and belongs to the user
-    const pet = await Pet.findById(petId)
-    if (!pet) {
-      throw new HttpError("Pet not found", 404)
-    }
 
-    if (pet.user.toString() !== req.userData.userId) {
-      throw new HttpError("You can only create adoption posts for your own pets", 403)
-    }
+    // // Verify the pet exists and belongs to the user
+    // const pet = await Pet.findById(petId)
+    // if (!pet) {
+    //   throw new HttpError("Pet not found", 404)
+    // }
 
-    // Check if there's already an active adoption post for this pet
-    const existingAdoption = await Adoption.findOne({
-      pet: petId,
-      status: { $in: ["active", "pending"] },
-    })
+    // if (pet.user.toString() !== req.userData.userId) {
+    //   throw new HttpError("You can only create adoption posts for your own pets", 403)
+    // }
 
-    if (existingAdoption) {
-      throw new HttpError("An active adoption post already exists for this pet", 409)
-    }
+    // // Check if there's already an active adoption post for this pet
+    // const existingAdoption = await Adoption.findOne({
+    //   pet: petId,
+    //   status: { $in: ["active", "pending"] },
+    // })
+
+    // if (existingAdoption) {
+    //   throw new HttpError("An active adoption post already exists for this pet", 409)
+    // }
     
     const adoptionPost = new Adoption({
-      pet: petId,
+    
       creator: req.userData.userId,
-      title,
+      name,
       description,
-      breed: pet.breed,
-      image: pet.image,
-      dob: pet.dob,
+      breed,
+      image,
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
+      status: "active", // Default status
     })
 
+    // Save the adoption post to the database
     await adoptionPost.save()
 
- 
     await adoptionPost.populate([
-      { path: "pet", select: "name breed image description" },
-      { path: "creator", select: "name email phone" },
-    ])
+  { path: "creator", select: "name email phone" },
+  { path: "image", select: "url publicId" },
+])
 
     res.status(201).json({
       success: true,
@@ -84,7 +85,6 @@ exports.getAdoptionPosts = async (req, res) => {
   try {
     const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
 
-  
     const filter = {}
     if (status && status !== "all") {
       filter.status = status
@@ -93,7 +93,6 @@ exports.getAdoptionPosts = async (req, res) => {
       filter.location = { $regex: location, $options: "i" }
     }
 
-    
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
     const sortOptions = {}
     sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
@@ -101,7 +100,7 @@ exports.getAdoptionPosts = async (req, res) => {
     // Get adoption posts
     const adoptionPosts = await Adoption.find(filter)
       .populate([
-        { path: "pet", select: "name breed image description dob" },
+        { path: "image", select: "url publicId" },
         { path: "creator", select: "name email phone" },
         { path: "interestedUsers.user", select: "name email" },
       ])
@@ -109,7 +108,6 @@ exports.getAdoptionPosts = async (req, res) => {
       .skip(skip)
       .limit(Number.parseInt(limit))
 
-  
     const totalCount = await Adoption.countDocuments(filter)
 
     res.status(200).json({
@@ -136,7 +134,7 @@ exports.getAdoptionPosts = async (req, res) => {
 exports.getAdoptionPostById = async (req, res) => {
   try {
     const adoptionPost = await Adoption.findById(req.params.id).populate([
-      { path: "pet", select: "name breed image description dob diseases vaccinations" },
+      { path:"image" , select: "url publicId" },
       { path: "creator", select: "name email phone" },
       { path: "interestedUsers.user", select: "name email phone" },
     ])
@@ -174,7 +172,7 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
 
     const adoptionPosts = await Adoption.find(filter)
       .populate([
-        { path: "pet", select: "name breed image description" },
+        { path: "image", select: "url publicId" },
         { path: "interestedUsers.user", select: "name email" },
       ])
       .sort({ createdAt: -1 })
@@ -281,7 +279,7 @@ exports.showInterest = async (req, res) => {
 
    
     await adoptionPost.populate([
-      { path: "pet", select: "name breed image" },
+      { path: "image", select: "url publicId" },
       { path: "creator", select: "name email" },
       { path: "interestedUsers.user", select: "name email" },
     ])
@@ -406,7 +404,7 @@ exports.updateAdoptionPost = async (req, res) => {
 
     const adoptionPostId = req.params.id;
     const userId = req.userData.userId;
-    const { title, description, location, contactInfo, requirements, status, image } = req.body;
+    const { name, description, breed, location, contactInfo, requirements, status, image } = req.body;
 
     // Find the adoption 
     const adoptionPost = await Adoption.findById(adoptionPostId);
@@ -435,9 +433,10 @@ exports.updateAdoptionPost = async (req, res) => {
 
     
     const updateData = {};
-    
-    if (title !== undefined) updateData.title = title;
+
+    if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
+    if (breed !== undefined) updateData.breed = breed;
     if (location !== undefined) updateData.location = location;
     if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
     if (requirements !== undefined) updateData.requirements = requirements;
@@ -486,7 +485,7 @@ exports.updateAdoptionPost = async (req, res) => {
         runValidators: true 
       }
     ).populate([
-      { path: "pet", select: "name breed image description dob" },
+      { path: "image", select: "url publicId" },
       { path: "creator", select: "name email phone" },
       { path: "interestedUsers.user", select: "name email" },
     ]);
