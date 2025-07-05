@@ -50,7 +50,7 @@ router.put(
   authenticate,
   imageUpload.single("profileImage"),
   updateUserValidation,
-  userController.updateUser
+  userController.updateCurrentUser
 );
 router.delete("/:id", authenticate, userController.deleteUser);
 
