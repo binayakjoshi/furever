@@ -322,4 +322,4 @@ exports.updatePassword = async (req, res) => {
 exports.signup = signup
 exports.login = login
 exports.logout = logout
-exports.getCurrentUser= getCurrentUser;
+exports.getCurrentUser = getCurrentUser
