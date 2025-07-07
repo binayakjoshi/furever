@@ -112,6 +112,7 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         name: existingUser.name,
         role: existingUser.role,
+        profileImage:existingUser.profileImage,
       },
     });
   } catch (error) {
