@@ -1,6 +1,7 @@
 const express = require("express")
 const { body } = require("express-validator")
 const authenticate = require("../middleware/authentication")
+const imageUpload = require("../middleware/imageUpload");
 const adoptionController = require("../controllers/adoptionController")
 const { createAdoptionValidation, updateAdoptionValidation } = require("../middleware/adoptionValidation")
 
@@ -10,7 +11,7 @@ router.use(authenticate)
 
 // Routes
 
-router.post("/", createAdoptionValidation, adoptionController.createAdoptionPost)
+router.post("/",imageUpload.single("image"),createAdoptionValidation,adoptionController.createAdoptionPost)
 
 router.get("/", adoptionController.getAdoptionPosts)
 

@@ -25,7 +25,10 @@ const adoptionSchema = new mongoose.Schema({
     required: [true, "Pet breed is required"],
     trim: true,
   },
- 
+  petType:{
+    type:String,
+    required : true
+  },
   image: {
     url: {
       type: String,
@@ -43,20 +46,7 @@ const adoptionSchema = new mongoose.Schema({
     trim: true,
   },
   contactInfo: {
-    phone: {
-      type: String,
-      trim: true,
-    },
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    preferredContact: {
-      type: String,
-      enum: ["phone", "email", "both"],
-      default: "both",
-    },
+    type:String,
   },
   requirements: {
     type: String,
