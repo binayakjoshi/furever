@@ -1,13 +1,17 @@
+require("dotenv").config()
+
 const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
-require("dotenv").config()
+const session = require('express-session') 
+const passport = require('./config/passport')
 
 const petRoutes = require("./routes/petRoutes")
 const userRoutes = require("./routes/userRoutes")
 const adoptionRoutes = require("./routes/adoptionRoutes")
-const vetRoutes = require("./routes/vetRoutes") // Fixed vet routes
+const vetRoutes = require("./routes/vetRoutes")
+const authRoutes = require("./routes/authRoutes") 
 const HttpError = require("./models/http-error")
 
 const app = express()
@@ -26,6 +30,21 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get("/", (req, res) => {
   res.json({
     message: "Pet Information API with JWT Authentication",
@@ -39,6 +58,8 @@ app.get("/", (req, res) => {
         login: "POST /api/users/login",
         logout: "POST /api/users/logout",
         me: "GET /api/users/me",
+        googleLogin: "GET /auth/google", 
+        googleCallback: "GET /auth/google/callback", 
       },
       pets: "/api/pets",
       users: "/api/users",
@@ -64,6 +85,9 @@ app.get("/", (req, res) => {
         deleteProfile: "DELETE /api/vets/profile",
         getBySpecialization: "GET /api/vets/specialization/:specialization",
         searchByLocation: "GET /api/vets/search/location",
+        findNearby: "GET /api/vets/nearby?latitude=LAT&longitude=LNG&radius=KM",
+        findNearbyByAddress: "GET /api/vets/nearby/address?address=ADDRESS&radius=KM",
+        getInBounds: "GET /api/vets/bounds?swLat=LAT&swLng=LNG&neLat=LAT&neLng=LNG",
         contact: "POST /api/vets/:id/contact",
         updateStatus: "PATCH /api/vets/:id/status",
       },
@@ -75,6 +99,7 @@ app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/adoptions", adoptionRoutes)
 app.use("/api/vets", vetRoutes)
+app.use("/auth", authRoutes) 
 
 app.use((req, res, next) => {
   const error = new HttpError(`Route ${req.originalUrl} not found`, 404)
@@ -98,6 +123,7 @@ mongoose
     console.log("Connected to MongoDB Atlas")
     app.listen(PORT, () => {
       console.log(`Server is running on: http://localhost:${PORT}`)
+      console.log(`Google OAuth URL: http://localhost:${PORT}/auth/google`) 
     })
   })
   .catch((err) => {
