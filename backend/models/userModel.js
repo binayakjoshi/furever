@@ -16,10 +16,19 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: function() {
+      // Password is required only if googleId is not present (regular signup)
+      return !this.googleId;
+    },
     minlength: 6,
   },
-  //added roles for login signup function
+  // Added Google OAuth field
+  googleId: {
+    type: String,
+    sparse: true, // Allows multiple null values but ensures uniqueness when present
+    unique: true
+  },
+  // Added roles for login signup function
   role: {
     type: String,
     enum: ["user", "vet"],
@@ -32,7 +41,7 @@ const userSchema = new mongoose.Schema({
       ref: "Pet",
     },
   ],
-  dob:{
+  dob: {
     type: Date,
   },
   phone: {
@@ -53,6 +62,19 @@ const userSchema = new mongoose.Schema({
   },
 })
 
-const User = mongoose.model("User", userSchema)
+// Add index for better query performance
+userSchema.index({ email: 1 });
+userSchema.index({ googleId: 1 });
 
+// Pre-save middleware to handle OAuth users
+userSchema.pre('save', function(next) {
+  // If this is a Google OAuth user and no password is set, generate a random one
+  if (this.googleId && !this.password) {
+    const bcrypt = require('bcryptjs');
+    this.password = bcrypt.hashSync(Math.random().toString(36) + Date.now().toString(), 12);
+  }
+  next();
+});
+
+const User = mongoose.model("User", userSchema)
 module.exports = User
