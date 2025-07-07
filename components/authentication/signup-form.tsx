@@ -9,7 +9,6 @@ import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
 import { useForm } from "@/lib/use-form";
-import { useAuth } from "@/context/auth-context";
 import { useHttp } from "@/lib/request-hook";
 import {
   VALIDATOR_EMAIL,
@@ -27,7 +26,6 @@ type SignupResponse = {
   data?: { userId: string; email: string; name: string; role: string };
 };
 const SignupForm = () => {
-  const { setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState("");
@@ -111,9 +109,7 @@ const SignupForm = () => {
 
       const res = await sendRequest("/api/auth/signup", "POST", requestData);
       if (res.success && res.data) {
-        setUser(res.data);
-        router.push("/");
-        router.push("/");
+        router.push("/login");
       }
     } catch (_) {}
   };

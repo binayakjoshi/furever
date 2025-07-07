@@ -119,20 +119,26 @@ const EditPetForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.isValid) return;
+
     try {
       const requestData = new FormData();
+
       const diseasesString = formState.inputs.diseases.value as string;
       const diseasesArray = diseasesString.split(",").map((d) => d.trim());
-
       diseasesArray.forEach((d) => requestData.append("diseases", d));
-      if (formState.vaccinations && formState.vaccinations.length) {
-        const vaccArray = formState.vaccinations.map((v) => ({
-          name: v.name,
-          vaccDate: v.vaccDate,
-          nextVaccDate: v.nextVaccDate,
-        }));
-        requestData.append("vaccinations", JSON.stringify(vaccArray));
+
+      if (formState.vaccinations && formState.vaccinations.length > 0) {
+        formState.vaccinations.forEach((v, i) => {
+          requestData.append(`vaccinations[${i}][name]`, v.name);
+          requestData.append(`vaccinations[${i}][vaccDate]`, v.vaccDate);
+          requestData.append(
+            `vaccinations[${i}][nextVaccDate]`,
+            v.nextVaccDate
+          );
+        });
       }
+
+      // Other form fields
       requestData.append("name", formState.inputs.name.value as string);
       requestData.append(
         "description",
@@ -140,11 +146,18 @@ const EditPetForm = () => {
       );
       requestData.append("dob", formState.inputs.dob.value as string);
       requestData.append("breed", formState.inputs.breed.value as string);
-      console.log("clicking before submitting");
+      requestData.append("petType", formState.inputs.petType.value as string);
+
+      console.log("Submitting form data:");
+      for (const [key, value] of requestData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
 
       await sendRequest(`/api/pets/${petSlug}/edit`, "PUT", requestData);
       router.push(`/pets/${petSlug}`);
-    } catch (_) {}
+    } catch (err) {
+      console.error("Error submitting form:", err);
+    }
   };
 
   const handleVaccinationChange = (
@@ -364,18 +377,17 @@ const EditPetForm = () => {
             ))}
           </div>
         </div>
-
-        <div className={styles.buttonGroup}>
-          <Button
-            type="button"
-            className={styles.cancelButton}
-            onClick={() => router.back()}
-          >
-            Cancel
-          </Button>
-          {isLoading ? (
-            <LoadingSpinner text="Updating..." />
-          ) : (
+        {isLoading ? (
+          <LoadingSpinner text="Updating..." />
+        ) : (
+          <div className={styles.buttonGroup}>
+            <Button
+              type="button"
+              className={styles.cancelButton}
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               disabled={!formState.isValid}
@@ -383,8 +395,8 @@ const EditPetForm = () => {
             >
               Save Changes
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </form>
     </div>
   );

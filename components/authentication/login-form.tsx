@@ -19,7 +19,13 @@ import ErrorModal from "../ui/error";
 type LoginResponse = {
   success: boolean;
   message: string;
-  data?: { userId: string; name: string; role: string; email: string };
+  data?: {
+    userId: string;
+    name: string;
+    role: string;
+    email: string;
+    profileImage: { url: string };
+  };
 };
 
 const LoginForm = () => {

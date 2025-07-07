@@ -13,13 +13,14 @@ import classes from "./nav-actions.module.css";
 const NavActions = () => {
   const { user, logout, loading } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  console.log("NavActions user:", user);
+  console.log("Profile image:", user?.profileImage);
 
   const toggleDrawer = () => setDrawerOpen((p) => !p);
 
   if (loading) {
     return <LoadingSpinner inline variant="bars" size="small" text="" />;
   }
-
   if (!user) {
     return (
       <div className={classes.authButtons}>
@@ -43,6 +44,7 @@ const NavActions = () => {
       >
         {user.profileImage ? (
           <Image
+            key={user.profileImage.url}
             src={user.profileImage.url}
             alt="profile Picture"
             width={40}
@@ -91,12 +93,12 @@ const NavActions = () => {
             </li>
             <li>
               <Link
-                href={`/user/${user.userId}/pets`}
+                href={`/adoption/add`}
                 onClick={toggleDrawer}
                 title="Manage your pets"
               >
                 <FaPaw size={16} />
-                Your Pet Profile
+                Post for Adoption
               </Link>
             </li>
             <li>

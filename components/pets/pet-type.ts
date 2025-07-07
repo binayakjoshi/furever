@@ -1,4 +1,4 @@
-export type vaccination = {
+export type Vaccination = {
   id?: number;
   name: string;
   vaccDate: string;
@@ -11,7 +11,7 @@ export type Pet = {
   dob: string;
   petType?: string;
   breed: string;
-  vaccinations: vaccination[];
+  vaccinations: Vaccination[];
   description: string;
   user?: {
     _id: string;
