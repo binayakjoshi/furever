@@ -1,3 +1,4 @@
+"use client";
 import { useForm } from "@/lib/use-form";
 
 const PostAdoption = () => {
@@ -11,5 +12,6 @@ const PostAdoption = () => {
     },
     false
   );
+  return <h2>create adoption post</h2>;
 };
 export default PostAdoption;

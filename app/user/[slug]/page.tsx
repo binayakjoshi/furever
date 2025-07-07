@@ -1,4 +1,3 @@
-// app/(protected)/profile/page.tsx
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Image from "next/image";
