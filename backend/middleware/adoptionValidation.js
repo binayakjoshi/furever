@@ -17,25 +17,11 @@ const createAdoptionValidation = [
     .withMessage("Pet breed is required")
     .isLength({ min: 1, max: 100 })
     .withMessage("Breed must be between 1 and 100 characters"),
-  body("image.url")
-    .notEmpty()
-    .withMessage("Pet image URL is required")
-    .isURL()
-    .withMessage("Invalid image URL"),
-  body("image.publicId")
-    .notEmpty()
-    .withMessage("Pet image public ID is required"),
   body("location")
     .notEmpty()
     .withMessage("Location is required")
     .isLength({ min: 2, max: 100 })
     .withMessage("Location must be between 2 and 100 characters"),
-  body("contactInfo.phone").optional().isMobilePhone().withMessage("Please provide a valid phone number"),
-  body("contactInfo.email").optional().isEmail().withMessage("Please provide a valid email address"),
-  body("contactInfo.preferredContact")
-    .optional()
-    .isIn(["phone", "email", "both"])
-    .withMessage("Preferred contact must be phone, email, or both"),
   body("requirements")
     .optional()
     .isLength({ max: 500 })

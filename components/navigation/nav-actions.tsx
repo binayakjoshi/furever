@@ -13,9 +13,6 @@ import classes from "./nav-actions.module.css";
 const NavActions = () => {
   const { user, logout, loading } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-  console.log("NavActions user:", user);
-  console.log("Profile image:", user?.profileImage);
-
   const toggleDrawer = () => setDrawerOpen((p) => !p);
 
   if (loading) {

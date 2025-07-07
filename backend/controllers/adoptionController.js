@@ -9,6 +9,7 @@ exports.createAdoptionPost = async (req, res, next) => {
   try {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+      console.log(errors.array())
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -16,39 +17,21 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-   const { name, description, breed, image, location, contactInfo, requirements } = req.body
-
-
-    // // Verify the pet exists and belongs to the user
-    // const pet = await Pet.findById(petId)
-    // if (!pet) {
-    //   throw new HttpError("Pet not found", 404)
-    // }
-
-    // if (pet.user.toString() !== req.userData.userId) {
-    //   throw new HttpError("You can only create adoption posts for your own pets", 403)
-    // }
-
-    // // Check if there's already an active adoption post for this pet
-    // const existingAdoption = await Adoption.findOne({
-    //   pet: petId,
-    //   status: { $in: ["active", "pending"] },
-    // })
-
-    // if (existingAdoption) {
-    //   throw new HttpError("An active adoption post already exists for this pet", 409)
-    // }
-    
+   const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
     const adoptionPost = new Adoption({
     
       creator: req.userData.userId,
       name,
       description,
       breed,
-      image,
+      image:{
+        url:req.file.path,
+        publicId:req.file.filename,
+      },
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
+      petType,
       status: "active", // Default status
     })
 
