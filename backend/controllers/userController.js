@@ -26,7 +26,7 @@ const signup = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return next(new HttpError("Invalid data passed", 400));
     }
-    const { name, email, password,address,phone,dob, role = "user" } = req.body;
+    const { name, email, password, address, phone, dob, role = "user" } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -46,9 +46,9 @@ const signup = async (req, res, next) => {
       address,
       phone,
       role,
-      profileImage:{
-        url:req.file.path,
-        publicId:req.file.filename,
+      profileImage: {
+        url: req.file ? req.file.path : '',
+        publicId: req.file ? req.file.filename : '',
       }
     });
     await newUser.save();
@@ -77,6 +77,7 @@ const signup = async (req, res, next) => {
   }
 };
 
+// FIXED: Single login function that handles both regular and OAuth users
 const login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -92,6 +93,15 @@ const login = async (req, res, next) => {
         message: "Invalid credentials, please check your email and password.",
       });
     }
+
+    // Check if this is a Google OAuth user trying to login with password
+    if (existingUser.googleId && !password) {
+      return res.status(400).json({
+        success: false,
+        message: "This account is linked with Google. Please use 'Continue with Google' to login.",
+      });
+    }
+
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
       return res.status(403).json({
@@ -112,7 +122,8 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         name: existingUser.name,
         role: existingUser.role,
-        profileImage:existingUser.profileImage,
+        profileImage: existingUser.profileImage,
+        isGoogleUser: !!existingUser.googleId, // Add this flag
       },
     });
   } catch (error) {
@@ -153,7 +164,18 @@ const getCurrentUser = async (req, res, next) => {
     }
     res.status(200).json({
       success: true,
-      data: { userId: user.id, email: user.email, name: user.name,dob:user.dob, role: user.role,phone:user.phone,address:user.address, profileImage:user.profileImage,createdAt:user.createdAt },
+      data: { 
+        userId: user.id, 
+        email: user.email, 
+        name: user.name,
+        dob: user.dob, 
+        role: user.role,
+        phone: user.phone,
+        address: user.address, 
+        profileImage: user.profileImage,
+        createdAt: user.createdAt,
+        isGoogleUser: !!user.googleId // Add this flag
+      },
     });
   } catch (error) {
     console.error("GetCurrentUser error:", error);
@@ -186,8 +208,6 @@ exports.getUserById = async (req, res) => {
     })
   }
 }
-
-
 
 exports.deleteUser = async (req, res) => {
   try {
@@ -228,6 +248,7 @@ exports.updateCurrentUser = async (req, res) => {
         message: "User not found",
       });
     }
+    
     // Handle profile image update if file is uploaded
     if (req.file) {
       user.profileImage = {
@@ -292,6 +313,14 @@ exports.updatePassword = async (req, res) => {
       });
     }
 
+    // Check if this is a Google OAuth user
+    if (user.googleId) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot change password for Google OAuth accounts",
+      });
+    }
+
     // Verify current password
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
@@ -319,7 +348,63 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-exports.signup = signup
-exports.login = login
-exports.logout = logout
-exports.getCurrentUser = getCurrentUser
+//  for Google OAuth
+const createOrUpdateGoogleUser = async (googleProfile) => {
+  try {
+    // Check if user already exists with this Google ID
+    let existingUser = await User.findOne({ googleId: googleProfile.id });
+    
+    if (existingUser) {
+      // Update existing Google user's profile image if needed
+      if (googleProfile.photos && googleProfile.photos[0]) {
+        existingUser.profileImage = {
+          url: googleProfile.photos[0].value,
+          publicId: 'google_' + googleProfile.id
+        };
+        await existingUser.save();
+      }
+      return existingUser;
+    }
+
+    // Check if user exists with same email
+    existingUser = await User.findOne({ email: googleProfile.emails[0].value });
+    
+    if (existingUser) {
+      // Link Google account to existing user
+      existingUser.googleId = googleProfile.id;
+      if (googleProfile.photos && googleProfile.photos[0]) {
+        existingUser.profileImage = {
+          url: googleProfile.photos[0].value,
+          publicId: 'google_' + googleProfile.id
+        };
+      }
+      await existingUser.save();
+      return existingUser;
+    }
+
+    // Create new user
+    const newUser = new User({
+      googleId: googleProfile.id,
+      name: googleProfile.displayName,
+      email: googleProfile.emails[0].value,
+      profileImage: {
+        url: googleProfile.photos && googleProfile.photos[0] ? googleProfile.photos[0].value : '',
+        publicId: 'google_' + googleProfile.id
+      },
+      role: 'user',
+      // Password will be auto-generated by pre-save middleware
+    });
+
+    await newUser.save();
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+exports.createOrUpdateGoogleUser = createOrUpdateGoogleUser;
+exports.signup = signup;
+exports.login = login;
+exports.logout = logout;
+exports.getCurrentUser = getCurrentUser;
