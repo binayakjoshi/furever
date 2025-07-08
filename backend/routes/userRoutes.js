@@ -30,7 +30,7 @@ router.get("/me", authenticate, userController.getCurrentUser);
 router.put(
   "/me", 
   authenticate, 
-  imageUpload.single("profileImage"),
+  // imageUpload.single("profileImage"),
   updateUserValidation,
   userController.updateCurrentUser
 );
