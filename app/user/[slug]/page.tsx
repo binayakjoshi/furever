@@ -11,6 +11,7 @@ import {
   FaPen,
   FaCog,
 } from "react-icons/fa";
+import Button from "@/components/custom-elements/button";
 import styles from "./page.module.css";
 
 type User = {
@@ -161,12 +162,15 @@ const UserProfilePage = async () => {
         </div>
 
         <div className={styles.actions}>
-          <button className={styles.editButton}>
+          <Button
+            className={styles.editButton}
+            href={`/user/${user.userId}/edit`}
+          >
             <span className={styles.buttonIcon}>
               <FaPen />
             </span>
             Edit Profile
-          </button>
+          </Button>
           <button className={styles.settingsButton}>
             <span className={styles.buttonIcon}>
               <FaCog />

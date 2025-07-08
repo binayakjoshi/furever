@@ -20,7 +20,7 @@ const ViewAdoptionList = async () => {
   }
   return (
     <>
-      <h2 className={styles.pageTitle}>Adoptions Posts</h2>
+      <h2 className={styles.pageTitle}>My Posts</h2>
       <div className={styles.pageContent}>
         <AdoptionList adoptionPets={pets} />
       </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { FaHeart } from "react-icons/fa";
 import SignupForm from "@/components/authentication/signup-form";
