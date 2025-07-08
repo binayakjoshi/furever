@@ -238,8 +238,7 @@ exports.deleteUser = async (req, res) => {
 exports.updateCurrentUser = async (req, res) => {
   try {
     const userId = req.userData.userId;
-    const { password, ...updateData } = req.body;
-
+    const { password, ...updateData } = req.body ?? {};
     // Find the user 
     let user = await User.findById(userId);
     if (!user) {
