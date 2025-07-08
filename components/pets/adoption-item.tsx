@@ -55,7 +55,7 @@ const AdoptionItem = ({ pet }: AdoptionItemProps) => {
               <span className={styles.value}>{pet.requirements}</span>
             </p>
             <p className={styles.adoptionCardAction}>
-              {user?.userId === pet.creator._id ? (
+              {user?.userId === pet.creator ? (
                 <>
                   <Button className={styles.editAdoption}>Edit</Button>
                   <Button className={styles.deleteAdoption}>Delete</Button>

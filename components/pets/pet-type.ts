@@ -27,9 +27,7 @@ export type AdoptionPet = {
   image: {
     url: string;
   };
-  creator: {
-    _id: string;
-  };
+  creator: string;
   location: string;
   contactInfo: string;
   requirements: string;

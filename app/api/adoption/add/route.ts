@@ -7,7 +7,7 @@ export const POST = async (request: NextRequest) => {
 
     const formData = await request.formData();
 
-    const backendRes = await fetch(`${process.env.BACKEND_URL}/api/adoptions`, {
+    const backendRes = await fetch(`${process.env.BACKEND_URL}/api/adoption`, {
       method: "POST",
       headers: {
         Cookie: cookieHeader,

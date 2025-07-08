@@ -6,7 +6,7 @@ const ViewAdoptionList = async () => {
   const cookieHeader = (await cookies()).toString();
   let pets: AdoptionPet[];
   try {
-    const url = `${process.env.NEXT_ROUTE_URL}/api/adoption`;
+    const url = `${process.env.NEXT_ROUTE_URL}/api/adoption/my`;
     const response = await fetch(url, {
       headers: {
         Cookie: cookieHeader,
@@ -18,6 +18,7 @@ const ViewAdoptionList = async () => {
   } catch (error) {
     throw new Error("Error while fetching the adoption list");
   }
+
   return (
     <>
       <h2 className={styles.pageTitle}>My Posts</h2>

@@ -6,7 +6,7 @@ const ViewAdoptionList = async () => {
   const cookieHeader = (await cookies()).toString();
   let pets: AdoptionPet[];
   try {
-    const url = `${process.env.NEXT_ROUTE_URL}/api/adoption`;
+    const url = `${process.env.NEXT_ROUTE_URL}/api/adoption/available`;
     const response = await fetch(url, {
       headers: {
         Cookie: cookieHeader,
