@@ -66,7 +66,7 @@ exports.createAdoptionPost = async (req, res, next) => {
 
 exports.getAdoptionPosts = async (req, res) => {
   try {
-    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc", excludeOwn = "false" } = req.query
+    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
 
     const filter = {}
     if (status && status !== "all") {
@@ -74,11 +74,6 @@ exports.getAdoptionPosts = async (req, res) => {
     }
     if (location) {
       filter.location = { $regex: location, $options: "i" }
-    }
-    
-    // Exclude user's post , frontend le pathauda excludeOwn=true pathauna parcha 
-    if (excludeOwn === "true" && req.userData && req.userData.userId) {
-      filter.creator = { $ne: req.userData.userId }
     }
 
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
@@ -512,3 +507,57 @@ exports.updateAdoptionPost = async (req, res) => {
     });
   }
 };
+
+// (for browsing available adoptions)
+exports.getAvailableAdoptionPosts = async (req, res) => {
+  try {
+    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
+    const userId = req.userData.userId
+
+    const filter = {
+      creator: { $ne: userId } 
+    }
+    
+    if (status && status !== "all") {
+      filter.status = status
+    }
+    if (location) {
+      filter.location = { $regex: location, $options: "i" }
+    }
+
+    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
+
+    
+    const adoptionPosts = await Adoption.find(filter)
+      .populate([
+        { path: "image", select: "url publicId" },
+        { path: "creator", select: "name email phone" },
+        { path: "interestedUsers.user", select: "name email" },
+      ])
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(Number.parseInt(limit))
+
+    const totalCount = await Adoption.countDocuments(filter)
+
+    res.status(200).json({
+      success: true,
+      data: adoptionPosts,
+      pagination: {
+        currentPage: Number.parseInt(page),
+        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
+        totalCount,
+        hasNext: skip + adoptionPosts.length < totalCount,
+        hasPrev: Number.parseInt(page) > 1,
+      },
+    })
+  } catch (error) {
+    console.error("Get available adoption posts error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch available adoption posts",
+    })
+  }
+}
