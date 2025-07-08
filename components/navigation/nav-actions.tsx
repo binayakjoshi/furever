@@ -90,11 +90,21 @@ const NavActions = () => {
             </li>
             <li>
               <Link
-                href={`/adoption/add`}
+                href={`/adoption/my-post`}
                 onClick={toggleDrawer}
                 title="Manage your pets"
               >
                 <FaPaw size={16} />
+                My Adoption Posts
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={`/adoption/add`}
+                onClick={toggleDrawer}
+                title="Manage your pets"
+              >
+                <FaPlus size={16} />
                 Post for Adoption
               </Link>
             </li>

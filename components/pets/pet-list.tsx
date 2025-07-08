@@ -12,7 +12,6 @@ const PetList = ({ pets }: PetListProps) => {
     return (
       <div className={styles.empty}>
         <h2>No pets found. Maybe add one?</h2>
-        <Button href="/pets/addpet">Add</Button>
       </div>
     );
   }

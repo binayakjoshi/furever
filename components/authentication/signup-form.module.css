@@ -3,7 +3,6 @@
   flex-direction: column;
   gap: 1rem;
 }
-
 .alert {
   display: flex;
   align-items: center;

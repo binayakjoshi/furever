@@ -18,3 +18,19 @@ export type Pet = {
   };
   diseases: string[];
 };
+export type AdoptionPet = {
+  _id: string;
+  name: string;
+  description: string;
+  breed: string;
+  petType: string;
+  image: {
+    url: string;
+  };
+  creator: {
+    _id: string;
+  };
+  location: string;
+  contactInfo: string;
+  requirements: string;
+};
