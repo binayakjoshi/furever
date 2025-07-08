@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
 import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
-
+import Image from "next/image";
 import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
 import { useForm } from "@/lib/use-form";
@@ -79,7 +79,9 @@ const SignupForm = () => {
     },
     false
   );
-
+  const handleGoogleSignup = () => {
+    window.location.href = `/api/auth/google`;
+  };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -301,6 +303,16 @@ const SignupForm = () => {
           ) : (
             "Create account"
           )}
+        </Button>
+        <Button className={styles.googleBtn} onClick={handleGoogleSignup}>
+          <Image
+            src="https://developers.google.com/identity/images/g-logo.png"
+            alt="google"
+            className={styles.googleIcon}
+            width={18}
+            height={18}
+          />
+          Continue with Google
         </Button>
       </form>
     </>

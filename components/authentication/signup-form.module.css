@@ -117,6 +117,34 @@
   width: 1rem;
   animation: spin 1s linear infinite;
 }
+.googleBtn{
+  padding: 0.875rem 1.5rem;
+  background: white;
+  color:  black;
+  border: none;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+
+}
+.googleBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.googleIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
 .errorText{
   color: #ef4444;
   font-size: 0.875rem;

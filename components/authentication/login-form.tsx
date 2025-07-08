@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
@@ -25,6 +26,9 @@ type LoginResponse = {
     role: string;
     email: string;
     profileImage: { url: string };
+    phone: string;
+    address: string;
+    dob: string;
   };
 };
 
@@ -44,6 +48,9 @@ const LoginForm = () => {
     false
   );
 
+  const handleGoogleLogin = () => {
+    window.location.href = "/api/auth/google";
+  };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -128,6 +135,16 @@ const LoginForm = () => {
             ) : (
               "Login"
             )}
+          </Button>
+          <Button className={styles.googleBtn} onClick={handleGoogleLogin}>
+            <Image
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="google"
+              className={styles.googleIcon}
+              width={18}
+              height={18}
+            />
+            Continue with Google
           </Button>
         </form>
       </div>
