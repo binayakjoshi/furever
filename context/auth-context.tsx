@@ -9,6 +9,9 @@ type User = {
   name: string;
   role: string;
   profileImage: { url: string };
+  phone: string;
+  address: string;
+  dob: string;
 };
 
 type AuthContextValue = {
