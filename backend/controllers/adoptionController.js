@@ -66,7 +66,7 @@ exports.createAdoptionPost = async (req, res, next) => {
 
 exports.getAdoptionPosts = async (req, res) => {
   try {
-    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
+    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc", excludeOwn = "false" } = req.query
 
     const filter = {}
     if (status && status !== "all") {
@@ -74,6 +74,11 @@ exports.getAdoptionPosts = async (req, res) => {
     }
     if (location) {
       filter.location = { $regex: location, $options: "i" }
+    }
+    
+    // Exclude user's post , frontend le pathauda excludeOwn=true pathauna parcha 
+    if (excludeOwn === "true" && req.userData && req.userData.userId) {
+      filter.creator = { $ne: req.userData.userId }
     }
 
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
