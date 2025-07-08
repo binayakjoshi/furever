@@ -15,6 +15,9 @@ router.post("/",imageUpload.single("image"),createAdoptionValidation,adoptionCon
 
 router.get("/", adoptionController.getAdoptionPosts)
 
+// afno adoption aafule herna mildaina
+router.get("/available", adoptionController.getAvailableAdoptionPosts)
+
 router.get("/my-posts", adoptionController.getAdoptionPostsByCreator)
 router.get("/creator/:creatorId", adoptionController.getAdoptionPostsByCreator)
 
