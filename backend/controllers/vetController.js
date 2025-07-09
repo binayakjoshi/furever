@@ -4,6 +4,131 @@ const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
 const { deleteFromCloudinary } = require("../config/cloudinary")
 
+exports.getNearbyVets = async (req, res, next) => {
+  const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+  const { lat, lng, radius } = req.body;
+  
+  const query = `
+    [out:json][timeout:25];
+    (
+      node["amenity"="veterinary"](around:${radius},${lat},${lng});
+      node["healthcare"="veterinary"](around:${radius},${lat},${lng});
+      node["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
+      way["amenity"="veterinary"](around:${radius},${lat},${lng});
+      way["healthcare"="veterinary"](around:${radius},${lat},${lng});
+      way["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
+      rel["amenity"="veterinary"](around:${radius},${lat},${lng});
+      rel["healthcare"="veterinary"](around:${radius},${lat},${lng});
+      rel["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
+    );
+    out center tags;
+  `;
+
+  try {
+    const osres = await fetch(OVERPASS_URL, {
+      method: 'POST',
+      body: query,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+
+    if (!osres.ok) throw new Error(`OSM error ${osres.status}`);
+    
+    const { elements } = await osres.json();
+    
+    const data = elements.map((el) => {
+      const { id, tags = {}, lat: nLat, lon: nLon, center } = el;
+      
+      // For ways/relations use center coordinates
+      const itemLat = nLat ?? center?.lat;
+      const itemLon = nLon ?? center?.lon;
+      
+      // Extract name with fallback options
+      const name = tags.name || 
+                  tags['name:en'] || 
+                  tags.brand || 
+                  tags['healthcare:speciality'] || 
+                  null;
+      
+      // Build comprehensive address string
+      const addressParts = [
+        tags['addr:housenumber'],
+        tags['addr:street'],
+        tags['addr:neighbourhood'],
+        tags['addr:suburb'],
+        tags['addr:city'],
+        tags['addr:state'],
+        tags['addr:postcode'],
+        tags['addr:country']
+      ].filter(Boolean);
+      
+      const address = addressParts.length > 0 ? addressParts.join(', ') : null;
+      
+      // Extract additional useful information
+      const phone = tags.phone || tags['contact:phone'] || null;
+      const website = tags.website || tags['contact:website'] || null;
+      const email = tags.email || tags['contact:email'] || null;
+      const openingHours = tags.opening_hours || null;
+      
+      // Determine facility type for better categorization
+      let facilityType = 'Veterinary Clinic';
+      if (tags.healthcare === 'animal_hospital' || tags.name?.toLowerCase().includes('hospital')) {
+        facilityType = 'Animal Hospital';
+      } else if (tags.healthcare === 'veterinary' || tags.amenity === 'veterinary') {
+        facilityType = 'Veterinary Clinic';
+      }
+      
+      // Emergency services indicator
+      const isEmergency = tags.emergency === 'yes' || 
+                         tags['healthcare:speciality']?.includes('emergency') ||
+                         tags.name?.toLowerCase().includes('emergency') ||
+                         tags.name?.toLowerCase().includes('24') ||
+                         false;
+      
+      return {
+        id: `${el.type}/${id}`,
+        name,
+        address,
+        lat: itemLat,
+        lon: itemLon,
+        phone,
+        website,
+        email,
+        openingHours,
+        facilityType,
+        isEmergency,
+        // Additional metadata
+        tags: {
+          amenity: tags.amenity,
+          healthcare: tags.healthcare,
+          operator: tags.operator,
+          brand: tags.brand
+        }
+      };
+    })
+    .filter(item => item.lat && item.lon) // Filter out items without coordinates
+    .sort((a, b) => {
+      // Sort by emergency services first, then by name
+      if (a.isEmergency && !b.isEmergency) return -1;
+      if (!a.isEmergency && b.isEmergency) return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    return res.json({
+      success: true,
+      message: 'Fetched nearby veterinary clinics and animal hospitals',
+      data,
+      count: data.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching nearby vets:', err);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch nearby veterinary services',
+      error: err.message 
+    });
+  }
+};
 // Create
 exports.createVeterinarianProfile = async (req, res, next) => {
   try {

@@ -11,7 +11,7 @@ const {
 
 const router = express.Router()
 
-
+router.post("/",veterinarianController.getNearbyVets);
 router.get("/", veterinarianController.getAllVeterinarians)
 
 
