@@ -34,6 +34,9 @@ export const NavigationLinks = () => {
             <li>
               <NavLink href="/adoption">Adoption</NavLink>
             </li>
+            <li>
+              <NavLink href="/vets/nearby">Nearby Vets</NavLink>
+            </li>
           </ul>
         </nav>
       </SideDrawer>
@@ -50,6 +53,9 @@ export const NavigationLinks = () => {
       </li>
       <li className={classes.navItem}>
         <NavLink href="/adoption">Adoption</NavLink>
+      </li>
+      <li className={classes.navItem}>
+        <NavLink href="/vets/nearby">Nearby Vets</NavLink>
       </li>
     </>
   );
