@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import Button from "../custom-elements/button";
 import styles from "./pet-detail-actions.module.css";
 import { useAuth } from "@/context/auth-context";
-import { Pet } from "./pet-type";
+import { Pet } from "@/lib/types";
 
 type PetDetailActionProps = {
   pet: Pet;

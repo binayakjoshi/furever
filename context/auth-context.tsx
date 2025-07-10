@@ -1,18 +1,10 @@
 "use client";
 
+import { PetOwner } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useState, useEffect } from "react";
 
-type User = {
-  userId: string;
-  email: string;
-  name: string;
-  role: string;
-  profileImage: { url: string };
-  phone: string;
-  address: string;
-  dob: string;
-};
+type User = PetOwner;
 
 type AuthContextValue = {
   user: User | null;

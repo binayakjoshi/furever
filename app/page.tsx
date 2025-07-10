@@ -1,9 +1,9 @@
 import React from "react";
 import { cookies } from "next/headers";
 import { FaCalendarAlt, FaHeart, FaClock, FaStethoscope } from "react-icons/fa";
-import { Pet } from "@/components/pets/pet-type";
+import { Pet } from "@/lib/types";
 import styles from "./page.module.css";
-import DashboardAction from "@/components/dashboard/dasboard-actions";
+import DashboardAction from "@/components/user/dasboard-actions";
 import PetList from "@/components/pets/pet-list";
 
 type UpcomingEvents = {

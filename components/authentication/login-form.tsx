@@ -16,20 +16,12 @@ import {
 } from "@/lib/validators";
 import styles from "./login-form.module.css";
 import ErrorModal from "../ui/error";
+import { PetOwner } from "@/lib/types";
 
 type LoginResponse = {
   success: boolean;
   message: string;
-  data?: {
-    userId: string;
-    name: string;
-    role: string;
-    email: string;
-    profileImage: { url: string };
-    phone: string;
-    address: string;
-    dob: string;
-  };
+  data?: PetOwner;
 };
 
 const LoginForm = () => {
@@ -71,7 +63,7 @@ const LoginForm = () => {
         setUser(response.data);
         router.push("/");
       }
-    } catch (_) {}
+    } catch {}
   };
 
   const isFormValid =

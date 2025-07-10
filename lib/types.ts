@@ -32,3 +32,17 @@ export type AdoptionPet = {
   contactInfo: string;
   requirements: string;
 };
+export type PetOwner = {
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  phone: string;
+  address: string;
+  dob: string;
+  createdAt: string;
+  profileImage: {
+    url: string;
+    publicId: string;
+  };
+};

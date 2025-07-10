@@ -5,7 +5,7 @@ import { useForm } from "@/lib/use-form";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
-import { type Pet } from "@/components/pets/pet-type";
+import { type Pet } from "@/lib/types";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
 import ImageUpload from "@/components/custom-elements/image-upload";
 import { useAuth } from "@/context/auth-context";

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { type AdoptionPet } from "./pet-type";
+import { type AdoptionPet } from "@/lib/types";
 import styles from "./adoption-item.module.css";
 import Button from "../custom-elements/button";
 import { useAuth } from "@/context/auth-context";

@@ -1,5 +1,4 @@
-import { type Pet } from "./pet-type";
-import Button from "../custom-elements/button";
+import { type Pet } from "@/lib/types";
 import PetItem from "./pet-item";
 import styles from "./pet-list.module.css";
 

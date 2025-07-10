@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { AdoptionList } from "@/components/pets/adoption-list";
-import { AdoptionPet } from "@/components/pets/pet-type";
+import { AdoptionPet } from "@/lib/types";
 import styles from "./page.module.css";
 const ViewAdoptionList = async () => {
   const cookieHeader = (await cookies()).toString();

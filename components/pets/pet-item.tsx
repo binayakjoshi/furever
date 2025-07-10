@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type Pet as PetItemProps } from "./pet-type";
+import { type Pet as PetItemProps } from "@/lib/types";
 import styles from "./pet-item.module.css";
 
 const PetItem = (props: PetItemProps) => {

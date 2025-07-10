@@ -11,7 +11,7 @@ import Button from "../custom-elements/button";
 import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "../ui/error";
 import LoadingSpinner from "../ui/loading-spinner";
-import type { Pet } from "../pets/pet-type";
+import type { Pet } from "@/lib/types";
 import styles from "./edit-pet-form.module.css";
 
 const useUniqueKey = (deps: unknown[]) => {
@@ -67,7 +67,7 @@ const EditPetForm = () => {
         res.data.dob = res.data.dob.split("T")[0];
         setFetchedPet(res.data);
         setIsDataLoaded(true);
-      } catch (_) {}
+      } catch {}
     })();
   }, [sendRequest, petSlug]);
 

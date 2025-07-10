@@ -2,7 +2,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { FaTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { useHttp } from "@/lib/request-hook";
-import { type Pet } from "@/components/pets/pet-type";
+import { type Pet } from "@/lib/types";
 import Modal from "@/components/ui/modal";
 import Button from "@/components/custom-elements/button";
 import styles from "./page.module.css";

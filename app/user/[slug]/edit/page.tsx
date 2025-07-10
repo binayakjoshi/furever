@@ -13,18 +13,12 @@ import ErrorModal from "@/components/ui/error";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import styles from "./page.module.css";
 import Modal from "@/components/ui/modal";
+import { PetOwner } from "@/lib/types";
 
 type UserDetailResponse = {
   success: boolean;
   message: string;
-  data: {
-    userId: string;
-    dob: string;
-    name: string;
-    role: string;
-    email: string;
-    profileImage: { url: string };
-  };
+  data: PetOwner;
 };
 const EditUserForm = () => {
   const router = useRouter();
