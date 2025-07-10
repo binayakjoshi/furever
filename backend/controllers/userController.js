@@ -211,28 +211,36 @@ exports.getUserById = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id)
+    const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
-      })
+      });
     }
 
-    await Pet.deleteMany({ user: req.params.id })
+    await Pet.deleteMany({ user: req.params.id });
+
+    // Clear cookie after confirming user deletion
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
 
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
-    })
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
-    })
+    });
   }
-}
+};
+
 
 // Update current user's profile (for authenticated users updating their own profile)
 exports.updateCurrentUser = async (req, res) => {
