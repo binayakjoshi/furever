@@ -8,32 +8,20 @@ import {
   FaUser,
   FaBirthdayCake,
   FaCalendarAlt,
-  FaPen,
-  FaCog,
 } from "react-icons/fa";
-import Button from "@/components/custom-elements/button";
+import { type PetOwner } from "@/lib/types";
 import styles from "./page.module.css";
+import UserProfileAction from "@/components/user/user-profile-actions";
 
-type User = {
-  userId: string;
-  email: string;
-  name: string;
-  role: string;
-  phone: string;
-  address: string;
-  dob: string;
-  createdAt: string;
-  profileImage: {
-    url: string;
-    publicId: string;
-  };
+type UserProfilePageProps = {
+  params: Promise<{ slug: string }>;
 };
-
-const UserProfilePage = async () => {
-  let user: User;
+const UserProfilePage = async ({ params }: UserProfilePageProps) => {
+  const { slug } = await params;
+  let user: PetOwner;
   try {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${process.env.NEXT_ROUTE_URL}/api/auth/me`, {
+    const res = await fetch(`${process.env.NEXT_ROUTE_URL}/api/user/${slug}`, {
       headers: { Cookie: cookieHeader },
       cache: "no-store",
     });
@@ -160,24 +148,7 @@ const UserProfilePage = async () => {
             </div>
           </div>
         </div>
-
-        <div className={styles.actions}>
-          <Button
-            className={styles.editButton}
-            href={`/user/${user.userId}/edit`}
-          >
-            <span className={styles.buttonIcon}>
-              <FaPen />
-            </span>
-            Edit Profile
-          </Button>
-          <button className={styles.settingsButton}>
-            <span className={styles.buttonIcon}>
-              <FaCog />
-            </span>
-            Settings
-          </button>
-        </div>
+        <UserProfileAction userId={slug} />
       </div>
     </div>
   );
