@@ -64,7 +64,7 @@ const getForumPosts = async (req, res) => {
       filter.$or = [
         { title: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
+       
       ]
     }
 
@@ -177,7 +177,7 @@ const updateForumPost = async (req, res) => {
 
     const postId = req.params.id
     const userId = req.userData.userId
-    const { title, content, category, tags } = req.body
+    const { title, content, category } = req.body
 
     const forumPost = await ForumPost.findById(postId)
 
@@ -200,7 +200,7 @@ const updateForumPost = async (req, res) => {
     if (title) forumPost.title = title
     if (content) forumPost.content = content
     if (category) forumPost.category = category
-    if (tags) forumPost.tags = tags.split(",").map((tag) => tag.trim())
+  
 
   
     await forumPost.save()
