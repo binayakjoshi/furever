@@ -17,7 +17,7 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-   const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
+    const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
     const adoptionPost = new Adoption({
     
       creator: req.userData.userId,
@@ -212,7 +212,7 @@ exports.deleteAdoptionPost = async (req, res) => {
 // Show interest in adoption post
 exports.showInterest = async (req, res) => {
   try {
-    const { message } = req.body
+    // const { message } = req.body
     const userId = req.userData.userId
     const adoptionPostId = req.params.id
 
