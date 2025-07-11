@@ -15,12 +15,7 @@ const {
 const enhancedLoginValidation = [
   body("email").isEmail().withMessage("Please provide a valid email address").normalizeEmail(),
   body("password").notEmpty().withMessage("Password is required"),
-  body("role")
-    .notEmpty()
-    .withMessage("Role is required")
-    .isIn(["pet-owner", "vet"])
-    .withMessage("Role must be either 'pet-owner' or 'vet'"),
-]
+  ]
 
 // Public routes
 router.post("/signup", imageUpload.single("profileImage"), createUserValidation, userController.signup)

@@ -27,6 +27,7 @@ const signup = async (req, res, next) => {
   try {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+  
       return next(new HttpError("Invalid data passed", 400))
     }
     const { name, email, password, address, phone, dob, role = "pet-owner" } = req.body
@@ -83,47 +84,40 @@ const signup = async (req, res, next) => {
     })
   }
 }
-
-// Enhanced login with role verification
 const login = async (req, res, next) => {
   try {
     const errors = validationResult(req)
+
     if (!errors.isEmpty()) {
+      console.log(errors.array())
       return next(new HttpError("Invalid data passed", 400))
     }
-    const { email, password, role } = req.body
+    const { email, password } = req.body
 
-    // Validate role is provided
-    if (!role || !["pet-owner", "vet"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please select your role: pet-owner or vet",
-      })
-    }
+    let existingUser;
 
-    const existingUser = await User.findOne({ email: email })
-    if (!existingUser) {
+
+    const existingPetOwner = await User.findOne({ email: email })
+    const existingVet = await Veterinarian.findOne({email:email})
+    
+    
+    if (!existingPetOwner && !existingVet) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials, please check your email and password.",
+        message: "Coudln't find User with that email. Please signup instead",
       })
     }
-
-    // Check if role matches
-    if (existingUser.role !== role) {
-      return res.status(403).json({
-        success: false,
-        message: `This account is registered as ${existingUser.role}, not ${role}. Please select the correct role.`,
-      })
-    }
-
-    // Check if this is a Google OAuth user trying to login with password
-    if (existingUser.googleId && !password) {
+    if (existingPetOwner.googleId && !password) {
       return res.status(400).json({
         success: false,
         message: "This account is linked with Google. Please use 'Continue with Google' to login.",
       })
     }
+    if(existingPetOwner)
+      existingUser = existingPetOwner;
+    else
+      existingUser = existingVet
+   
 
     const validPassword = await bcrypt.compare(password, existingUser.password)
     if (!validPassword) {
