@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { type AdoptionPet } from "@/lib/types";
 import styles from "./adoption-item.module.css";
 import Button from "../custom-elements/button";
@@ -12,6 +13,7 @@ type AdoptionItemProps = {
 
 const AdoptionItem = ({ pet }: AdoptionItemProps) => {
   const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <li className={styles.card}>
@@ -57,8 +59,22 @@ const AdoptionItem = ({ pet }: AdoptionItemProps) => {
             <p className={styles.adoptionCardAction}>
               {user?.userId === pet.creator ? (
                 <>
-                  <Button className={styles.editAdoption}>Edit</Button>
-                  <Button className={styles.deleteAdoption}>Delete</Button>
+                  <Button
+                    className={styles.editAdoption}
+                    onClick={() =>
+                      router.push(`/adoption/my-post/${pet._id}/edit`)
+                    }
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    className={styles.deleteAdoption}
+                    onClick={() =>
+                      router.push(`/adoption/my-post/${pet._id}/delete`)
+                    }
+                  >
+                    Delete
+                  </Button>
                 </>
               ) : (
                 <Button className={styles.showInterest}>Adopt</Button>
