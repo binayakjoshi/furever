@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 
 const veterinarianSchema = new mongoose.Schema({
-  
   name: {
     type: String,
     required: [true, "Veterinarian name is required"],
@@ -11,7 +10,7 @@ const veterinarianSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Email is required"],
-    unique: true, 
+    unique: true,
     trim: true,
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
@@ -28,37 +27,10 @@ const veterinarianSchema = new mongoose.Schema({
     min: [0, "Years of experience cannot be negative"],
     max: [60, "Years of experience cannot exceed 60 years"],
   },
-  age: {
-    type: Number,
-    required: [true, "Age is required"],
-    min: [18, "Age must be at least 18"],
-    max: [100, "Age cannot exceed 100"],
-  },
-  dob: {
-    type: Date,
-    required: [true, "Date of birth is required"],
-    validate: {
-      validator: (value) => value <= new Date(),
-      message: "Date of birth cannot be in the future",
-    },
-  },
- specialization: {
-    type: [String],
-    default: [],
-    validate: {
-      validator: (arr) => arr.length <= 10,
-      message: "Cannot have more than 10 specializations",
-    },
-  },
-  clinicName: {
+  location: {
     type: String,
+    required: [true, "Location is required"],
     trim: true,
-    maxlength: [200, "Clinic name cannot exceed 200 characters"],
-  },
-  clinicAddress: {
-    type: String,
-    trim: true,
-    maxlength: [300, "Clinic address cannot exceed 300 characters"],
   },
   phone: {
     type: String,
@@ -71,15 +43,6 @@ const veterinarianSchema = new mongoose.Schema({
     trim: true,
     unique: true,
     maxlength: [50, "License number cannot exceed 50 characters"],
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  bio: {
-    type: String,
-    trim: true,
-    maxlength: [1000, "Bio cannot exceed 1000 characters"],
   },
   profileImage: {
     url: String,
@@ -94,7 +57,7 @@ const veterinarianSchema = new mongoose.Schema({
     ],
     hours: {
       start: String, // example: "09:00"
-      end: String, 
+      end: String,
     },
   },
   consultationFee: {
@@ -122,24 +85,11 @@ veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
 veterinarianSchema.index({ specialization: 1 })
 veterinarianSchema.index({ status: 1, isVerified: 1 })
-
+// Add geospatial index
+veterinarianSchema.index({ location: "2dsphere" })
 
 veterinarianSchema.pre("save", function (next) {
   this.updatedAt = Date.now()
-  next()
-})
-
-// Validate age matches DOB
-veterinarianSchema.pre("save", function (next) {
-  if (this.dob && this.age) {
-    const today = new Date()
-    const birthDate = new Date(this.dob)
-    const calculatedAge = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000))
-
-    if (Math.abs(calculatedAge - this.age) > 1) {
-      return next(new Error("Age does not match date of birth"))
-    }
-  }
   next()
 })
 
