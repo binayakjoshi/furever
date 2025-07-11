@@ -24,32 +24,16 @@ const forumPostSchema = new mongoose.Schema({
     default: "general",
     required: true,
   },
- 
-  likes: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      likedAt: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
+
   replies: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ForumReply",
     },
   ],
-  isLocked: {
-    type: Boolean,
-    default: false,
-  },
   status: {
     type: String,
-    enum: ["active", "hidden", "deleted"],
+    enum: ["active", "deleted"],
     default: "active",
   },
   createdAt: {
