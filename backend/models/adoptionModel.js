@@ -60,15 +60,7 @@ const adoptionSchema = new mongoose.Schema({
         ref: "User",
         required: true,
       },
-      interestedAt: {
-        type: Date,
-        default: Date.now,
-      },
-      message: {
-        type: String,
-        trim: true,
-        maxlength: [300, "Interest message cannot exceed 300 characters"],
-      },
+     
     },
   ],
   status: {
