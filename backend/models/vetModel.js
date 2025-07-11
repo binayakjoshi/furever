@@ -32,10 +32,9 @@ const veterinarianSchema = new mongoose.Schema({
     required: [true, "Location is required"],
     trim: true,
   },
-  phone: {
-    type: String,
-    trim: true,
-    match: [/^\+?[\d\s\-()]+$/, "Please provide a valid phone number"],
+  contactInfo:{
+    type:String,
+    required: [true, "Contact information for office is required"],
   },
   licenseNumber: {
     type: String,
@@ -59,16 +58,6 @@ const veterinarianSchema = new mongoose.Schema({
       start: String, // example: "09:00"
       end: String,
     },
-  },
-  consultationFee: {
-    type: Number,
-    min: [0, "Consultation fee cannot be negative"],
-    default: 0,
-  },
-  status: {
-    type: String,
-    enum: ["active", "inactive", "suspended"],
-    default: "active",
   },
   createdAt: {
     type: Date,
