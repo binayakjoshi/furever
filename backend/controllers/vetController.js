@@ -1,548 +1,283 @@
 const Veterinarian = require("../models/vetModel")
-const User = require("../models/userModel")
-const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
-const { deleteFromCloudinary } = require("../config/cloudinary")
+const GeocodingService = require("../services/geocodingService")
 
-exports.getNearbyVets = async (req, res, next) => {
-  const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-  const { lat, lng, radius } = req.body;
-  
-  const query = `
-    [out:json][timeout:25];
-    (
-      node["amenity"="veterinary"](around:${radius},${lat},${lng});
-      node["healthcare"="veterinary"](around:${radius},${lat},${lng});
-      node["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
-      way["amenity"="veterinary"](around:${radius},${lat},${lng});
-      way["healthcare"="veterinary"](around:${radius},${lat},${lng});
-      way["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
-      rel["amenity"="veterinary"](around:${radius},${lat},${lng});
-      rel["healthcare"="veterinary"](around:${radius},${lat},${lng});
-      rel["healthcare"="animal_hospital"](around:${radius},${lat},${lng});
-    );
-    out center tags;
-  `;
-
-  try {
-    const osres = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      body: query,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-
-    if (!osres.ok) throw new Error(`OSM error ${osres.status}`);
-    
-    const { elements } = await osres.json();
-    
-    const data = elements.map((el) => {
-      const { id, tags = {}, lat: nLat, lon: nLon, center } = el;
-      
-      // For ways/relations use center coordinates
-      const itemLat = nLat ?? center?.lat;
-      const itemLon = nLon ?? center?.lon;
-      
-      // Extract name with fallback options
-      const name = tags.name || 
-                  tags['name:en'] || 
-                  tags.brand || 
-                  tags['healthcare:speciality'] || 
-                  null;
-      
-      // Build comprehensive address string
-      const addressParts = [
-        tags['addr:housenumber'],
-        tags['addr:street'],
-        tags['addr:neighbourhood'],
-        tags['addr:suburb'],
-        tags['addr:city'],
-        tags['addr:state'],
-        tags['addr:postcode'],
-        tags['addr:country']
-      ].filter(Boolean);
-      
-      const address = addressParts.length > 0 ? addressParts.join(', ') : null;
-      
-      // Extract additional useful information
-      const phone = tags.phone || tags['contact:phone'] || null;
-      const website = tags.website || tags['contact:website'] || null;
-      const email = tags.email || tags['contact:email'] || null;
-      const openingHours = tags.opening_hours || null;
-      
-      // Determine facility type for better categorization
-      let facilityType = 'Veterinary Clinic';
-      if (tags.healthcare === 'animal_hospital' || tags.name?.toLowerCase().includes('hospital')) {
-        facilityType = 'Animal Hospital';
-      } else if (tags.healthcare === 'veterinary' || tags.amenity === 'veterinary') {
-        facilityType = 'Veterinary Clinic';
-      }
-      
-      // Emergency services indicator
-      const isEmergency = tags.emergency === 'yes' || 
-                         tags['healthcare:speciality']?.includes('emergency') ||
-                         tags.name?.toLowerCase().includes('emergency') ||
-                         tags.name?.toLowerCase().includes('24') ||
-                         false;
-      
-      return {
-        id: `${el.type}/${id}`,
-        name,
-        address,
-        lat: itemLat,
-        lon: itemLon,
-        phone,
-        website,
-        email,
-        openingHours,
-        facilityType,
-        isEmergency,
-        // Additional metadata
-        tags: {
-          amenity: tags.amenity,
-          healthcare: tags.healthcare,
-          operator: tags.operator,
-          brand: tags.brand
-        }
-      };
-    })
-    .filter(item => item.lat && item.lon) // Filter out items without coordinates
-    .sort((a, b) => {
-      // Sort by emergency services first, then by name
-      if (a.isEmergency && !b.isEmergency) return -1;
-      if (!a.isEmergency && b.isEmergency) return 1;
-      return (a.name || '').localeCompare(b.name || '');
-    });
-
-    return res.json({
-      success: true,
-      message: 'Fetched nearby veterinary clinics and animal hospitals',
-      data,
-      count: data.length
-    });
-    
-  } catch (err) {
-    console.error('Error fetching nearby vets:', err);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Failed to fetch nearby veterinary services',
-      error: err.message 
-    });
+// Create a new veterinarian profile
+exports.createVeterinarianProfile = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
   }
-};
-// Create
-exports.createVeterinarianProfile = async (req, res, next) => {
-  try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
 
+  try {
     const {
-      name,
+      firstName,
+      lastName,
       email,
-      degree,
+      phoneNumber,
       yearsOfExperience,
-      age,
-      dob,
-      specialization,
-      clinicName,
-      clinicAddress,
-      phone,
+      education,
       licenseNumber,
-      bio,
+      about,
       availability,
-      consultationFee,
     } = req.body
 
-    // Validate DOB
-    const dobDate = new Date(dob)
-    if (isNaN(dobDate) || dobDate > new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid date of birth",
-      })
-    }
-
-
-    const existingVet = await Veterinarian.findOne({ email })
-    if (existingVet) {
-      return res.status(409).json({
-        success: false,
-        message: "Veterinarian profile with this email already exists",
-      })
+    // Check if veterinarian already exists
+    let veterinarian = await Veterinarian.findOne({ email })
+    if (veterinarian) {
+      return res.status(400).json({ message: "Veterinarian already exists" })
     }
 
     const vetData = {
-      name,
+      firstName,
+      lastName,
       email,
-      degree,
-      yearsOfExperience: Number(yearsOfExperience),
-      age: Number(age),
-      dob: dobDate,
+      phoneNumber,
+      yearsOfExperience,
+      education,
       licenseNumber,
-      specialization: specialization || [],
-      clinicName: clinicName || "",
-      clinicAddress: clinicAddress || "",
-      phone: phone || "",
-      bio: bio || "",
-      availability: availability || { days: [], hours: { start: "", end: "" } },
-      consultationFee: Number(consultationFee) || 0,
+      about,
+      availability,
     }
 
-    // Add profile image if uploaded
-    if (req.file) {
-      vetData.profileImage = {
-        url: req.file.path,
-        publicId: req.file.filename,
+    // Add geocoding for clinic address
+    if (clinicAddress) {
+      const coordinates = await GeocodingService.getCoordinatesFromAddress(clinicAddress)
+      if (coordinates) {
+        vetData.location = {
+          type: "Point",
+          coordinates: [coordinates.longitude, coordinates.latitude],
+          address: coordinates.displayName,
+        }
       }
     }
 
-    const veterinarian = await Veterinarian.create(vetData)
+    veterinarian = new Veterinarian(vetData)
 
-    res.status(201).json({
-      success: true,
-      message: "Veterinarian profile created successfully",
-      data: veterinarian,
-    })
+    await veterinarian.save()
+
+    res.status(201).json({ message: "Veterinarian profile created successfully", veterinarian })
   } catch (error) {
-    console.error("Create veterinarian profile error:", error)
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyValue)[0]
-      return res.status(409).json({
-        success: false,
-        message: `${field} already exists`,
-      })
-    }
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to create veterinarian profile",
-    })
+    console.error(error.message)
+    res.status(500).send("Server error")
   }
 }
 
-//Get all veterinarians  (NO AUTH REQUIRED)
+// Get all veterinarians
 exports.getAllVeterinarians = async (req, res) => {
   try {
-    const {
-      specialization,
-      location,
-      isVerified,
-      status = "active",
-      page = 1,
-      limit = 10,
-      sortBy = "createdAt",
-      sortOrder = "desc",
-    } = req.query
-
-
-    const filter = { status }
-    if (specialization) {
-      filter.specialization = { $in: [specialization] }
-    }
-    if (location) {
-      filter.clinicAddress = { $regex: location, $options: "i" }
-    }
-    if (isVerified !== undefined) {
-      filter.isVerified = isVerified === "true"
-    }
-
-    // Calculate pagination
-    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
-    const sortOptions = {}
-    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
-
-
-    const veterinarians = await Veterinarian.find(filter)
-      .select("-licenseNumber") //hide necessary detail before login view
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(Number.parseInt(limit))
-
-    // Get total count for pagination
-    const totalCount = await Veterinarian.countDocuments(filter)
-
-    res.status(200).json({
-      success: true,
-      message: "Veterinarians fetched successfully",
-      data: veterinarians,
-      pagination: {
-        currentPage: Number.parseInt(page),
-        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
-        totalCount,
-        hasNext: skip + veterinarians.length < totalCount,
-        hasPrev: Number.parseInt(page) > 1,
-      },
-    })
-  } catch (error) {
-    console.error("Get all veterinarians error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch veterinarians",
-    })
+    const veterinarians = await Veterinarian.find().select("-licenseNumber") // Exclude licenseNumber for privacy
+    res.json(veterinarians)
+  } catch (err) {
+    console.error(err.message)
+    res.status(500).send("Server Error")
   }
 }
 
-// PUBLIC: Get veterinarian by ID
+// Get veterinarian by ID
 exports.getVeterinarianById = async (req, res) => {
   try {
-    const veterinarian = await Veterinarian.findById(req.params.id).select("-licenseNumber") // Hide sensitive info
-
+    const veterinarian = await Veterinarian.findById(req.params.id).select("-licenseNumber") // Exclude licenseNumber for privacy
     if (!veterinarian) {
-      return res.status(404).json({
-        success: false,
-        message: "Veterinarian not found",
-      })
+      return res.status(404).json({ msg: "Veterinarian not found" })
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Veterinarian fetched successfully",
-      data: veterinarian,
-    })
-  } catch (error) {
-    console.error("Get veterinarian by ID error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch veterinarian",
-    })
-  }
-}
-
-//  Get veterinarians by specialization
-exports.getVeterinariansBySpecialization = async (req, res) => {
-  try {
-    const { specialization } = req.params
-    const { page = 1, limit = 10 } = req.query
-
-    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
-
-    const veterinarians = await Veterinarian.find({
-      specialization: { $in: [specialization] },
-      status: "active",
-      isVerified: true,
-    })
-      .populate("user", "name email")
-      .select("-licenseNumber")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number.parseInt(limit))
-
-    const totalCount = await Veterinarian.countDocuments({
-      specialization: { $in: [specialization] },
-      status: "active",
-      isVerified: true,
-    })
-
-    res.status(200).json({
-      success: true,
-      message: `Veterinarians specializing in ${specialization} fetched successfully`,
-      data: veterinarians,
-      pagination: {
-        currentPage: Number.parseInt(page),
-        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
-        totalCount,
-        hasNext: skip + veterinarians.length < totalCount,
-        hasPrev: Number.parseInt(page) > 1,
-      },
-    })
-  } catch (error) {
-    console.error("Get veterinarians by specialization error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch veterinarians by specialization",
-    })
-  }
-}
-
-// search vet
-exports.searchVeterinariansByLocation = async (req, res) => {
-  try {
-    const { location, page = 1, limit = 10 } = req.query
-
-    if (!location) {
-      return res.status(400).json({
-        success: false,
-        message: "Location parameter is required",
-      })
+    res.json(veterinarian)
+  } catch (err) {
+    console.error(err.message)
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Veterinarian not found" })
     }
-
-    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
-
-    const veterinarians = await Veterinarian.find({
-      clinicAddress: { $regex: location, $options: "i" },
-      status: "active",
-    })
-      .populate("user", "name email")
-      .select("-licenseNumber")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number.parseInt(limit))
-
-    const totalCount = await Veterinarian.countDocuments({
-      clinicAddress: { $regex: location, $options: "i" },
-      status: "active",
-    })
-
-    res.status(200).json({
-      success: true,
-      message: `Veterinarians in ${location} fetched successfully`,
-      data: veterinarians,
-      pagination: {
-        currentPage: Number.parseInt(page),
-        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
-        totalCount,
-        hasNext: skip + veterinarians.length < totalCount,
-        hasPrev: Number.parseInt(page) > 1,
-      },
-    })
-  } catch (error) {
-    console.error("Search veterinarians by location error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to search veterinarians by location",
-    })
-  }
-}
-
-// Get current veterinarian's own profile
-exports.getMyVeterinarianProfile = async (req, res) => {
-  try {
-    const userEmail = req.userData.email
-
-    const veterinarian = await Veterinarian.findOne({ email: userEmail })
-
-    if (!veterinarian) {
-      return res.status(404).json({
-        success: false,
-        message: "Veterinarian profile not found",
-      })
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Your veterinarian profile fetched successfully",
-      data: veterinarian,
-    })
-  } catch (error) {
-    console.error("Get my veterinarian profile error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch veterinarian profile",
-    })
+    res.status(500).send("Server Error")
   }
 }
 
 // Update veterinarian profile
 exports.updateVeterinarianProfile = async (req, res) => {
-  try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
 
-    const userEmail = req.userData.email
-    const veterinarian = await Veterinarian.findOne({ email: userEmail })
+  try {
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      yearsOfExperience,
+      education,
+      about,
+      availability,
+      status,
+    } = req.body
+
+    // Build veterinarian object
+    const vetFields = {}
+    if (firstName) vetFields.firstName = firstName
+    if (lastName) vetFields.lastName = lastName
+    if (phoneNumber) vetFields.phoneNumber = phoneNumber
+    if (yearsOfExperience) vetFields.yearsOfExperience = yearsOfExperience
+    if (education) vetFields.education = education
+    if (about) vetFields.about = about
+    if (availability) vetFields.availability = availability
+    if (status) vetFields.status = status
+
+
+    let veterinarian = await Veterinarian.findById(req.params.id)
 
     if (!veterinarian) {
-      return res.status(404).json({
-        success: false,
-        message: "Veterinarian profile not found",
-      })
+      return res.status(404).json({ msg: "Veterinarian not found" })
     }
 
-    // Fields that can be updated
-    const allowedUpdates = [
-      "name",
-      "email",
-      "degree",
-      "yearsOfExperience",
-      "age",
-      "dob",
-      "specialization",
-      "clinicName",
-      "clinicAddress",
-      "phone",
-      "bio",
-      "availability",
-      "consultationFee",
-    ]
+    veterinarian = await Veterinarian.findByIdAndUpdate(req.params.id, { $set: vetFields }, { new: true })
 
-    const updates = {}
-    allowedUpdates.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        if (field === "yearsOfExperience" || field === "age" || field === "consultationFee") {
-          updates[field] = Number(req.body[field])
-        } else if (field === "dob") {
-          const dobDate = new Date(req.body[field])
-          if (isNaN(dobDate) || dobDate > new Date()) {
-            return res.status(400).json({
-              success: false,
-              message: "Invalid date of birth",
-            })
-          }
-          updates[field] = dobDate
-        } else {
-          updates[field] = req.body[field]
-        }
-      }
-    })
-
-    // Handle profile image update
-    if (req.file) {
-      // Delete old image if exists
-      if (veterinarian.profileImage && veterinarian.profileImage.publicId) {
-        try {
-          await deleteFromCloudinary(veterinarian.profileImage.publicId)
-        } catch (error) {
-          console.log("Warning: Could not delete old profile image:", error.message)
-        }
-      }
-
-      updates.profileImage = {
-        url: req.file.path,
-        publicId: req.file.filename,
-      }
+    res.json(veterinarian)
+  } catch (err) {
+    console.error(err.message)
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Veterinarian not found" })
     }
-
-    const updatedVeterinarian = await Veterinarian.findByIdAndUpdate(veterinarian._id, updates, {
-      new: true,
-      runValidators: true,
-    }).populate("user", "name email")
-
-    res.status(200).json({
-      success: true,
-      message: "Veterinarian profile updated successfully",
-      data: updatedVeterinarian,
-    })
-  } catch (error) {
-    console.error("Update veterinarian profile error:", error)
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyValue)[0]
-      return res.status(409).json({
-        success: false,
-        message: `${field} already exists`,
-      })
-    }
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update veterinarian profile",
-    })
+    res.status(500).send("Server Error")
   }
 }
 
-//  Delete veterinarian profile
+// Delete veterinarian
 exports.deleteVeterinarianProfile = async (req, res) => {
   try {
+    const veterinarian = await Veterinarian.findById(req.params.id)
+
+    if (!veterinarian) {
+      return res.status(404).json({ msg: "Veterinarian not found" })
+    }
+
+    await veterinarian.remove()
+
+    res.json({ msg: "Veterinarian deleted" })
+  } catch (err) {
+    console.error(err.message)
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "Veterinarian not found" })
+    }
+    res.status(500).send("Server Error")
+  }
+}
+
+// // Find nearby veterinarians by coordinates
+// exports.findNearbyVeterinarians = async (req, res) => {
+//   try {
+//     const { latitude, longitude, radius = 25, limit = 6, specialization } = req.query
+
+//     if (!latitude || !longitude) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Latitude and longitude are required",
+//       })
+//     }
+
+//     const lat = Number.parseFloat(latitude)
+//     const lng = Number.parseFloat(longitude)
+
+//     if (isNaN(lat) || isNaN(lng)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid latitude or longitude",
+//       })
+//     }
+
+//     // Build query
+//     const query = {
+//       status: "active",
+//       location: {
+//         $near: {
+//           $geometry: {
+//             type: "Point",
+//             coordinates: [lng, lat],
+//           },
+//           $maxDistance: radius * 1000, // Convert km to meters
+//         },
+//       },
+//     }
+
+//     if (specialization) {
+//       query.specialization = { $in: [specialization] }
+//     }
+
+//     const veterinarians = await Veterinarian.find(query).select("-licenseNumber").limit(Number.parseInt(limit))
+
+//     // Calculate distances and add to response
+//     const vetsWithDistance = veterinarians.map((vet) => {
+//       const vetObj = vet.toObject()
+//       if (vet.location && vet.location.coordinates) {
+//         const distance = GeocodingService.calculateDistance(
+//           lat,
+//           lng,
+//           vet.location.coordinates[1], // latitude
+//           vet.location.coordinates[0], // longitude
+//         )
+//         vetObj.distance = Math.round(distance * 100) / 100 // Round to 2 decimal places
+//       }
+//       return vetObj
+//     })
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Nearby veterinarians found",
+//       data: vetsWithDistance,
+//       searchLocation: {
+//         latitude: lat,
+//         longitude: lng,
+//       },
+//       searchRadius: radius,
+//     })
+//   } catch (error) {
+//     console.error("Find nearby veterinarians error:", error)
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to find nearby veterinarians",
+//     })
+//   }
+// }
+
+// Update veterinarian location
+exports.updateVeterinarianLocation = async (req, res) => {
+  try {
     const userEmail = req.userData.email
-    const veterinarian = await Veterinarian.findOne({ email: userEmail })
+    const { latitude, longitude, address } = req.body
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude and longitude are required",
+      })
+    }
+
+    const lat = Number.parseFloat(latitude)
+    const lng = Number.parseFloat(longitude)
+
+    if (isNaN(lat) || isNaN(lng)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid latitude or longitude",
+      })
+    }
+
+    // Get address from coordinates if not provided
+    let locationAddress = address
+    if (!locationAddress) {
+      const addressData = await GeocodingService.getAddressFromCoordinates(lat, lng)
+      locationAddress = addressData ? addressData.address : ""
+    }
+
+    const veterinarian = await Veterinarian.findOneAndUpdate(
+      { email: userEmail },
+      {
+        location: {
+          type: "Point",
+          coordinates: [lng, lat], // MongoDB expects [longitude, latitude]
+          address: locationAddress,
+        },
+      },
+      { new: true, runValidators: true },
+    )
 
     if (!veterinarian) {
       return res.status(404).json({
@@ -551,65 +286,35 @@ exports.deleteVeterinarianProfile = async (req, res) => {
       })
     }
 
-    // Delete profile image if exists
-    if (veterinarian.profileImage && veterinarian.profileImage.publicId) {
-      try {
-        await deleteFromCloudinary(veterinarian.profileImage.publicId)
-      } catch (error) {
-        console.log("Warning: Could not delete profile image:", error.message)
-      }
-    }
-
-    await Veterinarian.findByIdAndDelete(veterinarian._id)
-
     res.status(200).json({
       success: true,
-      message: "Veterinarian profile deleted successfully",
+      message: "Location updated successfully",
+      data: {
+        location: veterinarian.location,
+      },
     })
   } catch (error) {
-    console.error("Delete veterinarian profile error:", error)
+    console.error("Update veterinarian location error:", error)
     res.status(500).json({
       success: false,
-      message: error.message || "Failed to delete veterinarian profile",
+      message: "Failed to update location",
     })
   }
 }
 
-
-
-
-// Update veterinarian status
-exports.updateVeterinarianStatus = async (req, res) => {
+exports.getMyVeterinarianProfile = async (req, res) => {
   try {
-    const { id } = req.params
-    const { status, isVerified } = req.body
-
-    const updates = {}
-    if (status) updates.status = status
-    if (isVerified !== undefined) updates.isVerified = isVerified
-
-    const veterinarian = await Veterinarian.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    }).populate("user", "name email")
-
+    const userEmail = req.userData.email
+    const veterinarian = await Veterinarian.findOne({ email: userEmail })
+    
     if (!veterinarian) {
-      return res.status(404).json({
-        success: false,
-        message: "Veterinarian not found",
-      })
+      return res.status(404).json({ msg: "Veterinarian profile not found" })
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Veterinarian status updated successfully",
-      data: veterinarian,
-    })
-  } catch (error) {
-    console.error("Update veterinarian status error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update veterinarian status",
-    })
+    
+    res.json(veterinarian)
+  } catch (err) {
+    console.error(err.message)
+    res.status(500).send("Server Error")
   }
 }
+
