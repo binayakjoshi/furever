@@ -11,13 +11,17 @@ const getDefaultRole = () => {
 }
 
 const canChangeRole = (currentRole, newRole) => {
-=
+  // Define role change rules
   if (!isValidRole(currentRole) || !isValidRole(newRole)) {
     return false
   }
 
-  
-  return true
+  // Allow pet-owners to become vets, but not the other way around
+  if (currentRole === "pet-owner" && newRole === "vet") {
+    return true
+  }
+
+  return false
 }
 
 const getRolePermissions = (role) => {
@@ -29,6 +33,11 @@ const getRolePermissions = (role) => {
       "reply_to_forum",
       "update_own_profile",
       "find_nearby_vets",
+      "view_vet_profiles",
+      "view_adoption_posts",
+      "update_location",
+      "view_own_profile",
+      "update_own_adoption_posts",
     ],
     vet: [
       "create_vet_profile",
