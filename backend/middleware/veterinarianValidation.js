@@ -17,12 +17,6 @@ const createVeterinarianValidation = [
     .withMessage("Years of experience must be a number")
     .custom((value) => value >= 0 && value <= 60)
     .withMessage("Years of experience must be between 0 and 60"),
-  body("age")
-    .isNumeric()
-    .withMessage("Age must be a number")
-    .custom((value) => value >= 18 && value <= 100)
-    .withMessage("Age must be between 18 and 100"),
-  body("dob").isISO8601().withMessage("Please provide a valid date of birth"),
   body("licenseNumber")
     .notEmpty()
     .withMessage("License number is required")
@@ -45,15 +39,7 @@ const updateVeterinarianValidation = [
     .optional()
     .isNumeric()
     .withMessage("Years of experience must be a number")
-    .custom((value) => value >= 0 && value <= 60)
-    .withMessage("Years of experience must be between 0 and 60"),
-  body("age")
-    .optional()
-    .isNumeric()
-    .withMessage("Age must be a number")
-    .custom((value) => value >= 18 && value <= 100)
-    .withMessage("Age must be between 18 and 100"),
-  body("dob").optional().isISO8601().withMessage("Please provide a valid date of birth"),
+    .custom((value) => value >= 0 && value <= 60),
   body("phone").optional().isMobilePhone().withMessage("Please provide a valid phone number"),
   body("consultationFee")
     .optional()
