@@ -35,13 +35,13 @@ passport.use(
               coordinates: [0, 0]
             }
           }
-          await existingUser.save() // This line is causing the error
+          await existingUser.save() 
           return done(null, existingUser)
         }
 
         existingUser = await User.findOne({ email: profile.emails[0].value })
         if (existingUser) {
-           //existing user ko role user vayeko le oauth ma prooblem aayo
+           
           if (existingUser.role !== "pet-owner") {
             console.log("Updating role for existing user:", existingUser.email, "to pet-owner")
             existingUser.role = "pet-owner"
