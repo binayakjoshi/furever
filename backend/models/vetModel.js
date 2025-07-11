@@ -83,7 +83,6 @@ const veterinarianSchema = new mongoose.Schema({
 //query helpers
 veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
-veterinarianSchema.index({ specialization: 1 })
 veterinarianSchema.index({ status: 1, isVerified: 1 })
 // Add geospatial index
 veterinarianSchema.index({ location: "2dsphere" })
