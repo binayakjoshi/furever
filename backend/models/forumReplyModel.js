@@ -22,22 +22,9 @@ const forumReplySchema = new mongoose.Schema({
     ref: "ForumReply",
     default: null, // null for top-level replies, set for nested replies
   },
-
-  likes: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      likedAt: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
   status: {
     type: String,
-    enum: ["active", "hidden", "deleted"],
+    enum: ["active", "deleted"],
     default: "active",
   },
   createdAt: {
