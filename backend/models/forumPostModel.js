@@ -24,19 +24,7 @@ const forumPostSchema = new mongoose.Schema({
     default: "general",
     required: true,
   },
-  tags: [
-    {
-      type: String,
-      trim: true,
-      maxlength: [30, "Tag cannot exceed 30 characters"],
-    },
-  ],
-  images: [
-    {
-      url: String,
-      publicId: String,
-    },
-  ],
+ 
   likes: [
     {
       user: {
@@ -55,14 +43,6 @@ const forumPostSchema = new mongoose.Schema({
       ref: "ForumReply",
     },
   ],
-  views: {
-    type: Number,
-    default: 0,
-  },
-  isPinned: {
-    type: Boolean,
-    default: false,
-  },
   isLocked: {
     type: Boolean,
     default: false,
