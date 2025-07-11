@@ -6,7 +6,7 @@ const { validationResult } = require("express-validator")
 exports.createPet = async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+     if (!errors.isEmpty()) {
       console.log("Validation errors:", errors.array());
       return res.status(400).json({
         success: false,
@@ -193,6 +193,23 @@ exports.updatePet = async (req, res) => {
   try {
     const petData = req.body
     const existingPet = await Pet.findById(req.params.id)
+    const role= req.userData.role
+
+    const userId = req.userData.userId
+
+    if( existingPet.creatorId != userId){
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
+
+    if( role !== "pet-owner") {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
 
     if (!existingPet) {
       return res.status(404).json({
