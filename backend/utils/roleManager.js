@@ -11,13 +11,12 @@ const getDefaultRole = () => {
 }
 
 const canChangeRole = (currentRole, newRole) => {
-  // Define role change rules
+=
   if (!isValidRole(currentRole) || !isValidRole(newRole)) {
     return false
   }
 
-  // For now, allow all role changes
-  // You can add more complex logic here if needed
+  
   return true
 }
 
