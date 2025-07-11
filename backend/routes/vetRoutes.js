@@ -3,6 +3,7 @@ const { body } = require("express-validator")
 const authenticate = require("../middleware/authentication")
 const imageUpload = require("../middleware/imageUpload")
 const veterinarianController = require("../controllers/vetController")
+const geocodingService = require("../services/geocodingService")
 
 const {
   createVeterinarianValidation,
@@ -11,17 +12,17 @@ const {
 
 const router = express.Router()
 
-router.post("/",veterinarianController.getNearbyVets);
+router.post("/",geocodingService.getNearbyVets);
 router.get("/", veterinarianController.getAllVeterinarians)
 
 
 router.get("/:id", veterinarianController.getVeterinarianById)
 
-// Get veterinarians by specialization
-router.get("/specialization/:specialization", veterinarianController.getVeterinariansBySpecialization)
+// // Get veterinarians by specialization
+// router.get("/specialization/:specialization", veterinarianController.getVeterinariansBySpecialization)
 
-// Search veterinarians by location
-router.get("/search/location", veterinarianController.searchVeterinariansByLocation)
+// // Search veterinarians by location
+// router.get("/search/location", veterinarianController.searchVeterinariansByLocation)
 
 //for logged in users only
 router.use(authenticate)
