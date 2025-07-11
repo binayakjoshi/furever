@@ -1,58 +1,65 @@
-const express = require("express");
-const router = express.Router();
-const userController = require("../controllers/userController");
-const authenticate = require("../middleware/authentication"); // adjust path if needed
-const { body } = require("express-validator");
-const imageUpload = require("../middleware/imageUpload");
-const { 
-  createUserValidation, 
-  updateUserValidation, 
-  updatePasswordValidation, 
-  loginValidation 
-} = require("../middleware/userValidation");
-router.post(
-  "/signup",
-  imageUpload.single("profileImage"),
+const express = require("express")
+const router = express.Router()
+const userController = require("../controllers/userController")
+const authenticate = require("../middleware/authentication")
+const { body } = require("express-validator")
+const imageUpload = require("../middleware/imageUpload")
+const {
   createUserValidation,
-  userController.signup,
-);
-
-router.post(
-  "/login",
+  updateUserValidation,
+  updatePasswordValidation,
   loginValidation,
-  userController.login,
-);
+} = require("../middleware/userValidation")
 
-router.post("/logout", authenticate, userController.logout);
-router.get("/me", authenticate, userController.getCurrentUser);
+// Enhanced login validation with role
+const enhancedLoginValidation = [
+  body("email").isEmail().withMessage("Please provide a valid email address").normalizeEmail(),
+  body("password").notEmpty().withMessage("Password is required"),
+  body("role")
+    .notEmpty()
+    .withMessage("Role is required")
+    .isIn(["pet-owner", "vet"])
+    .withMessage("Role must be either 'pet-owner' or 'vet'"),
+]
+
+// Public routes
+router.post("/signup", imageUpload.single("profileImage"), createUserValidation, userController.signup)
+router.post("/login", enhancedLoginValidation, userController.login)
+
+// Protected routes
+router.use(authenticate)
+
+router.post("/logout", userController.logout)
+router.get("/me", userController.getCurrentUser)
 
 // Update current user's profile
-router.put(
-  "/me", 
-  authenticate, 
-  // imageUpload.single("profileImage"),
-  updateUserValidation,
-  userController.updateCurrentUser
-);
+router.put("/me", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
 
-// update the password if needed
-router.put(
-  "/me/password", 
-  authenticate, 
-  updatePasswordValidation,
-  userController.updatePassword
-);
+// Update password
+router.put("/me/password", updatePasswordValidation, userController.updatePassword)
 
-//routes for managing users by admin
-router.get("/:id", userController.getUserById);
+// Location routes
 router.put(
-  "/:id", 
-  authenticate,
-  imageUpload.single("profileImage"),
-  updateUserValidation,
-  userController.updateCurrentUser
-);
-router.delete("/:id", authenticate, userController.deleteUser);
+  "/location",
+  [
+    body("latitude").isFloat({ min: -90, max: 90 }).withMessage("Invalid latitude"),
+    body("longitude").isFloat({ min: -180, max: 180 }).withMessage("Invalid longitude"),
+    body("address").optional().isString().withMessage("Address must be a string"),
+  ],
+  userController.updateUserLocation,
+)
 
+router.put(
+  "/location/address",
+  [body("address").notEmpty().withMessage("Address is required")],
+  userController.updateUserLocationByAddress,
+)
+
+router.get("/nearby-vets", userController.findNearbyVets)
+
+// Admin routes for managing users
+router.get("/:id", userController.getUserById)
+router.put("/:id", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
+router.delete("/:id", userController.deleteUser)
 
 module.exports = router
