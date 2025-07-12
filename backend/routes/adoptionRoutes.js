@@ -8,25 +8,23 @@ const { createAdoptionValidation, updateAdoptionValidation } = require("../middl
 const router = express.Router()
 
 
+// Public 
 router.get("/", adoptionController.getAdoptionPosts)
 
-
+// Protected routes (authentication required)
 router.use(authenticate)
 
-//problem yeta thyo /id paila thyo
+
 router.get("/available", adoptionController.getAvailableAdoptionPosts)
+router.get("/my-posts", adoptionController.getAdoptionPostsByCreator)
+router.get("/creator/:creatorId", adoptionController.getAdoptionPostsByCreator)
 
 
 router.post("/", imageUpload.single("image"), createAdoptionValidation, adoptionController.createAdoptionPost)
 
+//last ma rakhdiye
 
 router.get("/:id", adoptionController.getAdoptionPostById)
-
-
-router.get("/my-posts", adoptionController.getAdoptionPostsByCreator)
-
-
-router.get("/creator/:creatorId", adoptionController.getAdoptionPostsByCreator)
 
 
 router.put("/:id", imageUpload.single("image"), updateAdoptionValidation, adoptionController.updateAdoptionPost)
