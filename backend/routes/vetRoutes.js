@@ -1,6 +1,6 @@
 const express = require("express")
 const { body } = require("express-validator")
-const authenticate = require("../middleware/authentication")
+const { authenticate } = require("../middleware/authentication")
 const imageUpload = require("../middleware/imageUpload")
 const veterinarianController = require("../controllers/vetController")
 const geocodingService = require("../services/geocodingService")
@@ -12,37 +12,30 @@ const {
 
 const router = express.Router()
 
-router.post("/",geocodingService.getNearbyVets);
+
+router.post("/", geocodingService.getNearbyVets)
 router.get("/", veterinarianController.getAllVeterinarians)
 
 
-router.get("/:id", veterinarianController.getVeterinarianById)
-
-
-//for logged in users only
 router.use(authenticate)
 
-
+// route fix gare yeta ni
+router.get("/my-profile", veterinarianController.getMyVeterinarianProfile)
 router.post(
   "/profile",
   imageUpload.single("profileImage"),
   createVeterinarianValidation,
-   veterinarianController.createVeterinarianProfile,
+  veterinarianController.createVeterinarianProfile,
 )
-
-router.get("/my-profile", veterinarianController.getMyVeterinarianProfile)
-
-
 router.put(
   "/profile",
   imageUpload.single("profileImage"),
   updateVeterinarianValidation,
-   veterinarianController.updateVeterinarianProfile,
+  veterinarianController.updateVeterinarianProfile,
 )
-
-
 router.delete("/profile", veterinarianController.deleteVeterinarianProfile)
 
-
+// last ma lage
+router.get("/:id", veterinarianController.getVeterinarianById)
 
 module.exports = router

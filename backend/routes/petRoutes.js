@@ -1,14 +1,19 @@
 const express = require("express")
 const { body } = require("express-validator") 
 
-const authenticate = require("../middleware/authentication"); // adjust path if needed
+const { authenticate } = require("../middleware/authentication") 
 
 const petController = require("../controllers/petController")
 const imageUpload = require("../middleware/imageUpload")
 
 const router = express.Router()
 
-router.use(authenticate);
+router.use(authenticate)
+
+
+router.get("/user/:userId", petController.getPetsByUserId)
+
+
 router.post(
   "/",
   imageUpload.single("image"),
@@ -22,7 +27,7 @@ router.post(
   petController.createPet,
 )
 
-router.get("/user/:userId", petController.getPetsByUserId)
+
 router.get("/:id", petController.getPetById)
 router.put("/:id", imageUpload.single("image"), petController.updatePet)
 router.delete("/:id", petController.deletePet)
