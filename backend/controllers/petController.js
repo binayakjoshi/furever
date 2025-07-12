@@ -14,6 +14,15 @@ exports.createPet = async (req, res, next) => {
         errors: errors.array(),
       });
     }
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -191,6 +200,14 @@ exports.getPetById = async (req, res) => {
 
 exports.updatePet = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const petData = req.body
     const existingPet = await Pet.findById(req.params.id)
     const role= req.userData.role
@@ -317,6 +334,14 @@ exports.updatePet = async (req, res) => {
 
 exports.deletePet = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const pet = await Pet.findById(req.params.id)
 
     if (!pet) {

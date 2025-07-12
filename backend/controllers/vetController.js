@@ -240,6 +240,14 @@ exports.deleteVeterinarianProfile = async (req, res) => {
 // Update veterinarian location
 exports.updateVeterinarianLocation = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.email) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userEmail = req.userData.email
     const { latitude, longitude, address } = req.body
 
@@ -304,6 +312,14 @@ exports.updateVeterinarianLocation = async (req, res) => {
 
 exports.getMyVeterinarianProfile = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.email) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userEmail = req.userData.email
     const veterinarian = await Veterinarian.findOne({ email: userEmail })
     

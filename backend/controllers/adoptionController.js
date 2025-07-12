@@ -17,6 +17,14 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+
     const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
     const adoptionPost = new Adoption({
     
@@ -145,6 +153,14 @@ exports.getAdoptionPostById = async (req, res) => {
 // Get adoption posts by creator
 exports.getAdoptionPostsByCreator = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const creatorId = req.params.creatorId || req.userData.userId
     const { status } = req.query
 
@@ -177,6 +193,14 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
 // Delete adoption post
 exports.deleteAdoptionPost = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const adoptionPost = await Adoption.findById(req.params.id)
 
     if (!adoptionPost) {
@@ -212,7 +236,16 @@ exports.deleteAdoptionPost = async (req, res) => {
 // Show interest in adoption post
 exports.showInterest = async (req, res) => {
   try {
-    // const { message } = req.body
+    const { message } = req.body
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const adoptionPostId = req.params.id
 
@@ -287,6 +320,14 @@ exports.showInterest = async (req, res) => {
 // Remove interest from adoption post
 exports.removeInterest = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const adoptionPostId = req.params.id
 
@@ -332,6 +373,14 @@ exports.removeInterest = async (req, res) => {
 // Get interested users for a specific adoption post (only for creator)
 exports.getInterestedUsers = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const adoptionPostId = req.params.id
     const userId = req.userData.userId
 
@@ -359,7 +408,7 @@ exports.getInterestedUsers = async (req, res) => {
       success: true,
       data: {
         adoptionPostId: adoptionPost._id,
-        petName: adoptionPost.pet?.name,
+        petName: adoptionPost.name,
         interestedUsers: adoptionPost.interestedUsers,
         totalInterested: adoptionPost.interestedUsers.length,
       },
@@ -383,6 +432,14 @@ exports.updateAdoptionPost = async (req, res) => {
         message: "Validation failed",
         errors: errors.array(),
       });
+    }
+
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
     }
 
     const adoptionPostId = req.params.id;

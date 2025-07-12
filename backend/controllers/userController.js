@@ -175,6 +175,14 @@ const logout = async (req, res, next) => {
 
 const getCurrentUser = async (req, res, next) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const { userId } = req.userData
     const user = await User.findById(userId).select("-password")
     if (!user) {
@@ -318,6 +326,14 @@ const deleteUser = async (req, res) => {
 // Update current user's profile
 const updateCurrentUser = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const { password, ...updateData } = req.body ?? {}
 
@@ -365,6 +381,14 @@ const updateCurrentUser = async (req, res) => {
 // Update user password
 const updatePassword = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const { currentPassword, newPassword } = req.body
 
@@ -425,6 +449,14 @@ const updatePassword = async (req, res) => {
 // Location-related functions
 const updateUserLocation = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const { latitude, longitude, address } = req.body
 
@@ -482,6 +514,14 @@ const updateUserLocation = async (req, res) => {
 
 const updateUserLocationByAddress = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const { address } = req.body
 
@@ -534,6 +574,14 @@ const updateUserLocationByAddress = async (req, res) => {
 // Enhanced nearby vets with better distance sorting
 const findNearbyVets = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const { radius = 25, limit = 10 } = req.query
 
