@@ -11,22 +11,21 @@ const {
   updatePasswordValidation,
 } = require("../middleware/userValidation")
 
-// Authentication routes (no middleware needed)
+
 router.post("/signup", imageUpload.single("profileImage"), signupValidation, signup)
 router.post("/login", loginValidation, login)
 router.post("/logout", logout)
 router.get("/me", authenticate, getCurrentUser)
 
-// Apply authentication middleware to remaining routes
+
 router.use(authenticate)
 
-// User profile management routes
 router.put("/me", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
 
-// Update password
+
 router.put("/me/password", updatePasswordValidation, userController.updatePassword)
 
-// Admin routes for managing users
+
 router.get("/:id", userController.getUserById)
 
 //wrapper frontend bata fetch garya syntax namilya vyaera added
