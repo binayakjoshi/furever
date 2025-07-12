@@ -512,6 +512,15 @@ exports.updateAdoptionPost = async (req, res) => {
 exports.getAvailableAdoptionPosts = async (req, res) => {
   try {
     const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
 
     const filter = {
@@ -525,7 +534,11 @@ exports.getAvailableAdoptionPosts = async (req, res) => {
       filter.location = { $regex: location, $options: "i" }
     }
 
-    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+    // Parse and validate pagination parameters
+    const pageNum = Math.max(1, Number.parseInt(page) || 1)
+    const limitNum = Math.min(50, Math.max(1, Number.parseInt(limit) || 10)) // Cap at 50 items per page
+    const skip = (pageNum - 1) * limitNum
+    
     const sortOptions = {}
     sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
 
@@ -538,7 +551,7 @@ exports.getAvailableAdoptionPosts = async (req, res) => {
       ])
       .sort(sortOptions)
       .skip(skip)
-      .limit(Number.parseInt(limit))
+      .limit(limitNum)
 
     const totalCount = await Adoption.countDocuments(filter)
 
@@ -546,11 +559,11 @@ exports.getAvailableAdoptionPosts = async (req, res) => {
       success: true,
       data: adoptionPosts,
       pagination: {
-        currentPage: Number.parseInt(page),
-        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalCount / limitNum),
         totalCount,
         hasNext: skip + adoptionPosts.length < totalCount,
-        hasPrev: Number.parseInt(page) > 1,
+        hasPrev: pageNum > 1,
       },
     })
   } catch (error) {
