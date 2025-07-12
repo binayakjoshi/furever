@@ -38,12 +38,12 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, 
     },
   }),
 )
 
-// Initialize passport
+// passport user gare
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -56,19 +56,16 @@ app.get("/", (req, res) => {
     },
     endpoints: {
       auth: {
-        signup: "POST /api/users/signup (with role: pet-owner or vet)",
-        login: "POST /api/users/login (with role verification)",
-        logout: "POST /api/users/logout",
-        me: "GET /api/users/me",
+        signup: "POST /auth/signup (with role: pet-owner or vet)",
+        login: "POST /auth/login (with role verification)",
+        logout: "POST /auth/logout",
+        me: "GET /auth/me",
         googleLogin: "GET /auth/google",
         googleCallback: "GET /auth/google/callback",
       },
       pets: "/api/pets",
       users: {
         base: "/api/users",
-        signup: "POST /api/users/signup",
-        login: "POST /api/users/login",
-        logout: "POST /api/users/logout",
         me: "GET /api/users/me",
         updateProfile: "PUT /api/users/me",
         updatePassword: "PUT /api/users/me/password",
@@ -119,15 +116,15 @@ app.get("/", (req, res) => {
       },
     },
     features: {
-      authentication: "✅ Role-based login (pet-owner/vet)",
-      locationServices: "✅ Enhanced nearby vet search with distance sorting",
-      cascadeDelete: "✅ Complete user data cleanup on deletion",
-      communityForum: "✅ Posts, replies, likes, and image support",
-      adoptionSystem: "✅ Pet adoption with interest tracking",
-      veterinarianProfiles: "✅ Professional vet profiles with verification",
+      authentication: " Role-based login (pet-owner/vet)",
+      locationServices: "Enhanced nearby vet search with distance sorting",
+      cascadeDelete: " Complete user data cleanup on deletion",
+      communityForum: "Posts, replies, likes, and image support",
+      adoptionSystem: "Pet adoption with interest tracking",
+      veterinarianProfiles: "Professional vet profiles with verification",
     },
     locationServices: {
-      status: "✅ Available",
+      status: "Available",
       features: [
         "User location tracking",
         "Veterinarian location tracking",
@@ -157,7 +154,7 @@ app.use((req, res, next) => {
   next(error)
 })
 
-// Global error handler
+
 app.use((error, req, res, next) => {
   if (res.headersSent) {
     return next(error)
@@ -176,30 +173,15 @@ app.use((error, req, res, next) => {
   })
 })
 
-// Database connection and server startup
+
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Connected to MongoDB Atlas")
-
-    const User = require("./models/userModel")
-    const Veterinarian = require("./models/vetModel")
-
-    // Ensure geospatial indexes exist
-    User.collection
-      .createIndex({ location: "2dsphere" }, { background: true })
-      .then(() => console.log("User geospatial index ensured"))
-      .catch((err) => console.log("User geospatial index warning:", err.message))
-
-    Veterinarian.collection
-      .createIndex({ location: "2dsphere" }, { background: true })
-      .then(() => console.log("Veterinarian geospatial index ensured"))
-      .catch((err) => console.log("Veterinarian geospatial index warning:", err.message))
-
     app.listen(PORT, () => {
       console.log(`Server is running on: http://localhost:${PORT}`)
       console.log(`Google OAuth URL: http://localhost:${PORT}/auth/google`)
-      console.log(`Location services: ENABLED`)
+      
     })
   })
   .catch((err) => {
