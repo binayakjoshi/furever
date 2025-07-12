@@ -56,16 +56,15 @@ app.get("/", (req, res) => {
     },
     endpoints: {
       auth: {
-        signup: "POST /auth/signup (with role: pet-owner or vet)",
-        login: "POST /auth/login (with role verification)",
-        logout: "POST /auth/logout",
-        me: "GET /auth/me",
         googleLogin: "GET /auth/google",
         googleCallback: "GET /auth/google/callback",
       },
       pets: "/api/pets",
       users: {
         base: "/api/users",
+        signup: "POST /api/users/signup (with role: pet-owner or vet)",
+        login: "POST /api/users/login (with role verification)",
+        logout: "POST /api/users/logout",
         me: "GET /api/users/me",
         updateProfile: "PUT /api/users/me",
         updatePassword: "PUT /api/users/me/password",
