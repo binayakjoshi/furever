@@ -1,21 +1,41 @@
 const express = require("express")
 const passport = require("../config/passport")
-const jwt = require("jsonwebtoken")
+const { body } = require("express-validator")
+const imageUpload = require("../middleware/imageUpload")
+const { signup, login, logout, authenticate, getCurrentUser, sendTokenCookie } = require("../middleware/authentication")
+
 const router = express.Router()
 
-const sendTokenCookie = (res, payload) => {
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "6h" })
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 6 * 60 * 60 * 1000, // 6 hours
-  }
-  res.cookie("token", token, cookieOptions)
-  return token
-}
 
-// Start Google OAuth flow
+const signupValidation = [
+  body("name").notEmpty().withMessage("Name is required").trim(),
+  body("email").isEmail().withMessage("Please enter a valid email").normalizeEmail(),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+  body("role").isIn(["pet-owner", "vet"]).withMessage("Role must be either pet-owner or vet"),
+  body("phone").optional().isMobilePhone().withMessage("Please enter a valid phone number"),
+  body("address").optional().trim(),
+  body("dob").optional().isISO8601().withMessage("Please enter a valid date of birth"),
+  
+  // Vet-specific validations
+  body("degree").if(body("role").equals("vet")).notEmpty().withMessage("Degree is required for veterinarians"),
+  body("licenseNumber").if(body("role").equals("vet")).notEmpty().withMessage("License number is required for veterinarians"),
+  body("contactInfo").if(body("role").equals("vet")).notEmpty().withMessage("Contact info is required for veterinarians"),
+  body("experience").if(body("role").equals("vet")).optional().isNumeric().withMessage("Experience must be a number"),
+
+]
+
+
+const loginValidation = [
+  body("email").isEmail().withMessage("Please enter a valid email").normalizeEmail(),
+  body("password").notEmpty().withMessage("Password is required"),
+]
+
+
+router.post("/signup", imageUpload.single("profileImage"), signupValidation, signup)
+router.post("/login", loginValidation, login)
+router.post("/logout", logout)
+
+// Google OAuth routes
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -24,7 +44,6 @@ router.get(
   }),
 )
 
-// Google OAuth callback
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -35,15 +54,15 @@ router.get(
     try {
       console.log("Google OAuth callback successful for user:", req.user.email)
 
-      // Create JWT token with role
+      
       const payload = {
         userId: req.user._id,
         email: req.user.email,
-        role: req.user.role || "pet-owner", // Default to pet-owner for Google users
+        role: req.user.role || "pet-owner", //default pet-owner cause user ko lagi matra ho google login
       }
       sendTokenCookie(res, payload)
 
-      // Redirect to frontend with user data
+      
       res.redirect(
         `${process.env.FRONTEND_URL}/auth/success?user=${encodeURIComponent(
           JSON.stringify({
@@ -63,12 +82,22 @@ router.get(
   },
 )
 
-// Check OAuth status
+
+router.get("/me", authenticate, getCurrentUser)
+
+
 router.get("/status", (req, res) => {
   res.json({
     success: true,
-    message: "OAuth routes are working",
-    callbackUrl: "http://localhost:5000/auth/google/callback",
+    message: "Auth routes are working",
+    endpoints: {
+      signup: "POST /auth/signup",
+      login: "POST /auth/login",
+      logout: "POST /auth/logout",
+      me: "GET /auth/me",
+      googleLogin: "GET /auth/google",
+      googleCallback: "GET /auth/google/callback",
+    },
   })
 })
 
