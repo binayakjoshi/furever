@@ -2,20 +2,25 @@ const express = require("express")
 const router = express.Router()
 const userController = require("../controllers/userController")
 const petController = require("../controllers/petController")
-const { authenticate, getCurrentUser } = require("../middleware/authentication")
+const { authenticate, signup, login, logout, getCurrentUser } = require("../middleware/authentication")
 const imageUpload = require("../middleware/imageUpload")
 const {
+  signupValidation,
+  loginValidation,
   updateUserValidation,
   updatePasswordValidation,
 } = require("../middleware/userValidation")
 
+// Authentication routes (no middleware needed)
+router.post("/signup", imageUpload.single("profileImage"), signupValidation, signup)
+router.post("/login", loginValidation, login)
+router.post("/logout", logout)
+router.get("/me", authenticate, getCurrentUser)
 
+// Apply authentication middleware to remaining routes
 router.use(authenticate)
 
-
-router.get("/me", getCurrentUser)
-
-
+// User profile management routes
 router.put("/me", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
 
 // Update password
