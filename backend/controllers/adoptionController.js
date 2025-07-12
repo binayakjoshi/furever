@@ -1,6 +1,4 @@
 const Adoption = require("../models/adoptionModel")
-const Pet = require("../models/petModel")
-const User = require("../models/userModel")
 const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
 
@@ -236,7 +234,7 @@ exports.deleteAdoptionPost = async (req, res) => {
 // Show interest in adoption post
 exports.showInterest = async (req, res) => {
   try {
-    const { message } = req.body
+    
     
     // Ensure user is authenticated and userData is available
     if (!req.userData || !req.userData.userId) {
@@ -287,8 +285,6 @@ exports.showInterest = async (req, res) => {
     // Add user to interested users array
     adoptionPost.interestedUsers.push({
       user: userId,
-      message: message || "",
-      interestedAt: new Date(),
     })
 
     await adoptionPost.save()
@@ -320,7 +316,7 @@ exports.showInterest = async (req, res) => {
 // Remove interest from adoption post
 exports.removeInterest = async (req, res) => {
   try {
-    // Ensure user is authenticated and userData is available
+  
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
