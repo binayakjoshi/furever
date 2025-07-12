@@ -23,12 +23,7 @@ const createVeterinarianValidation = [
     .isLength({ min: 1, max: 50 })
     .withMessage("License number must be between 1 and 50 characters"),
   body("phone").optional().isMobilePhone().withMessage("Please provide a valid phone number"),
-  body("consultationFee")
-    .optional()
-    .isNumeric()
-    .withMessage("Consultation fee must be a number")
-    .custom((value) => value >= 0)
-    .withMessage("Consultation fee cannot be negative"),
+
 ]
 
 const updateVeterinarianValidation = [
@@ -41,12 +36,7 @@ const updateVeterinarianValidation = [
     .withMessage("Years of experience must be a number")
     .custom((value) => value >= 0 && value <= 60),
   body("phone").optional().isMobilePhone().withMessage("Please provide a valid phone number"),
-  body("consultationFee")
-    .optional()
-    .isNumeric()
-    .withMessage("Consultation fee must be a number")
-    .custom((value) => value >= 0)
-    .withMessage("Consultation fee cannot be negative"),
+
 ]
 
 module.exports = {
