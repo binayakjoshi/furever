@@ -51,7 +51,6 @@ forumPostSchema.index({ author: 1 })
 forumPostSchema.index({ category: 1 })
 forumPostSchema.index({ status: 1 })
 forumPostSchema.index({ createdAt: -1 })
-forumPostSchema.index({ isPinned: -1, createdAt: -1 })
 
 
 forumPostSchema.pre("save", function (next) {
