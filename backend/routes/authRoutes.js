@@ -91,12 +91,12 @@ router.get("/status", (req, res) => {
     success: true,
     message: "Auth routes are working",
     endpoints: {
-      signup: "POST /auth/signup",
-      login: "POST /auth/login",
-      logout: "POST /auth/logout",
-      me: "GET /auth/me",
-      googleLogin: "GET /auth/google",
-      googleCallback: "GET /auth/google/callback",
+      signup: "POST /api/auth/signup",
+      login: "POST /api/auth/login",
+      logout: "POST /api/auth/logout",
+      me: "GET /api/auth/me",
+      googleLogin: "GET /api/auth/google",
+      googleCallback: "GET /api/auth/google/callback",
     },
   })
 })
