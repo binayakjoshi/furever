@@ -46,3 +46,25 @@ export type PetOwner = {
     publicId: string;
   };
 };
+export type Author = {
+  _id: string;
+  name: string;
+  role: string;
+  profileImage: {
+    url: string;
+    publicId: string;
+  };
+};
+
+export type ForumPost = {
+  _id: string;
+  title: string;
+  content: string;
+  author: Author;
+  category: string;
+  replies: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
