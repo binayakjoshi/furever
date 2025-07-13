@@ -44,6 +44,13 @@ const petSchema = new mongoose.Schema({
       } 
     },
   ],
+
+  petType: {
+    type: String,
+    required: [true, "Pet type is required"],
+    enum: ["Dog", "Cat"],
+    
+  },
   breed: {
     type: String,
     required: [true, "Pet breed is required"],
@@ -67,5 +74,3 @@ const petSchema = new mongoose.Schema({
 const Pet = mongoose.model("Pet", petSchema)
 
 module.exports = Pet
-
-

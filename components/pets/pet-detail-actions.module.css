@@ -1,36 +1,163 @@
-
+/* Button Group */
 .buttonGroup {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
 }
-.editButton {
-  background-color: #28a745;
-  padding: 8px 16px;
-  color: white;
+
+/* Base Button Styles */
+.editButton,
+.removeButton {
+  padding: 12px 24px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Button */
+.editButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
 }
 
 .editButton:hover {
-  background-color: #218838;
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
+/* Remove Button */
 .removeButton {
-  background-color: #dc3545;
-  padding: 8px 16px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-
 }
 
 .removeButton:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
+
+/* Outlined Variants */
+.editButton.outlined {
+  background: transparent;
+  color: #10b981;
+  border: 2px solid #10b981;
+}
+
+.editButton.outlined:hover {
+  background: #10b981;
+  color: white;
+}
+
+.removeButton.outlined {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+}
+
+.removeButton.outlined:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Size Variants */
+.editButton.small,
+.removeButton.small {
+  padding: 8px 16px;
+  font-size: 12px;
+  min-width: 80px;
+}
+
+.editButton.large,
+.removeButton.large {
+  padding: 16px 32px;
+  font-size: 16px;
+  min-width: 140px;
+}
+
+/* States */
+.editButton:disabled,
+.removeButton:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.editButton.loading,
+.removeButton.loading {
+  color: transparent;
+  position: relative;
+}
+
+.editButton.loading::after,
+.removeButton.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .buttonGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .editButton,
+  .removeButton {
+    width: 100%;
+    min-width: unset;
+  }
+}
+/* Dark mode support */
+/* @media (prefers-color-scheme: dark) {
+  .editButton.outlined {
+    color: #34d399;
+    border-color: #34d399;
+  }
+  
+  .removeButton.outlined {
+    color: #f87171;
+    border-color: #f87171;
+  }
+} */
+
+/* Icon support */
+/* .editButton .icon,
+.removeButton .icon {
+  margin-right: 8px;
+  font-size: 16px;
+} */
+
+/* .editButton.icon-only,
+.removeButton.icon-only {
+  min-width: unset;
+  width: 44px;
+  padding: 12px;
+}
+
+.editButton.icon-only .icon,
+.removeButton.icon-only .icon {
+  margin: 0;
+} */

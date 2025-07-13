@@ -1,48 +1,52 @@
 const mongoose = require("mongoose")
 
 const adoptionSchema = new mongoose.Schema({
-  pet: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Pet",
-    required: [true, "Pet reference is required"],
+  name: {
+    type: String,
+    required: [true, "Pet name is required"],
+    trim: true,
+    maxlength: [100, "Name cannot exceed 100 characters"],
   },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: [true, "Creator reference is required"],
   },
-  title: {
-    type: String,
-    required: [true, "Adoption post title is required"],
-    trim: true,
-    maxlength: [100, "Title cannot be more than 100 characters"],
-  },
+ 
   description: {
     type: String,
     required: [true, "Adoption post description is required"],
     trim: true,
+    minlength: [20, "Description must be at least 20 characters"],
     maxlength: [1000, "Description cannot exceed 1000 characters"],
   },
+   breed: {
+    type: String,
+    required: [true, "Pet breed is required"],
+    trim: true,
+  },
+  petType:{
+    type:String,
+    required : true
+  },
+  image: {
+    url: {
+      type: String,
+      required: [true, "Pet image URL is required"],
+    },
+    publicId: {
+      type: String,
+      required: [true, "Pet image public ID is required"],
+    },
+  },
+  
   location: {
     type: String,
     required: [true, "Location is required"],
     trim: true,
   },
   contactInfo: {
-    phone: {
-      type: String,
-      trim: true,
-    },
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    preferredContact: {
-      type: String,
-      enum: ["phone", "email", "both"],
-      default: "both",
-    },
+    type:String,
   },
   requirements: {
     type: String,
@@ -56,15 +60,7 @@ const adoptionSchema = new mongoose.Schema({
         ref: "User",
         required: true,
       },
-      interestedAt: {
-        type: Date,
-        default: Date.now,
-      },
-      message: {
-        type: String,
-        trim: true,
-        maxlength: [300, "Interest message cannot exceed 300 characters"],
-      },
+     
     },
   ],
   status: {

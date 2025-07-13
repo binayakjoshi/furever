@@ -1,6 +1,8 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
 import Button from "../custom-elements/button";
@@ -14,11 +16,12 @@ import {
 } from "@/lib/validators";
 import styles from "./login-form.module.css";
 import ErrorModal from "../ui/error";
+import { PetOwner } from "@/lib/types";
 
 type LoginResponse = {
   success: boolean;
   message: string;
-  data?: { userId: string; name: string; role: string; email: string };
+  data?: PetOwner;
 };
 
 const LoginForm = () => {
@@ -37,8 +40,12 @@ const LoginForm = () => {
     false
   );
 
+  const handleGoogleLogin = () => {
+    window.location.href = "/api/auth/google";
+  };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
     if (!formState.isValid || isLoading) return;
 
     try {
@@ -56,71 +63,84 @@ const LoginForm = () => {
         setUser(response.data);
         router.push("/");
       }
-    } catch (_) {}
+    } catch {}
   };
 
+  const isFormValid =
+    formState.isValid &&
+    formState.inputs.email.value &&
+    formState.inputs.password.value;
+
   return (
-    <form onSubmit={handleSubmit} className={styles.form} noValidate>
-      <div className={styles.fieldGroup}>
-        <Input
-          id="email"
-          element="input"
-          type="email"
-          label="Email address"
-          placeholder="you@domain.com"
-          validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
-          errorText="Please enter a valid email address"
-          onInput={inputHandler}
-          className={styles.inputField}
-        />
-      </div>
-
-      <div className={styles.fieldGroup}>
-        <div className={styles.passwordContainer}>
-          <Input
-            id="password"
-            element="input"
-            type={showPassword ? "text" : "password"}
-            label="Password"
-            placeholder="Enter your password"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(6)]}
-            errorText="Password must be at least 6 characters long"
-            onInput={inputHandler}
-            className={styles.passwordField}
-          />
-          <Button
-            type="button"
-            onClick={() => setShowPassword((p) => !p)}
-            className={styles.passwordToggle}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-          </Button>
-        </div>
-      </div>
-
+    <>
       {error && <ErrorModal error={error} clearError={clearError} />}
+      <div className={styles.formContainer}>
+        <form onSubmit={handleSubmit} className={styles.form} noValidate>
+          <div className={styles.fieldGroup}>
+            <Input
+              id="email"
+              element="input"
+              type="email"
+              placeholder="you@example.com"
+              label="Email"
+              validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+              errorText="Please enter a valid email address"
+              onInput={inputHandler}
+              className={styles.inputField}
+            />
+          </div>
 
-      <Button
-        type="submit"
-        className={styles.submitButton}
-        disabled={
-          isLoading ||
-          !formState.isValid ||
-          !formState.inputs.email.value ||
-          !formState.inputs.password.value
-        }
-      >
-        {isLoading ? (
-          <>
-            <FaSpinner className={styles.loadingIcon} size={20} />
-            Signing in...
-          </>
-        ) : (
-          "Sign in"
-        )}
-      </Button>
-    </form>
+          <div className={styles.fieldGroup}>
+            <div className={styles.passwordContainer}>
+              <Input
+                id="password"
+                element="input"
+                label="Paswword"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(6)]}
+                errorText="Password must be at least 6 characters long"
+                onInput={inputHandler}
+                className={styles.passwordField}
+              />
+              <Button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className={styles.passwordToggle}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              </Button>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            className={styles.submitButton}
+            disabled={isLoading || !isFormValid}
+          >
+            {isLoading ? (
+              <>
+                <FaSpinner className={styles.loadingIcon} size={18} />
+                Signing in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </Button>
+          <Button className={styles.googleBtn} onClick={handleGoogleLogin}>
+            <Image
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="google"
+              className={styles.googleIcon}
+              width={18}
+              height={18}
+            />
+            Continue with Google
+          </Button>
+        </form>
+      </div>
+    </>
   );
 };
 

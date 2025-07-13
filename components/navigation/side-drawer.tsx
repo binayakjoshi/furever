@@ -7,15 +7,23 @@ type SideDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
+  position?: "left" | "right";
 };
 
-const SideDrawer = ({ isOpen, onClose, children }: SideDrawerProps) => {
+const SideDrawer = ({
+  isOpen,
+  onClose,
+  children,
+  position = "right",
+}: SideDrawerProps) => {
   return (
     <>
       {isOpen && <div className={classes.backdrop} onClick={onClose} />}
 
       <aside
-        className={`${classes.drawer} ${isOpen ? classes.open : ""}`}
+        className={`${classes.drawer} ${isOpen ? classes.open : ""} ${
+          position === "left" ? classes.left : classes.right
+        }`}
         role="navigation"
       >
         <button

@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 
 export const POST = async (request: Request) => {
   try {
-    const body = await request.json();
+    const body = await request.formData();
     const backendRes = await fetch(
       `${process.env.BACKEND_URL}/api/users/signup`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: body,
       }
     );
     const data = await backendRes.json();

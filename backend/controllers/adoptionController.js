@@ -1,38 +1,13 @@
 const Adoption = require("../models/adoptionModel")
-const Pet = require("../models/petModel")
-const User = require("../models/userModel")
 const HttpError = require("../models/http-error")
 const { validationResult } = require("express-validator")
-
-const checkCases = async (petId, creatorId) => {
-  // pet exists or not
-  const pet = await Pet.findById(petId)
-  if (!pet) {
-    throw new HttpError("Pet not found", 404)
-  }
-
-  if (pet.user.toString() !== creatorId) {
-    throw new HttpError("You can only create adoption posts for your own pets", 403)
-  }
-
-  // Check if there's already an active adoption post for this pet
-  const existingAdoption = await Adoption.findOne({
-    pet: petId,
-    status: { $in: ["active", "pending"] },
-  })
-
-  if (existingAdoption) {
-    throw new HttpError("An active adoption post already exists for this pet", 409)
-  }
-
-  return pet
-}
 
 // Create adoption post
 exports.createAdoptionPost = async (req, res, next) => {
   try {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+      console.log(errors.array())
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -40,30 +15,39 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-    const { petId, title, description, location, contactInfo, requirements } = req.body
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
 
-    const creatorId = req.userData.userId
-
-   
-    const pet = await checkCases(petId, creatorId)
-
+    const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
     const adoptionPost = new Adoption({
-      pet: petId,
-      creator: creatorId,
-      title,
+    
+      creator: req.userData.userId,
+      name,
       description,
+      breed,
+      image:{
+        url:req.file.path,
+        publicId:req.file.filename,
+      },
       location,
       contactInfo: contactInfo || {},
       requirements: requirements || "",
+      petType,
+      status: "active", // Default status
     })
 
+    // Save the adoption post to the database
     await adoptionPost.save()
 
- 
     await adoptionPost.populate([
-      { path: "pet", select: "name breed image description" },
-      { path: "creator", select: "name email phone" },
-    ])
+  { path: "creator", select: "name email phone" },
+  { path: "image", select: "url publicId" },
+])
 
     res.status(201).json({
       success: true,
@@ -90,7 +74,6 @@ exports.getAdoptionPosts = async (req, res) => {
   try {
     const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
 
-  
     const filter = {}
     if (status && status !== "all") {
       filter.status = status
@@ -99,7 +82,6 @@ exports.getAdoptionPosts = async (req, res) => {
       filter.location = { $regex: location, $options: "i" }
     }
 
-    
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
     const sortOptions = {}
     sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
@@ -107,7 +89,7 @@ exports.getAdoptionPosts = async (req, res) => {
     // Get adoption posts
     const adoptionPosts = await Adoption.find(filter)
       .populate([
-        { path: "pet", select: "name breed image description dob" },
+        { path: "image", select: "url publicId" },
         { path: "creator", select: "name email phone" },
         { path: "interestedUsers.user", select: "name email" },
       ])
@@ -115,7 +97,6 @@ exports.getAdoptionPosts = async (req, res) => {
       .skip(skip)
       .limit(Number.parseInt(limit))
 
-  
     const totalCount = await Adoption.countDocuments(filter)
 
     res.status(200).json({
@@ -142,7 +123,7 @@ exports.getAdoptionPosts = async (req, res) => {
 exports.getAdoptionPostById = async (req, res) => {
   try {
     const adoptionPost = await Adoption.findById(req.params.id).populate([
-      { path: "pet", select: "name breed image description dob diseases vaccinations" },
+      { path:"image" , select: "url publicId" },
       { path: "creator", select: "name email phone" },
       { path: "interestedUsers.user", select: "name email phone" },
     ])
@@ -170,6 +151,14 @@ exports.getAdoptionPostById = async (req, res) => {
 // Get adoption posts by creator
 exports.getAdoptionPostsByCreator = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const creatorId = req.params.creatorId || req.userData.userId
     const { status } = req.query
 
@@ -180,7 +169,7 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
 
     const adoptionPosts = await Adoption.find(filter)
       .populate([
-        { path: "pet", select: "name breed image description" },
+        { path: "image", select: "url publicId" },
         { path: "interestedUsers.user", select: "name email" },
       ])
       .sort({ createdAt: -1 })
@@ -199,71 +188,17 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
   }
 }
 
-// Update adoption post
-exports.updateAdoptionPost = async (req, res) => {
-  try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
-
-    const adoptionPost = await Adoption.findById(req.params.id)
-
-    if (!adoptionPost) {
-      return res.status(404).json({
-        success: false,
-        message: "Adoption post not found",
-      })
-    }
-
-    // Only creator can update the post
-    if (adoptionPost.creator.toString() !== req.userData.userId) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only update your own adoption posts",
-      })
-    }
-
-  
-    const allowedUpdates = ["title", "description", "location", "contactInfo", "requirements", "status"]
-
-    const updates = {}
-    allowedUpdates.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field]
-      }
-    })
-
-    const updatedPost = await Adoption.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
-      runValidators: true,
-    }).populate([
-      { path: "pet", select: "name breed image description" },
-      { path: "creator", select: "name email phone" },
-      { path: "interestedUsers.user", select: "name email" },
-    ])
-
-    res.status(200).json({
-      success: true,
-      message: "Adoption post updated successfully",
-      data: updatedPost,
-    })
-  } catch (error) {
-    console.error("Update adoption post error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update adoption post",
-    })
-  }
-}
-
 // Delete adoption post
 exports.deleteAdoptionPost = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const adoptionPost = await Adoption.findById(req.params.id)
 
     if (!adoptionPost) {
@@ -299,7 +234,16 @@ exports.deleteAdoptionPost = async (req, res) => {
 // Show interest in adoption post
 exports.showInterest = async (req, res) => {
   try {
-    const { message } = req.body
+    
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const adoptionPostId = req.params.id
 
@@ -341,15 +285,13 @@ exports.showInterest = async (req, res) => {
     // Add user to interested users array
     adoptionPost.interestedUsers.push({
       user: userId,
-      message: message || "",
-      interestedAt: new Date(),
     })
 
     await adoptionPost.save()
 
    
     await adoptionPost.populate([
-      { path: "pet", select: "name breed image" },
+      { path: "image", select: "url publicId" },
       { path: "creator", select: "name email" },
       { path: "interestedUsers.user", select: "name email" },
     ])
@@ -374,6 +316,14 @@ exports.showInterest = async (req, res) => {
 // Remove interest from adoption post
 exports.removeInterest = async (req, res) => {
   try {
+  
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const userId = req.userData.userId
     const adoptionPostId = req.params.id
 
@@ -419,6 +369,14 @@ exports.removeInterest = async (req, res) => {
 // Get interested users for a specific adoption post (only for creator)
 exports.getInterestedUsers = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const adoptionPostId = req.params.id
     const userId = req.userData.userId
 
@@ -446,7 +404,7 @@ exports.getInterestedUsers = async (req, res) => {
       success: true,
       data: {
         adoptionPostId: adoptionPost._id,
-        petName: adoptionPost.pet?.name,
+        petName: adoptionPost.name,
         interestedUsers: adoptionPost.interestedUsers,
         totalInterested: adoptionPost.interestedUsers.length,
       },
@@ -456,6 +414,216 @@ exports.getInterestedUsers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch interested users",
+    })
+  }
+}
+
+//update the post
+exports.updateAdoptionPost = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors.array(),
+      });
+    }
+
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+
+    const adoptionPostId = req.params.id;
+    const userId = req.userData.userId;
+    const { name, description, breed, location, contactInfo, requirements, status, image } = req.body;
+
+    // Find the adoption 
+    const adoptionPost = await Adoption.findById(adoptionPostId);
+    if (!adoptionPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Adoption post not found",
+      });
+    }
+
+    // Only creator can update the post
+    if (adoptionPost.creator.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own adoption posts",
+      });
+    }
+
+   
+    if (adoptionPost.status === "adopted") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update an already adopted pet post",
+      });
+    }
+
+    
+    const updateData = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (breed !== undefined) updateData.breed = breed;
+    if (location !== undefined) updateData.location = location;
+    if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
+    if (requirements !== undefined) updateData.requirements = requirements;
+    
+    // Handle image update
+    if (image !== undefined) {
+      
+      if (image && typeof image === 'object' && image.url && image.publicId) {
+        updateData.image = {
+          url: image.url,
+          publicId: image.publicId
+        };
+      } else if (image === null || image === '') {
+        // cannot remove image, it must be provided
+        return res.status(400).json({
+          success: false,
+          message: "Image is required. Please provide a valid image with url and publicId",
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid image format. Image must contain url and publicId",
+        });
+      }
+    }
+    
+    // Only allow status updates to specific values
+    if (status !== undefined) {
+      const allowedStatusUpdates = ["active", "pending", "cancelled"];
+      if (allowedStatusUpdates.includes(status)) {
+        updateData.status = status;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status update. Allowed values: active, pending, cancelled",
+        });
+      }
+    }
+
+    // Update the adoption post
+    const updatedAdoptionPost = await Adoption.findByIdAndUpdate(
+      adoptionPostId,
+      updateData,
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    ).populate([
+      { path: "image", select: "url publicId" },
+      { path: "creator", select: "name email phone" },
+      { path: "interestedUsers.user", select: "name email" },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Adoption post updated successfully",
+      data: updatedAdoptionPost,
+    });
+
+  } catch (error) {
+    console.error("Update adoption post error:", error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: Object.values(error.errors).map(err => ({
+          field: err.path,
+          message: err.message
+        }))
+      });
+    }
+
+    if (error instanceof HttpError) {
+      return res.status(error.code).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update adoption post",
+    });
+  }
+};
+
+// (for browsing available adoptions)
+exports.getAvailableAdoptionPosts = async (req, res) => {
+  try {
+    const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
+    const userId = req.userData.userId
+
+    const filter = {
+      creator: { $ne: userId } 
+    }
+    
+    if (status && status !== "all") {
+      filter.status = status
+    }
+    if (location) {
+      filter.location = { $regex: location, $options: "i" }
+    }
+
+    // Parse and validate pagination parameters
+    const pageNum = Math.max(1, Number.parseInt(page) || 1)
+    const limitNum = Math.min(50, Math.max(1, Number.parseInt(limit) || 10)) // Cap at 50 items per page
+    const skip = (pageNum - 1) * limitNum
+    
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
+
+    
+    const adoptionPosts = await Adoption.find(filter)
+      .populate([
+        { path: "image", select: "url publicId" },
+        { path: "creator", select: "name email phone" },
+        { path: "interestedUsers.user", select: "name email" },
+      ])
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum)
+
+    const totalCount = await Adoption.countDocuments(filter)
+
+    res.status(200).json({
+      success: true,
+      data: adoptionPosts,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalCount / limitNum),
+        totalCount,
+        hasNext: skip + adoptionPosts.length < totalCount,
+        hasPrev: pageNum > 1,
+      },
+    })
+  } catch (error) {
+    console.error("Get available adoption posts error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch available adoption posts",
     })
   }
 }

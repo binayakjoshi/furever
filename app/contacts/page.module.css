@@ -3,14 +3,36 @@
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
-.introSection{
+.introSection {
   text-align: center;
-	margin-bottom: 4rem;
+  margin-bottom: 4rem;
+  padding: 3rem 2rem;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.introSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient);
+  opacity: 0.05;
+  z-index: 0;
+}
+
+.introSection > * {
+  position: relative;
+  z-index: 1;
 }
 .introTitle{
 	font-size: 3rem;
   font-weight: bold;
-  color: #1f2937;
+  color:rgb(94, 79, 184);
   margin-bottom: 1rem;
 }
 .introContent{
@@ -41,7 +63,7 @@
 .contactTitle {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #1f2937;
+  color: rgb(94, 79, 184);
   margin-bottom: 2rem;
 }
 
@@ -53,16 +75,18 @@
 }
 
 .contactIcon {
-  width: 2.5rem;
-  height: 2.5rem;
-  background-color: #dbeafe;
+  width: 3rem;
+  height: 3rem;
+  background: var(--gradient);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3b82f6;
+  color: white;
   flex-shrink: 0;
+  box-shadow: var(--shadow-md);
 }
+
 
 .contactDetails h3 {
   font-size: 1.125rem;

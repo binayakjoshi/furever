@@ -1,34 +1,39 @@
-const express = require("express");
-const router = express.Router();
-const userController = require("../controllers/userController");
-const authenticate = require("../middleware/authentication"); // adjust path if needed
-const { body } = require("express-validator");
+const express = require("express")
+const router = express.Router()
+const userController = require("../controllers/userController")
+const petController = require("../controllers/petController")
+const { authenticate, signup, login, logout, getCurrentUser } = require("../middleware/authentication")
+const imageUpload = require("../middleware/imageUpload")
+const {
+  signupValidation,
+  loginValidation,
+  updateUserValidation,
+  updatePasswordValidation,
+} = require("../middleware/userValidation")
 
-router.post(
-  "/signup",
-  [
-    body("name").not().isEmpty().withMessage("Name is required"),
-    body("email").isEmail().withMessage("Please enter a valid email"),
-    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
-    body("role").optional().isIn(["user", "vet"]).withMessage("Role must be either user or vet"),
-  ],
-  userController.signup,
-);
 
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Please enter a valid email"),
-    body("password").not().isEmpty().withMessage("Password is required"),
-  ],
-  userController.login,
-);
-router.post("/logout", authenticate, userController.logout);
-router.get("/me", authenticate, userController.getCurrentUser);
+router.post("/signup", imageUpload.single("profileImage"), signupValidation, signup)
+router.post("/login", loginValidation, login)
+router.post("/logout", logout)
+router.get("/me", authenticate, getCurrentUser)
+
+
+router.use(authenticate)
+
+router.put("/me", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
+
+
+router.put("/me/password", updatePasswordValidation, userController.updatePassword)
+
 
 router.get("/:id", userController.getUserById)
-router.put("/:id", userController.updateUser)
-router.delete("/:id", userController.deleteUser)
 
+//wrapper frontend bata fetch garya syntax namilya vyaera added
+router.get("/:id/pets", (req, res, next) => {
+  req.params.userId = req.params.id;
+  petController.getPetsByUserId(req, res, next);
+})
+router.put("/:id", imageUpload.single("profileImage"), updateUserValidation, userController.updateCurrentUser)
+router.delete("/:id", userController.deleteUser)
 
 module.exports = router

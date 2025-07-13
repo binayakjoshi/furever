@@ -1,38 +1,355 @@
 .card {
   list-style: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  max-width: 300px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   background: #fff;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5db;
+  .imageWrapper img {
+  transform: scale(1.05);
+  }
+  .heading {
+  color: #664982;
+  }
+}
+
+.cardContent {
+  display: flex;.card {
+  list-style: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  background: #fff;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5db;
+  .imageWrapper img {
+  transform: scale(1.05);
+  }
+  .heading {
+  color: #664982;
+  }
+}
+
+.cardContent {
+  display: flex;
+  align-items: stretch;
+  min-height: 160px;
+  width: 100%;
 }
 
 .imageWrapper {
   position: relative;
-  width: 100%;
-  height: 200px;
+  width: 160px;
+  min-width: 160px;
+  height: auto;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.imageWrapper img {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.imageWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .imageWrapper::after {
+  opacity: 1;
 }
 
 .content {
-  padding: 12px;
+  padding: 20px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
 }
 
 .heading {
-  margin: 0 0 8px;
-  font-size: 1.25rem;
+  margin: 0 0 12px;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+  transition: color 0.3s ease;
+}
+
+
+
+.metaContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .meta {
-  margin: 4px 0;
-  font-size: 0.9rem;
-  color: #555;
+  margin: 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.description {
-  margin-top: 8px;
-  font-size: 0.95rem;
-  color: #333;
+.label {
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 60px;
+}
+
+.value {
+  color: #374151;
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.card:hover .value {
+  color: #1f2937;
+}
+
+/* Accent bar */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .cardContent {
+    min-height: 120px;
+  }
+  
+  .imageWrapper {
+    width: 120px;
+    min-width: 120px;
+    height: auto; /* Changed to auto to match parent height */
+  }
+  
+  .content {
+    padding: 16px 20px;
+  }
+  
+  .heading {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+  
+  .meta {
+    font-size: 0.8rem;
+  }
+  
+  .label {
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardContent {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .imageWrapper {
+    width: 100%;
+    min-width: 100%;
+    height: 200px; /* Fixed height for mobile portrait layout */
+  }
+  
+  .content {
+    padding: 16px;
+  }
+  
+  .metaContainer {
+    gap: 6px;
+  }
+}
+  align-items: stretch;
+  min-height: 160px;
+  width: 100%;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 160px;
+  min-width: 160px;
+  height: auto;
+  overflow: hidden;
+  background: #f3f4f6;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.imageWrapper img {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.imageWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .imageWrapper::after {
+  opacity: 1;
+}
+
+.content {
+  padding: 20px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.heading {
+  margin: 0 0 12px;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+  transition: color 0.3s ease;
 }
 
 
+
+.metaContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meta {
+  margin: 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 60px;
+}
+
+.value {
+  color: #374151;
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.card:hover .value {
+  color: rgb(53, 129, 53);
+}
+
+/* Accent bar */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .cardContent {
+    min-height: 120px;
+  }
+  
+  .imageWrapper {
+    width: 120px;
+    min-width: 120px;
+    height: auto; /* Changed to auto to match parent height */
+  }
+  
+  .content {
+    padding: 16px 20px;
+  }
+  
+  .heading {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+  
+  .meta {
+    font-size: 0.8rem;
+  }
+  
+  .label {
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardContent {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .imageWrapper {
+    width: 100%;
+    min-width: 100%;
+    height: 200px; /* Fixed height for mobile portrait layout */
+  }
+  
+  .content {
+    padding: 16px;
+  }
+  
+  .metaContainer {
+    gap: 6px;
+  }
+}

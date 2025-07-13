@@ -6,7 +6,7 @@ const { validationResult } = require("express-validator")
 exports.createPet = async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+     if (!errors.isEmpty()) {
       console.log("Validation errors:", errors.array());
       return res.status(400).json({
         success: false,
@@ -14,6 +14,15 @@ exports.createPet = async (req, res, next) => {
         errors: errors.array(),
       });
     }
+    
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -107,6 +116,7 @@ exports.createPet = async (req, res, next) => {
     const newPetData = {
       name: petData.name,
       description: petData.description,
+      petType: petData.petType || "Dog", //we set default to Dog incase not provided by the user
       breed: petData.breed,
       dob: dobDate,
       user: req.userData.userId,
@@ -187,10 +197,36 @@ exports.getPetById = async (req, res) => {
   }
 }
 
+
 exports.updatePet = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const petData = req.body
     const existingPet = await Pet.findById(req.params.id)
+    const role= req.userData.role
+
+    const userId = req.userData.userId
+
+    if( existingPet.creatorId != userId){
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
+
+    if( role !== "pet-owner") {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
 
     if (!existingPet) {
       return res.status(404).json({
@@ -235,9 +271,12 @@ exports.updatePet = async (req, res) => {
       vaccinations = vaccinations.filter((v) => v && v.name)
     }
 
+    //added petType to updateData
+
     const updateData = {
       name: petData.name || existingPet.name,
       description: petData.description || existingPet.description,
+      petType: petData.petType || existingPet.petType || "Dog", // Default to Dog if not provided
       breed: petData.breed || existingPet.breed,
       dob: petData.dob || existingPet.dob,
       user:req.userData.userId ,
@@ -295,6 +334,14 @@ exports.updatePet = async (req, res) => {
 
 exports.deletePet = async (req, res) => {
   try {
+    // Ensure user is authenticated and userData is available
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
     const pet = await Pet.findById(req.params.id)
 
     if (!pet) {

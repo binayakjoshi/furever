@@ -8,7 +8,7 @@
 .formTitle {
 	font-size: 1.5rem;
 	font-weight: bold;
-	color: #1f2937;
+	color: rgb(94, 79, 184);;
 	margin-bottom: 2rem;
 }
 
@@ -16,7 +16,7 @@
 	margin-bottom: 1.5rem;
 }
 .submitButton{
-	background-color: black;
+	background-color: rgb(94, 79, 184);
 	color: white;
 	padding: 0.75rem 1.5rem;
 	border: none;
@@ -28,6 +28,6 @@
 
 }
 .submitButton:hover {
-	background-color: #262729;
+	background-color:  rgb(73, 57, 163);
 	transform: translateY(-1px);
 	}

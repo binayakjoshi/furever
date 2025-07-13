@@ -11,7 +11,7 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 import PetDetailAction from "@/components/pets/pet-detail-actions";
-import { Pet } from "@/components/pets/pet-type";
+import { Pet } from "@/lib/types";
 import styles from "./page.module.css";
 
 type PetDetailPageProps = { params: Promise<{ petSlug: string }> };
@@ -190,7 +190,7 @@ const PetDetailPage = async ({ params }: PetDetailPageProps) => {
         </div>
       )}
       <div className={styles.actionsSection}>
-        <PetDetailAction petId={petSlug} />
+        <PetDetailAction pet={pet} />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { useForm } from "@/lib/use-form";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import Input from "@/components/custom-elements/input";
-import { type Pet } from "@/components/pets/pet-type";
+import { type Pet } from "@/lib/types";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
 import ImageUpload from "@/components/custom-elements/image-upload";
 import { useAuth } from "@/context/auth-context";
@@ -31,8 +31,8 @@ const AddPetPage: React.FC = () => {
   ] = useForm(
     {
       name: { value: "", isValid: false, touched: false },
-      type: { value: "", isValid: false, touched: false },
       breed: { value: "", isValid: false, touched: false },
+      petType: { value: "", isValid: false, touched: false },
       dob: { value: "", isValid: false, touched: false },
       description: { value: "", isValid: false, touched: false },
       image: { value: undefined, isValid: false, touched: false },
@@ -58,7 +58,7 @@ const AddPetPage: React.FC = () => {
       if (formState.vaccinations && formState.vaccinations.length) {
         const vaccArray = formState.vaccinations.map((v) => ({
           name: v.name,
-          vaccDate: v.VaccDate,
+          vaccDate: v.vaccDate,
           nextVaccDate: v.nextVaccDate,
         }));
         requestData.append("vaccinations", JSON.stringify(vaccArray));
@@ -71,6 +71,7 @@ const AddPetPage: React.FC = () => {
       requestData.append("dob", formState.inputs.dob.value as string);
       requestData.append("breed", formState.inputs.breed.value as string);
       requestData.append("image", formState.inputs.image.value as File);
+      requestData.append("petType", formState.inputs.petType.value as string);
 
       await sendRequest("/api/pets", "POST", requestData);
       router.push(`/user/${user?.userId}/pets`);
@@ -108,13 +109,13 @@ const AddPetPage: React.FC = () => {
 
             <div className={styles.fieldWrapper}>
               <Input
-                id="type"
+                id="petType"
                 element="radio"
                 label="Please pick an option:"
                 errorText="Please select one option"
                 options={[
-                  { label: "Cat", value: "cat" },
-                  { label: "Dog", value: "dog" },
+                  { label: "Cat", value: "Cat" },
+                  { label: "Dog", value: "Dog" },
                 ]}
                 onInput={inputHandler}
                 validators={[VALIDATOR_REQUIRE()]}
@@ -224,11 +225,11 @@ const AddPetPage: React.FC = () => {
                           </label>
                           <input
                             type="date"
-                            value={vaccination.VaccDate}
+                            value={vaccination.vaccDate}
                             onChange={(e) =>
                               handleVaccinationChange(
                                 vaccination.id,
-                                "VaccDate",
+                                "vaccDate",
                                 e.target.value
                               )
                             }
