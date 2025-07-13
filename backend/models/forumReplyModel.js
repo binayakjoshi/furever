@@ -20,7 +20,7 @@ const forumReplySchema = new mongoose.Schema({
   parentReply: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ForumReply",
-    default: null, // null for top-level replies, set for nested replies
+    default: null, //nested reply ko lagi 
   },
   status: {
     type: String,
@@ -37,14 +37,14 @@ const forumReplySchema = new mongoose.Schema({
   },
 })
 
-// Indexes for better query performance
+
 forumReplySchema.index({ post: 1 })
 forumReplySchema.index({ author: 1 })
 forumReplySchema.index({ parentReply: 1 })
 forumReplySchema.index({ status: 1 })
 forumReplySchema.index({ createdAt: -1 })
 
-// Update the updatedAt field before saving
+
 forumReplySchema.pre("save", function (next) {
   this.updatedAt = Date.now()
   next()
