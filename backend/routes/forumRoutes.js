@@ -35,8 +35,11 @@ const forumReplyValidation = [
 
 router.get("/", forumController.getForumPosts)
 
-
+// Authentication required for these routes
 router.use(authenticate)
+
+// add garde hai maile
+router.post("/", forumPostValidation, forumController.createForumPost)
 
 // fix
 router.get("/user/my-posts", forumController.getUserForumPosts)
@@ -44,15 +47,15 @@ router.get("/user/my-posts", forumController.getUserForumPosts)
 
 // fix
 router.get("/:id/replies", forumController.getForumReplies)
-router.post("/:id/like", forumController.toggleForumPostLike)
-router.post("/:id/replies", imageUpload.array("images", 3), forumReplyValidation, forumController.createForumReply)
+
+router.post("/:id/replies", forumReplyValidation, forumController.createForumReply)
 router.put("/:id/replies/:replyId", forumReplyValidation, forumController.updateForumReply)
 router.delete("/:id/replies/:replyId", forumController.deleteForumReply)
-router.post("/:id/replies/:replyId/like", forumController.toggleForumReplyLike)
+
 
 // routing fix
 router.get("/:id", forumController.getForumPostById)
-router.put("/:id", imageUpload.array("images", 5), forumPostValidation, forumController.updateForumPost)
+router.put("/:id", forumPostValidation, forumController.updateForumPost)
 router.delete("/:id", forumController.deleteForumPost)
 
 module.exports = router
