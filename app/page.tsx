@@ -135,7 +135,7 @@ export const Dashboard = async () => {
                   <div>
                     <strong>{evt.eventName}</strong> for {evt.petName}
                   </div>
-                  <div>{evt.date}</div>
+                  <div className={styles.eventDate}>{evt.date}</div>
                 </li>
               ))}
             </ul>
