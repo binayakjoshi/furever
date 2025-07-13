@@ -24,9 +24,11 @@
   gap: 1rem;
   justify-content: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 .cardSummary {
   flex: 1;
+  min-width: 200px;
   background: #f9f9f9;
   border-radius: 0.5rem;
   padding: 1rem;
@@ -68,9 +70,15 @@
   justify-content: space-between;
   padding: 0.75rem 0;
   border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 .listItem:last-child {
   border-bottom: none;
+}
+.eventDate {
+  color: #666;
+  font-size: 0.9rem;
 }
 .badgeHealthy {
   background-color: #d4edda;
@@ -100,6 +108,30 @@
   border-radius: 0.25rem;
   margin-left: 0.5rem;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 0.5rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .summaryGrid {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .cardSummary {
+    min-width: auto;
+  }
+  .listItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (min-width: 768px) {
-  .dashboard { padding: 2rem; }
+  .dashboard { 
+    padding: 2rem; 
+  }
 }
