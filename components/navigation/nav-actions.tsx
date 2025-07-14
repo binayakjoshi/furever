@@ -118,6 +118,16 @@ const NavActions = () => {
                 Add Pet
               </Link>
             </li>
+            <li>
+              <Link
+                href="/pet-forum/post/add"
+                onClick={toggleDrawer}
+                title="add a post"
+              >
+                <FaPlus size={16} />
+                Post in Forum
+              </Link>
+            </li>
           </ul>
         </nav>
 
