@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavigationBar from "@/components/navigation/navigation-bar";
 import { AuthProvider } from "@/context/auth-context";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import ChatWidgetWrapper from "@/components/custom-elements/ChatWidgetWrapper";
-
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,13 +26,10 @@ const RootLayout = ({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ErrorBoundary>
-          <AuthProvider initialUser={null}>
-            <NavigationBar />
-            {children}
-            <ChatWidgetWrapper />
-          </AuthProvider>
-        </ErrorBoundary>
+        <AuthProvider initialUser={null}>
+          <NavigationBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
