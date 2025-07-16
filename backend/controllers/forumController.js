@@ -223,7 +223,7 @@ const updateForumPost = async (req, res) => {
     }
 
     
-    if (title) forumPost.title = title
+    if (title?.trim()) forumPost.title = title.trim()
     if (content) forumPost.content = content
     if (category) forumPost.category = category
   
@@ -359,9 +359,12 @@ const createForumReply = async (req, res) => {
     await forumReply.save()
     await forumReply.populate("author", "name profileImage role")
 
-    //sab reply lai populate gardine ho database ma reply array banayera
-    forumPost.replies.push(forumReply._id)
-    await forumPost.save()
+    // Only add to post's replies array if it's a top-level reply (no parentReply)
+    // The middleware will handle adding to parent reply's replies array if needed
+    if (!parentReply) {
+      forumPost.replies.push(forumReply._id)
+      await forumPost.save()
+    }
 
     res.status(201).json({
       success: true,
