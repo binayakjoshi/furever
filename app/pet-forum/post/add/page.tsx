@@ -75,13 +75,14 @@ const AddForumPost = () => {
             <div className={styles.fieldWrapper}>
               <Input
                 id="content"
-                element="input"
+                element="textarea"
                 type="text"
                 label="Description"
-                placeholder="short description"
-                errorText="Description is required and must not exceed 100 Characters"
+                placeholder=" Details of the post...."
+                errorText="Description is required"
                 onInput={inputHandler}
-                validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(50)]}
+                validators={[VALIDATOR_REQUIRE()]}
+                rows={8}
               />
             </div>
 
