@@ -62,9 +62,15 @@ export type ForumPost = {
   content: string;
   author: Author;
   category: string;
-  replies: string;
+  replies: ForumReply[];
   status: string;
   createdAt: string;
   updatedAt: string;
-  __v: number;
+};
+export type ForumReply = {
+  _id: string;
+  content: string;
+  author: Author;
+  post: string;
+  createdAt: string;
 };
