@@ -1,4 +1,3 @@
-Binayak Joshi
 .submitButton {
   padding: 0.5rem 1.5rem;
   margin-left: auto;
@@ -55,4 +54,28 @@ Binayak Joshi
 
 .submitButton:disabled::before {
   display: none;
+}
+.loadingIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
