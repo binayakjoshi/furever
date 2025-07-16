@@ -15,7 +15,7 @@ exports.createAdoptionPost = async (req, res, next) => {
       })
     }
 
-    // Ensure user is authenticated and userData is available
+    // userID check garya yeta
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -38,10 +38,10 @@ exports.createAdoptionPost = async (req, res, next) => {
       contactInfo: contactInfo || {},
       requirements: requirements || "",
       petType,
-      status: "active", // Default status
+      status: "active", 
     })
 
-    // Save the adoption post to the database
+    //adoption save garna
     await adoptionPost.save()
 
     await adoptionPost.populate([
@@ -151,7 +151,7 @@ exports.getAdoptionPostById = async (req, res) => {
 // Get adoption posts by creator
 exports.getAdoptionPostsByCreator = async (req, res) => {
   try {
-    // Ensure user is authenticated and userData is available
+    //same userID check garya yeta 
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -191,7 +191,7 @@ exports.getAdoptionPostsByCreator = async (req, res) => {
 // Delete adoption post
 exports.deleteAdoptionPost = async (req, res) => {
   try {
-    // Ensure user is authenticated and userData is available
+   
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -208,7 +208,7 @@ exports.deleteAdoptionPost = async (req, res) => {
       })
     }
 
-    // Only creator can delete the post
+    
     if (adoptionPost.creator.toString() !== req.userData.userId) {
       return res.status(403).json({
         success: false,
@@ -236,7 +236,7 @@ exports.showInterest = async (req, res) => {
   try {
     
     
-    // Ensure user is authenticated and userData is available
+    
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -256,7 +256,7 @@ exports.showInterest = async (req, res) => {
       })
     }
 
-    // Check if post is active
+    
     if (adoptionPost.status !== "active") {
       return res.status(400).json({
         success: false,
@@ -264,7 +264,7 @@ exports.showInterest = async (req, res) => {
       })
     }
 
-    // Creator cannot show interest in their own post
+    
     if (adoptionPost.creator.toString() === userId) {
       return res.status(403).json({
         success: false,
@@ -272,7 +272,7 @@ exports.showInterest = async (req, res) => {
       })
     }
 
-    // Check if user already showed interest
+  
     const alreadyInterested = adoptionPost.interestedUsers.some((interest) => interest.user.toString() === userId)
 
     if (alreadyInterested) {
@@ -369,7 +369,7 @@ exports.removeInterest = async (req, res) => {
 // Get interested users for a specific adoption post (only for creator)
 exports.getInterestedUsers = async (req, res) => {
   try {
-    // Ensure user is authenticated and userData is available
+   
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -430,7 +430,7 @@ exports.updateAdoptionPost = async (req, res) => {
       });
     }
 
-    // Ensure user is authenticated and userData is available
+   
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -561,12 +561,12 @@ exports.updateAdoptionPost = async (req, res) => {
   }
 };
 
-// (for browsing available adoptions)
+
 exports.getAvailableAdoptionPosts = async (req, res) => {
   try {
     const { status = "active", location, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
     
-    // Ensure user is authenticated and userData is available
+    
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,

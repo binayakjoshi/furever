@@ -15,25 +15,62 @@ const veterinarianSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
   },
+  password: {
+    type: String,
+    required: function() {
+      return !this.googleId; // Password required only if not Google OAuth user
+    },
+    minlength: [6, "Password must be at least 6 characters long"],
+  },
+  role: {
+    type: String,
+    default: "vet",
+    enum: ["vet"],
+  },
+  googleId: {
+    type: String,
+    sparse: true, // Allow multiple null values but unique non-null values
+  },
+  dob: {
+    type: Date,
+  },
+  address: {
+    type: String,
+    trim: true,
+  },
+  phone: {
+    type: String,
+    trim: true,
+  },
   degree: {
     type: String,
     required: [true, "Degree is required"],
     trim: true,
     maxlength: [200, "Degree cannot exceed 200 characters"],
   },
-  yearsOfExperience: {
+  experience: {
     type: Number,
-    required: [true, "Years of experience is required"],
-    min: [0, "Years of experience cannot be negative"],
-    max: [60, "Years of experience cannot exceed 60 years"],
+    default: 0,
+    min: [0, "Experience cannot be negative"],
+    max: [60, "Experience cannot exceed 60 years"],
   },
   location: {
-    type: String,
-    required: [true, "Location is required"],
-    trim: true,
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [0, 0],
+    },
+    address: {
+      type: String,
+      trim: true,
+    },
   },
-  contactInfo:{
-    type:String,
+  contactInfo: {
+    type: String,
     required: [true, "Contact information for office is required"],
   },
   licenseNumber: {
@@ -72,7 +109,6 @@ const veterinarianSchema = new mongoose.Schema({
 //query helpers
 veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
-veterinarianSchema.index({ status: 1, isVerified: 1 })
 // Add geospatial index
 veterinarianSchema.index({ location: "2dsphere" })
 

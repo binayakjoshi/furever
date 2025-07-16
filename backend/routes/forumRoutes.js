@@ -35,17 +35,17 @@ const forumReplyValidation = [
 
 router.get("/", forumController.getForumPosts)
 
-// Authentication required for these routes
+
 router.use(authenticate)
 
-// add garde hai maile
+// add garde hai maile post garne route
 router.post("/", forumPostValidation, forumController.createForumPost)
 
-// fix
+// fixed , moved to starting 
 router.get("/user/my-posts", forumController.getUserForumPosts)
 
 
-// fix
+// fixed . moved to starting
 router.get("/:id/replies", forumController.getForumReplies)
 
 router.post("/:id/replies", forumReplyValidation, forumController.createForumReply)
