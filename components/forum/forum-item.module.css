@@ -48,6 +48,14 @@
   color: #111827;
   margin: 0;
   font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.authorDetails h3:hover {
+  color: #664982;
+  transform: translateY(-1px);
+  text-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  
 }
 
 .authorMeta {
@@ -132,6 +140,14 @@
   font-weight: 700;
   color: #111827;
   margin: 0 0 8px 0;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.title:hover {
+  color:#664982;
+  transform: translateY(-1px);
+  text-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .description {
@@ -139,9 +155,11 @@
   line-height: 1.6;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 1;
+  line-clamp: 1; 
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .footer {

@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ForumPost } from "@/lib/types";
 import styles from "./forum-item.module.css";
 
@@ -8,7 +9,7 @@ interface ForumPostItemProps {
   onClick?: (post: ForumPost) => void;
 }
 
-const ForumPostItem: React.FC<ForumPostItemProps> = ({ post, onClick }) => {
+const ForumPostItem = ({ post, onClick }: ForumPostItemProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -50,14 +51,16 @@ const ForumPostItem: React.FC<ForumPostItemProps> = ({ post, onClick }) => {
           <div className={styles.avatar}>
             <Image
               src={post.author.profileImage.url}
-              alt={post.author.name}
+              alt={post.author._id}
               width={40}
               height={40}
               className={styles.avatarImage}
             />
           </div>
           <div className={styles.authorDetails}>
-            <h3>{post.author.name}</h3>
+            <Link href={`/user/${post.author._id}`}>
+              <h3>{post.author.name}</h3>
+            </Link>
             <div className={styles.authorMeta}>
               <span
                 className={`${styles.roleBadge} ${getRoleClassName(
@@ -72,6 +75,7 @@ const ForumPostItem: React.FC<ForumPostItemProps> = ({ post, onClick }) => {
             </div>
           </div>
         </div>
+
         <span
           className={`${styles.categoryBadge} ${getCategoryClassName(
             post.category
@@ -83,7 +87,10 @@ const ForumPostItem: React.FC<ForumPostItemProps> = ({ post, onClick }) => {
 
       {/* Post Content */}
       <div className={styles.content}>
-        <h2 className={styles.title}>{post.title}</h2>
+        <Link href={`/pet-forum/post/${post._id}`}>
+          <h2 className={styles.title}>{post.title}</h2>
+        </Link>
+
         <p className={styles.description}>{post.content}</p>
       </div>
 
