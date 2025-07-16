@@ -95,7 +95,7 @@ const Input: React.FC<CustomInputProps> = (props) => {
     !inputState.isValid && inputState.isTouched ? styles.inputError : ""
   }`;
 
-  const baseTextareaClass = `${styles.textareaBase} ${
+  const baseTextareaClass = `${styles.inputBase} ${
     !inputState.isValid && inputState.isTouched ? styles.inputError : ""
   }`;
 
