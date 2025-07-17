@@ -59,7 +59,7 @@ exports.createVeterinarianProfile = async (req, res) => {
 // Get all veterinarians
 exports.getAllVeterinarians = async (req, res) => {
   try {
-    const veterinarians = await Veterinarian.find().select("-licenseNumber","-password") // Exclude licenseNumber and password for privacy
+    const veterinarians = await Veterinarian.find().select("-password") // Exclude password for privacy
     res.json(veterinarians)
   } catch (err) {
     console.error(err.message)
@@ -70,7 +70,7 @@ exports.getAllVeterinarians = async (req, res) => {
 // Get veterinarian by ID
 exports.getVeterinarianById = async (req, res) => {
   try {
-    const veterinarian = await Veterinarian.findById(req.params.id).select("-licenseNumber","-password") // Exclude licenseNumber and password for privacy
+    const veterinarian = await Veterinarian.findById(req.params.id).select("-password") // Exclude  password for privacy
     if (!veterinarian) {
       return res.status(404).json({ msg: "Veterinarian not found" })
     }
