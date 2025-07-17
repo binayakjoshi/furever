@@ -27,21 +27,7 @@ const veterinarianSchema = new mongoose.Schema({
     default: "vet",
     enum: ["vet"],
   },
-  googleId: {
-    type: String,
-    sparse: true, // Allow multiple null values but unique non-null values
-  },
-  dob: {
-    type: Date,
-  },
-  address: {
-    type: String,
-    trim: true,
-  },
-  phone: {
-    type: String,
-    trim: true,
-  },
+
   degree: {
     type: String,
     required: [true, "Degree is required"],
@@ -53,25 +39,6 @@ const veterinarianSchema = new mongoose.Schema({
     default: 0,
     min: [0, "Experience cannot be negative"],
     max: [60, "Experience cannot exceed 60 years"],
-  },
-  location: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
-    },
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      default: [0, 0],
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-  },
-  contactInfo: {
-    type: String,
-    required: [true, "Contact information for office is required"],
   },
   licenseNumber: {
     type: String,
@@ -113,8 +80,6 @@ const veterinarianSchema = new mongoose.Schema({
 //query helpers
 veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
-// Add geospatial index
-veterinarianSchema.index({ location: "2dsphere" })
 
 veterinarianSchema.pre("save", function (next) {
   this.updatedAt = Date.now()
