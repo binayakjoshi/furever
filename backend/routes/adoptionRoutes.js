@@ -31,6 +31,7 @@ router.delete("/:id/interest", adoptionController.removeInterest)
 router.get("/:id/interested-users", adoptionController.getInterestedUsers)
 
 // :/id at last
+router.get("/:id",adoptionController.getAdoptionPostById)
 router.put("/:id", imageUpload.single("image"), updateAdoptionValidation, adoptionController.updateAdoptionPost)
 router.delete("/:id", adoptionController.deleteAdoptionPost)
 
