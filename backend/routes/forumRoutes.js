@@ -48,6 +48,9 @@ router.get("/user/my-posts", forumController.getUserForumPosts)
 // fixed . moved to starting
 router.get("/:id/replies", forumController.getForumReplies)
 
+// reply ko ni reply
+router.get("/:id/replies/:replyId/replies", forumController.getReplyReplies)
+
 router.post("/:id/replies", forumReplyValidation, forumController.createForumReply)
 router.put("/:id/replies/:replyId", forumReplyValidation, forumController.updateForumReply)
 router.delete("/:id/replies/:replyId", forumController.deleteForumReply)
