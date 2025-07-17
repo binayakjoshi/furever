@@ -70,6 +70,12 @@ const signup = async (req, res, next) => {
         })
       }
 
+      // Process availability data to ensure days are lowercase
+      const processedAvailability = otherData.availability ? {
+        days: otherData.availability.days?.map(day => day.toLowerCase()) || [],
+        hours: otherData.availability.hours || { start: "", end: "" }
+      } : { days: [], hours: { start: "", end: "" } }
+
       newUser = new Veterinarian({
         name,
         email,
@@ -78,7 +84,7 @@ const signup = async (req, res, next) => {
         degree,
         licenseNumber,
         experience: otherData.experience || 0,
-        availability: otherData.availability || { days: [], hours: { start: "", end: "" } },
+        availability: processedAvailability,
         profileImage: {
           url: req.file ? req.file.path : "",
           publicId: req.file ? req.file.filename : "",
@@ -110,7 +116,7 @@ const signup = async (req, res, next) => {
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
-        redirectTo: "/login",
+        redirectTo: "api/users/login",
       },
     })
   } catch (error) {
