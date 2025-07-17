@@ -12,7 +12,6 @@ const signupValidation = [
   // Vet-specific validations
   body("degree").if(body("role").equals("vet")).notEmpty().withMessage("Degree is required for veterinarians"),
   body("licenseNumber").if(body("role").equals("vet")).notEmpty().withMessage("License number is required for veterinarians"),
-  body("contactInfo").if(body("role").equals("vet")).notEmpty().withMessage("Contact info is required for veterinarians"),
   body("experience").if(body("role").equals("vet")).optional().isNumeric().withMessage("Experience must be a number"),
 ]
 
