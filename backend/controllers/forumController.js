@@ -359,8 +359,7 @@ const createForumReply = async (req, res) => {
     await forumReply.save()
     await forumReply.populate("author", "name profileImage role")
 
-    // Only add to post's replies array if it's a top-level reply (no parentReply)
-    // The middleware will handle adding to parent reply's replies array if needed
+    //top level ko reply ho vane matra add garne
     if (!parentReply) {
       forumPost.replies.push(forumReply._id)
       await forumPost.save()
@@ -421,6 +420,66 @@ const getForumReplies = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch replies",
+    })
+  }
+}
+
+// Get replies of a specific reply (nested replies)
+const getReplyReplies = async (req, res) => {
+  try {
+    const replyId = req.params.replyId
+    const { page = 1, limit = 10 } = req.query
+
+    if (!isValidObjectId(replyId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reply ID format",
+      })
+    }
+
+    // Check if the parent reply exists
+    const parentReply = await ForumReply.findById(replyId)
+    if (!parentReply) {
+      return res.status(404).json({
+        success: false,
+        message: "Parent reply not found",
+      })
+    }
+
+    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+
+    // Find all replies that have this reply as their parent
+    const nestedReplies = await ForumReply.find({ 
+      parentReply: replyId, 
+      status: "active" 
+    })
+      .populate("author", "name profileImage role")
+      .populate("parentReply", "content author")
+      .sort({ createdAt: 1 }) // oldest first
+      .skip(skip)
+      .limit(Number.parseInt(limit))
+
+    const totalCount = await ForumReply.countDocuments({ 
+      parentReply: replyId, 
+      status: "active" 
+    })
+
+    res.status(200).json({
+      success: true,
+      data: nestedReplies,
+      pagination: {
+        currentPage: Number.parseInt(page),
+        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
+        totalCount,
+        hasNext: skip + nestedReplies.length < totalCount,
+        hasPrev: Number.parseInt(page) > 1,
+      },
+    })
+  } catch (error) {
+    console.error("Get reply replies error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch nested replies",
     })
   }
 }
@@ -584,4 +643,5 @@ module.exports = {
   updateForumReply,
   deleteForumReply,
   getUserForumPosts,
+  getReplyReplies,
 }
