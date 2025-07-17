@@ -334,3 +334,50 @@ exports.getMyVeterinarianProfile = async (req, res) => {
   }
 }
 
+// Toggle veterinarian availability for appointments
+exports.toggleAppointmentAvailability = async (req, res) => {
+  try {
+    if (!req.userData || !req.userData.email) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+    
+    const userEmail = req.userData.email
+    const { isAvailable } = req.body
+
+    const veterinarian = await Veterinarian.findOne({ email: userEmail })
+    
+    if (!veterinarian) {
+      return res.status(404).json({
+        success: false,
+        message: "Veterinarian profile not found"
+      })
+    }
+
+    // Toggle availability
+    if (isAvailable !== undefined) {
+      veterinarian.isAvailableForAppointments = isAvailable
+    } else {
+      veterinarian.isAvailableForAppointments = !veterinarian.isAvailableForAppointments
+    }
+
+    await veterinarian.save()
+
+    res.status(200).json({
+      success: true,
+      message: `Appointment availability ${veterinarian.isAvailableForAppointments ? 'enabled' : 'disabled'} successfully`,
+      data: {
+        isAvailableForAppointments: veterinarian.isAvailableForAppointments
+      }
+    })
+  } catch (error) {
+    console.error("Toggle appointment availability error:", error)
+    res.status(500).json({
+      success: false,
+      message: "Failed to update appointment availability",
+    })
+  }
+}
+
