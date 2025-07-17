@@ -179,21 +179,21 @@ const updateCurrentUser = async (req, res) => {
       }
     }
 
-    // Update common fields
+    // Update common fields that exist in both models
     if (updateData.name) user.name = updateData.name
-    if (updateData.phone) user.phone = updateData.phone
-    if (updateData.address) user.address = updateData.address
-    if (updateData.dob) user.dob = new Date(updateData.dob)
+    // Only update phone, address, dob for pet-owners as they exist in User model
+    if (role === "pet-owner") {
+      if (updateData.phone) user.phone = updateData.phone
+      if (updateData.address) user.address = updateData.address
+      if (updateData.dob) user.dob = new Date(updateData.dob)
+    }
 
     // Update vet-specific fields if user is a vet
     if (role === "vet") {
       if (updateData.degree) user.degree = updateData.degree
       if (updateData.experience !== undefined) user.experience = updateData.experience
-      if (updateData.clinicName) user.clinicName = updateData.clinicName
-      if (updateData.specialization) user.specialization = updateData.specialization
-      if (updateData.bio) user.bio = updateData.bio
-      if (updateData.contactInfo) user.contactInfo = updateData.contactInfo
       if (updateData.availability) user.availability = updateData.availability
+      if (updateData.isAvailableForAppointments !== undefined) user.isAvailableForAppointments = updateData.isAvailableForAppointments
     }
 
     await user.save()

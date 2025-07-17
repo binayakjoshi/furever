@@ -33,9 +33,7 @@ exports.createPet = async (req, res, next) => {
     console.log("req.body:", req.body);
     const petData = req.body;
 
-    // --- Parse diseases as array of strings ---
-    // Frontend should send multiple fields with key 'diseases':
-    // formData.append('diseases', 'd1'); formData.append('diseases', 'd2');
+   
     let diseases = [];
     if (petData.diseases) {
       if (Array.isArray(petData.diseases)) {
@@ -50,11 +48,7 @@ exports.createPet = async (req, res, next) => {
     }
     console.log("Parsed diseases:", diseases);
 
-    // --- Parse vaccinations as array of objects ---
-    // Frontend should send one field:
-    // formData.append('vaccinations', JSON.stringify([
-    //   { name: "...", vaccDate: "YYYY-MM-DD", nextVaccDate: "YYYY-MM-DD" }, ...
-    // ]));
+
     let vaccinations = [];
     if (petData.vaccinations) {
       if (typeof petData.vaccinations === 'string') {
@@ -83,7 +77,7 @@ exports.createPet = async (req, res, next) => {
           console.log("Failed to JSON.parse vaccinations:", e);
         }
       } else if (Array.isArray(petData.vaccinations)) {
-        // Unlikely unless frontend sends multiple fields; handle similarly
+       
         for (const v of petData.vaccinations) {
           if (v && v.name && v.vaccDate && v.nextVaccDate) {
             const vaccDateObj = new Date(v.vaccDate);
@@ -214,7 +208,7 @@ exports.updatePet = async (req, res) => {
 
     const userId = req.userData.userId
 
-    if( existingPet.creatorId != userId){
+    if( existingPet.user.toString() !== userId){
       return res.status(403).json({
         success: false,
         message: "You do not have permission to update this pet",
