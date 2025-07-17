@@ -52,18 +52,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  
-  location:{
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
-    },
-    coordinates: {
-      type: [Number],
-      index: "2dsphere", // For geospatial queries
-    },
-  },
   profileImage: {
     url: String,
     publicId: String,
