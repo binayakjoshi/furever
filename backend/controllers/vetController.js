@@ -47,7 +47,9 @@ exports.createVeterinarianProfile = async (req, res) => {
 
     await veterinarian.save()
 
-    res.status(201).json({ message: "Veterinarian profile created successfully", veterinarian })
+    // Exclude password from response
+    const veterinarianResponse = await Veterinarian.findById(veterinarian._id).select("-password")
+    res.status(201).json({ message: "Veterinarian profile created successfully", veterinarian: veterinarianResponse })
   } catch (error) {
     console.error(error.message)
     res.status(500).send("Server error")
@@ -118,7 +120,7 @@ exports.updateVeterinarianProfile = async (req, res) => {
       return res.status(404).json({ msg: "Veterinarian not found" })
     }
 
-    veterinarian = await Veterinarian.findByIdAndUpdate(req.params.id, { $set: vetFields }, { new: true })
+    veterinarian = await Veterinarian.findByIdAndUpdate(req.params.id, { $set: vetFields }, { new: true }).select("-password")
 
     res.json(veterinarian)
   } catch (err) {
@@ -162,7 +164,7 @@ exports.getMyVeterinarianProfile = async (req, res) => {
     }
     
     const userEmail = req.userData.email
-    const veterinarian = await Veterinarian.findOne({ email: userEmail })
+    const veterinarian = await Veterinarian.findOne({ email: userEmail }).select("-password")
     
     if (!veterinarian) {
       return res.status(404).json({ msg: "Veterinarian profile not found" })
