@@ -96,6 +96,10 @@ const veterinarianSchema = new mongoose.Schema({
       end: String,
     },
   },
+  isAvailableForAppointments: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
