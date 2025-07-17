@@ -1,8 +1,9 @@
 .form {
-  display: flex;
-  flex-direction: column;
+  display:grid;
+  grid-template-rows: auto;
   gap: 1rem;
 }
+
 .alert {
   display: flex;
   align-items: center;
@@ -19,6 +20,20 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* New grid container for input fields */
+.inputFieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 768px) {
+  .inputFieldsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .label {
@@ -84,39 +99,68 @@
   height: 0.875rem;
   width: 0.875rem;
 }
-
 .submitButton {
-  width: 100%;
-  height: 2.75rem;
+  padding: 0.875rem 1.5rem;
+  background: #664982;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: #000;
-  color: #fff;
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: #374151;
+  background-color: #764ba2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.submitButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .submitButton:disabled {
-  background-color: #9ca3af;
-  opacity: 0.5;
+  background: #9ca3af;
+  color: #ffffff;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+.submitButton:disabled::before {
+  display: none;
+}
 .loadingIcon {
   height: 1rem;
   width: 1rem;
   animation: spin 1s linear infinite;
 }
+
 .googleBtn{
   padding: 0.875rem 1.5rem;
   background: white;
@@ -134,24 +178,33 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
-
 }
+
 .googleBtn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
+
 .googleIcon {
   width: 18px;
   height: 18px;
   margin-right: 8px;
 }
+
 .errorText{
   color: #ef4444;
   font-size: 0.875rem;
   margin:0;
   padding: 0;
 }
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.toggleWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
