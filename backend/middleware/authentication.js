@@ -53,7 +53,7 @@ const signup = async (req, res, next) => {
     
     if (role === "vet") {
       // Validate required vet fields
-      const { degree, licenseNumber } = otherData
+      const { degree, licenseNumber,availability } = otherData
       if (!degree || !licenseNumber) {
         return res.status(400).json({
           success: false,
@@ -71,10 +71,10 @@ const signup = async (req, res, next) => {
       }
 
       // Process availability data to ensure days are lowercase
-      const processedAvailability = otherData.availability ? {
-        days: otherData.availability.days?.map(day => day.toLowerCase()) || [],
-        hours: otherData.availability.hours || { start: "", end: "" }
-      } : { days: [], hours: { start: "", end: "" } }
+      // const processedAvailability = otherData.availability ? {
+      //   days: otherData.availability.days?.map(day => day.toLowerCase()) || [],
+      //   hours: otherData.availability.hours || { start: "", end: "" }
+      // } : { days: [], hours: { start: "", end: "" } }
 
       newUser = new Veterinarian({
         name,
@@ -84,7 +84,7 @@ const signup = async (req, res, next) => {
         degree,
         licenseNumber,
         experience: otherData.experience || 0,
-        availability: processedAvailability,
+        availability,
         profileImage: {
           url: req.file ? req.file.path : "",
           publicId: req.file ? req.file.filename : "",

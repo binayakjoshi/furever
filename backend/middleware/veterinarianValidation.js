@@ -25,18 +25,18 @@ const createVeterinarianValidation = [
     .withMessage("License number is required")
     .isLength({ min: 1, max: 50 })
     .withMessage("License number must be between 1 and 50 characters"),
-  body("availability.days")
-    .optional()
-    .isArray()
-    .withMessage("Availability days must be an array"),
-  body("availability.hours.start")
-    .optional()
-    .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
-    .withMessage("Start time must be in HH:MM format"),
-  body("availability.hours.end")
-    .optional()
-    .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
-    .withMessage("End time must be in HH:MM format"),
+  // body("availability.days")
+  //   .optional()
+  //   .isArray()
+  //   .withMessage("Availability days must be an array"),
+  // body("availability.hours.start")
+  //   .optional()
+  //   .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
+  //   .withMessage("Start time must be in HH:MM format"),
+  // body("availability.hours.end")
+  //   .optional()
+  //   .matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
+  //   .withMessage("End time must be in HH:MM format"),
 ]
 
 const updateVeterinarianValidation = [
