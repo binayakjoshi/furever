@@ -68,7 +68,7 @@ exports.getAllVeterinarians = async (req, res) => {
 // Get veterinarian by ID
 exports.getVeterinarianById = async (req, res) => {
   try {
-    const veterinarian = await Veterinarian.findById(req.params.id).select("-licenseNumber") // Exclude licenseNumber for privacy
+    const veterinarian = await Veterinarian.findById(req.params.id).select("-licenseNumber","-password") // Exclude licenseNumber and password for privacy
     if (!veterinarian) {
       return res.status(404).json({ msg: "Veterinarian not found" })
     }
