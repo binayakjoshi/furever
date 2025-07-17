@@ -57,7 +57,7 @@ exports.createVeterinarianProfile = async (req, res) => {
 // Get all veterinarians
 exports.getAllVeterinarians = async (req, res) => {
   try {
-    const veterinarians = await Veterinarian.find().select("-licenseNumber") // Exclude licenseNumber for privacy
+    const veterinarians = await Veterinarian.find().select("-licenseNumber","-password") // Exclude licenseNumber and password for privacy
     res.json(veterinarians)
   } catch (err) {
     console.error(err.message)
