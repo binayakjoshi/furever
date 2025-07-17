@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  
   profileImage: {
     url: String,
     publicId: String,

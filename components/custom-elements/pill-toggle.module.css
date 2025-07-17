@@ -1,0 +1,37 @@
+
+.pillToggle {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 280px;               
+  padding: 8px;
+  background: #f0f0f0;        
+  border: 1px solid #ccc;     
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pillToggle:hover {     
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+.pillOption {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;             
+  border-radius: 50px;
+  font-weight: 500;
+  color: #555;                
+  white-space: nowrap;        
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.active {
+  background:  #664982;
+  color: #fff;               
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

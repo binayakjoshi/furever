@@ -6,14 +6,17 @@ export const POST = async (request: NextRequest) => {
 
     const body = await request.json();
 
-    const backendRes = await fetch(`${process.env.BACKEND_URL}/api/vets`, {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    const backendRes = await fetch(
+      `${process.env.BACKEND_URL}/api/vets/nearby`,
+      {
+        method: "POST",
+        headers: {
+          Cookie: cookieHeader,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
     const data = await backendRes.json();
     const nextRes = NextResponse.json(data, { status: backendRes.status });
 

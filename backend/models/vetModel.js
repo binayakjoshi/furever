@@ -51,17 +51,21 @@ const veterinarianSchema = new mongoose.Schema({
     url: String,
     publicId: String,
   },
-  availability: {
-    days: [
-      {
-        type: String,
-        enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-      },
-    ],
-    hours: {
-      start: String, // example: "09:00"
-      end: String,
-    },
+  // availability: {
+  //   days: [
+  //     {
+  //       type: String,
+  //       enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+  //     },
+  //   ],
+  //   hours: {
+  //     start: String, // example: "09:00"
+  //     end: String,
+  //   },
+  // },
+  availability:{
+    type:String,
+    required:true
   },
   isAvailableForAppointments: {
     type: Boolean,
