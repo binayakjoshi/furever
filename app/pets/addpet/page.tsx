@@ -75,7 +75,7 @@ const AddPetPage = () => {
       requestData.append("petType", formState.inputs.petType.value as string);
 
       await sendRequest("/api/pets", "POST", requestData);
-      router.push(`/user/${user?.userId}/pets`);
+      router.push('/');
     } catch (_) {}
   };
 
