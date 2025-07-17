@@ -16,7 +16,7 @@ type ForumReplyFormProps = {
 
 const ForumReplyForm = ({ postId, addReply }: ForumReplyFormProps) => {
   const router = useRouter();
-  const [formState, inputHandler] = useForm(
+  const [formState, inputHandler, setFormData] = useForm(
     {
       content: { value: "", isValid: false, touched: false },
     },
@@ -36,6 +36,11 @@ const ForumReplyForm = ({ postId, addReply }: ForumReplyFormProps) => {
         { "Content-Type": "application/json" }
       );
       addReply();
+      setFormData(
+        { content: { value: "", isValid: false, touched: false } },
+        false
+      );
+
       router.refresh();
     } catch {}
   };
@@ -47,7 +52,7 @@ const ForumReplyForm = ({ postId, addReply }: ForumReplyFormProps) => {
           id="content"
           element="input"
           type="text"
-          placeholder="you reply"
+          placeholder="your reply"
           validators={[VALIDATOR_REQUIRE()]}
           errorText="Please enter some text"
           onInput={inputHandler}
