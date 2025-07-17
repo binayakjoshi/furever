@@ -4,8 +4,8 @@ import Image from "next/image";
 import { ForumPost } from "@/lib/types";
 import ReplyItem from "@/components/forum/forum-reply-item";
 import styles from "./page.module.css";
-import ForumReplyForm from "@/components/forms/forum-reply-form";
 import { revalidatePath } from "next/cache";
+import ForumPostAction from "@/components/forum/forum-post-action";
 
 type ForumPostDetailProps = {
   params: Promise<{ postId: string }>;
@@ -103,12 +103,11 @@ const ForumPostDetailPage = async ({ params }: ForumPostDetailProps) => {
               <p>No replies yet. Be the first to reply!</p>
             </div>
           )}
-
-          {/* Reply Form */}
-          <div className={styles.replyFormSection}>
-            <h4>Add a Reply</h4>
-            <ForumReplyForm postId={postId} addReply={validatePath} />
-          </div>
+          <ForumPostAction
+            authorId={forumPost.author._id}
+            postId={postId}
+            validatePath={validatePath}
+          />
         </div>
       </div>
     </>

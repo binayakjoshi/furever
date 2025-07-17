@@ -229,17 +229,6 @@
   font-size: 1rem;
 }
 
-.replyFormSection {
-  border-top: 1px solid #e1e5e9;
-  padding-top: 24px;
-}
-
-.replyFormSection h4 {
-  margin: 0 0 16px 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1a1a1a;
-}
 
 /* Loading States */
 .loading {
