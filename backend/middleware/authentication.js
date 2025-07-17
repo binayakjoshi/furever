@@ -53,11 +53,11 @@ const signup = async (req, res, next) => {
     
     if (role === "vet") {
       // Validate required vet fields
-      const { degree, licenseNumber, contactInfo } = otherData
-      if (!degree || !licenseNumber || !contactInfo) {
+      const { degree, licenseNumber } = otherData
+      if (!degree || !licenseNumber) {
         return res.status(400).json({
           success: false,
-          message: "Degree, license number, and contact info are required for veterinarians",
+          message: "Degree and license number are required for veterinarians",
         })
       }
 
@@ -74,15 +74,10 @@ const signup = async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
-        dob,
-        address,
-        phone,
         role,
         degree,
         licenseNumber,
-        contactInfo,
         experience: otherData.experience || 0,
-        specialization: otherData.specialization || [],
         availability: otherData.availability || { days: [], hours: { start: "", end: "" } },
         profileImage: {
           url: req.file ? req.file.path : "",
@@ -293,21 +288,22 @@ const getCurrentUser = async (req, res, next) => {
         userId: user.id,
         email: user.email,
         name: user.name,
-        dob: user.dob,
         role: user.role,
-        phone: user.phone,
-        address: user.address,
-        location: user.location,
         profileImage: user.profileImage,
         createdAt: user.createdAt,
         isGoogleUser: !!user.googleId,
+        // Include fields that exist in both models
+        ...(user.dob && { dob: user.dob }),
+        ...(user.phone && { phone: user.phone }),
+        ...(user.address && { address: user.address }),
+        ...(user.location && { location: user.location }),
         // Include vet-specific fields if applicable
         ...(role === "vet" && {
           degree: user.degree,
           experience: user.experience,
           licenseNumber: user.licenseNumber,
-          contactInfo: user.contactInfo,
           availability: user.availability,
+          isAvailableForAppointments: user.isAvailableForAppointments,
         }),
       },
     })
