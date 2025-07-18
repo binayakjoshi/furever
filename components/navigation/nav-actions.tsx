@@ -80,7 +80,11 @@ const NavActions = () => {
           <ul>
             <li>
               <Link
-                href={`/user/${user.userId}`}
+                href={
+                  user.role === "vet"
+                    ? `/vets/${user.userId}`
+                    : `/user/${user.userId}`
+                }
                 onClick={toggleDrawer}
                 title="View your profile"
               >
@@ -88,36 +92,41 @@ const NavActions = () => {
                 Your Profile
               </Link>
             </li>
-            <li>
-              <Link
-                href={`/adoption/my-post`}
-                onClick={toggleDrawer}
-                title="Manage your pets"
-              >
-                <FaPaw size={16} />
-                My Adoption Posts
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={`/adoption/add`}
-                onClick={toggleDrawer}
-                title="Manage your pets"
-              >
-                <FaPlus size={16} />
-                Post for Adoption
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/pets/addpet"
-                onClick={toggleDrawer}
-                title="Add a new pet"
-              >
-                <FaPlus size={16} />
-                Add Pet
-              </Link>
-            </li>
+            {user.role == "pet-owner" && (
+              <>
+                <li>
+                  <Link
+                    href={`/adoption/my-post`}
+                    onClick={toggleDrawer}
+                    title="Manage your pets"
+                  >
+                    <FaPaw size={16} />
+                    My Adoption Posts
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`/adoption/add`}
+                    onClick={toggleDrawer}
+                    title="Manage your pets"
+                  >
+                    <FaPlus size={16} />
+                    Post for Adoption
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/pets/addpet"
+                    onClick={toggleDrawer}
+                    title="Add a new pet"
+                  >
+                    <FaPlus size={16} />
+                    Add Pet
+                  </Link>
+                </li>
+              </>
+            )}
+
             <li>
               <Link
                 href="/pet-forum/post/add"
