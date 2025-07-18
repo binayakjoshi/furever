@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-export const DELETE = async (
-  request: NextRequest,
-  { params }: { params: { adoptSlug: string } }
-) => {
+
+type ParamType = {
+  params: Promise<{ adoptSlug: string }>;
+};
+export const DELETE = async (request: NextRequest, { params }: ParamType) => {
   try {
     const { adoptSlug } = await params;
     const cookieHeader = request.headers.get("cookie") || "";

@@ -9,6 +9,7 @@ import { type Pet } from "@/lib/types";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
 import ImageUpload from "@/components/custom-elements/image-upload";
 import { useAuth } from "@/context/auth-context";
+import Button from "@/components/custom-elements/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useHttp } from "@/lib/request-hook";
 import styles from "./page.module.css";
@@ -19,7 +20,7 @@ type AddPetResponse = {
   message: string;
   data: Pet;
 };
-const AddPetPage: React.FC = () => {
+const AddPetPage = () => {
   const [
     formState,
     inputHandler,
@@ -74,7 +75,7 @@ const AddPetPage: React.FC = () => {
       requestData.append("petType", formState.inputs.petType.value as string);
 
       await sendRequest("/api/pets", "POST", requestData);
-      router.push(`/user/${user?.userId}/pets`);
+      router.push('/');
     } catch (_) {}
   };
 
@@ -284,7 +285,7 @@ const AddPetPage: React.FC = () => {
               text="Adding pet...."
             />
           ) : (
-            <button
+            <Button
               type="submit"
               className={`${styles.submitButton} ${
                 formState.isValid
@@ -293,8 +294,8 @@ const AddPetPage: React.FC = () => {
               }`}
               disabled={!formState.isValid}
             >
-              Submit
-            </button>
+              Add Pet
+            </Button>
           )}
         </form>
       </div>

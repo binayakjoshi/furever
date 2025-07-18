@@ -20,8 +20,14 @@ const forumReplySchema = new mongoose.Schema({
   parentReply: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ForumReply",
-    default: null, // null for top-level replies, set for nested replies
+    default: null, //nested reply ko lagi 
   },
+  replies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ForumReply",
+    },
+  ],
   status: {
     type: String,
     enum: ["active", "deleted"],
@@ -37,17 +43,58 @@ const forumReplySchema = new mongoose.Schema({
   },
 })
 
-// Indexes for better query performance
+
 forumReplySchema.index({ post: 1 })
 forumReplySchema.index({ author: 1 })
 forumReplySchema.index({ parentReply: 1 })
 forumReplySchema.index({ status: 1 })
 forumReplySchema.index({ createdAt: -1 })
 
-// Update the updatedAt field before saving
+
 forumReplySchema.pre("save", function (next) {
   this.updatedAt = Date.now()
   next()
+})
+
+// Middleware to maintain bidirectional relationships
+forumReplySchema.post("save", async function (doc) {
+  // If this reply has a parent reply, add this reply to parent's replies array
+  if (doc.parentReply) {
+    await mongoose.model("ForumReply").findByIdAndUpdate(
+      doc.parentReply,
+      { $addToSet: { replies: doc._id } }
+    )
+  }
+  
+  // Add this reply to the post's replies array (if it's a top-level reply)
+  if (!doc.parentReply) {
+    await mongoose.model("ForumPost").findByIdAndUpdate(
+      doc.post,
+      { $addToSet: { replies: doc._id } }
+    )
+  }
+})
+
+// Middleware to clean up relationships when a reply is deleted
+forumReplySchema.pre("findOneAndDelete", async function () {
+  const doc = await this.model.findOne(this.getQuery())
+  if (doc) {
+    // Remove from parent reply's replies array
+    if (doc.parentReply) {
+      await mongoose.model("ForumReply").findByIdAndUpdate(
+        doc.parentReply,
+        { $pull: { replies: doc._id } }
+      )
+    }
+    
+    // Remove from post's replies array (if it's a top-level reply)
+    if (!doc.parentReply) {
+      await mongoose.model("ForumPost").findByIdAndUpdate(
+        doc.post,
+        { $pull: { replies: doc._id } }
+      )
+    }
+  }
 })
 
 const ForumReply = mongoose.model("ForumReply", forumReplySchema)

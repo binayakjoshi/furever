@@ -3,6 +3,12 @@ const ForumReply = require("../models/forumReplyModel")
 const User = require("../models/userModel")
 const { validationResult } = require("express-validator")
 const { deleteFromCloudinary } = require("../config/cloudinary")
+const mongoose = require("mongoose")
+
+
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id)
+}
 
 // Create a new forum post
 const createForumPost = async (req, res) => {
@@ -16,18 +22,14 @@ const createForumPost = async (req, res) => {
       })
     }
 
-    const { title, content, category, tags } = req.body
+    const { title, content, category } = req.body
     const userId = req.userData.userId
-
-   
 
     const forumPost = new ForumPost({
       title,
       content,
       author: userId,
       category: category || "general",
-      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-      
     })
 
     await forumPost.save()
@@ -58,6 +60,15 @@ const getForumPosts = async (req, res) => {
       filter.category = category
     }
     if (author) {
+
+      //author lai saddhai ID validate garnu parcha
+      
+      if (!isValidObjectId(author)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid author ID format",
+        })
+      }
       filter.author = author
     }
     if (search) {
@@ -72,11 +83,6 @@ const getForumPosts = async (req, res) => {
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
     const sortOptions = {}
     sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
-
-    // Special sorting for pinned posts
-    if (sortBy === "createdAt") {
-      sortOptions.isPinned = -1 // Pinned posts first
-    }
 
     const forumPosts = await ForumPost.find(filter)
       .populate("author", "name profileImage role")
@@ -95,13 +101,20 @@ const getForumPosts = async (req, res) => {
 
     const totalCount = await ForumPost.countDocuments(filter)
 
-    // Add reply count
-    const postsWithStats = forumPosts.map((post) => {
-      const postObj = post.toObject()
-      postObj.replyCount = post.replies.length
-      postObj.latestReply = post.replies.length > 0 ? post.replies[0] : null
-      return postObj
-    })
+    // reply count ko lagi
+    const postsWithStats = await Promise.all(
+      forumPosts.map(async (post) => {
+        const postObj = post.toObject()
+        
+        //latest reply count 
+        postObj.replyCount = await ForumReply.countDocuments({ 
+          post: post._id, 
+          status: "active" 
+        })
+        postObj.latestReply = post.replies.length > 0 ? post.replies[0] : null
+        return postObj
+      })
+    )
 
     res.status(200).json({
       success: true,
@@ -123,13 +136,18 @@ const getForumPosts = async (req, res) => {
   }
 }
 
-// Get a single forum post with all replies
+
 const getForumPostById = async (req, res) => {
   try {
     const postId = req.params.id
 
-    // Increment view count
-    await ForumPost.findByIdAndUpdate(postId, { $inc: { views: 1 } })
+    
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID format",
+      })
+    }
 
     const forumPost = await ForumPost.findById(postId)
       .populate("author", "name profileImage role createdAt")
@@ -140,7 +158,7 @@ const getForumPostById = async (req, res) => {
           path: "author",
           select: "name profileImage role",
         },
-        options: { sort: { createdAt: 1 } }, // Oldest replies first
+        options: { sort: { createdAt: 1 } }, // Old reply paila dekhaucha sort garda
       })
 
     if (!forumPost || forumPost.status !== "active") {
@@ -163,7 +181,7 @@ const getForumPostById = async (req, res) => {
   }
 }
 
-// Update forum post
+
 const updateForumPost = async (req, res) => {
   try {
     const errors = validationResult(req)
@@ -179,6 +197,14 @@ const updateForumPost = async (req, res) => {
     const userId = req.userData.userId
     const { title, content, category } = req.body
 
+    
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID format",
+      })
+    }
+
     const forumPost = await ForumPost.findById(postId)
 
     if (!forumPost) {
@@ -188,7 +214,7 @@ const updateForumPost = async (req, res) => {
       })
     }
 
-    // Only author can update the post
+    
     if (forumPost.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -196,8 +222,8 @@ const updateForumPost = async (req, res) => {
       })
     }
 
-    // Update fields
-    if (title) forumPost.title = title
+    
+    if (title?.trim()) forumPost.title = title.trim()
     if (content) forumPost.content = content
     if (category) forumPost.category = category
   
@@ -220,11 +246,19 @@ const updateForumPost = async (req, res) => {
   }
 }
 
-// Delete forum post
+
 const deleteForumPost = async (req, res) => {
   try {
     const postId = req.params.id
     const userId = req.userData.userId
+
+    
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID format",
+      })
+    }
 
     const forumPost = await ForumPost.findById(postId)
 
@@ -235,7 +269,7 @@ const deleteForumPost = async (req, res) => {
       })
     }
 
-    // Only author can delete the post
+    // author le matra delete garna milcha afno post
     if (forumPost.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -243,7 +277,7 @@ const deleteForumPost = async (req, res) => {
       })
     }
 
-    // Delete all replies to this post
+    // Delete all replies
     await ForumReply.deleteMany({ post: postId })
 
     await ForumPost.findByIdAndDelete(postId)
@@ -261,52 +295,8 @@ const deleteForumPost = async (req, res) => {
   }
 }
 
-// Like/Unlike forum post
-const toggleForumPostLike = async (req, res) => {
-  try {
-    const postId = req.params.id
-    const userId = req.userData.userId
 
-    const forumPost = await ForumPost.findById(postId)
 
-    if (!forumPost) {
-      return res.status(404).json({
-        success: false,
-        message: "Forum post not found",
-      })
-    }
-
-    // Check if user already liked the post
-    const existingLikeIndex = forumPost.likes.findIndex((like) => like.user.toString() === userId)
-
-    if (existingLikeIndex > -1) {
-      // Unlike the post
-      forumPost.likes.splice(existingLikeIndex, 1)
-    } else {
-      // Like the post
-      forumPost.likes.push({ user: userId })
-    }
-
-    await forumPost.save()
-
-    res.status(200).json({
-      success: true,
-      message: existingLikeIndex > -1 ? "Post unliked" : "Post liked",
-      data: {
-        likesCount: forumPost.likes.length,
-        isLiked: existingLikeIndex === -1,
-      },
-    })
-  } catch (error) {
-    console.error("Toggle forum post like error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to toggle like",
-    })
-  }
-}
-
-// Create a reply to a forum post
 const createForumReply = async (req, res) => {
   try {
     const errors = validationResult(req)
@@ -322,20 +312,39 @@ const createForumReply = async (req, res) => {
     const { content, parentReply } = req.body
     const userId = req.userData.userId
 
-    // Check if the post exists
+    
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID format",
+      })
+    }
+
+   
+    if (parentReply && !isValidObjectId(parentReply)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid parent reply ID format",
+      })
+    }
+
+    // Check if parentReply exist
+    if (parentReply) {
+      const parentReplyExists = await ForumReply.findById(parentReply)
+      if (!parentReplyExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Parent reply not found",
+        })
+      }
+    }
+
+    
     const forumPost = await ForumPost.findById(postId)
     if (!forumPost) {
       return res.status(404).json({
         success: false,
         message: "Forum post not found",
-      })
-    }
-
-    // Check if post is locked
-    if (forumPost.isLocked) {
-      return res.status(403).json({
-        success: false,
-        message: "This post is locked and cannot receive new replies",
       })
     }
 
@@ -350,9 +359,11 @@ const createForumReply = async (req, res) => {
     await forumReply.save()
     await forumReply.populate("author", "name profileImage role")
 
-    // Add reply to the post's replies array
-    forumPost.replies.push(forumReply._id)
-    await forumPost.save()
+    //top level ko reply ho vane matra add garne
+    if (!parentReply) {
+      forumPost.replies.push(forumReply._id)
+      await forumPost.save()
+    }
 
     res.status(201).json({
       success: true,
@@ -368,18 +379,26 @@ const createForumReply = async (req, res) => {
   }
 }
 
-// Get replies for a specific post
+
 const getForumReplies = async (req, res) => {
   try {
     const postId = req.params.id
     const { page = 1, limit = 20 } = req.query
+
+    
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post ID format",
+      })
+    }
 
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
 
     const replies = await ForumReply.find({ post: postId, status: "active" })
       .populate("author", "name profileImage role")
       .populate("parentReply", "content author")
-      .sort({ createdAt: 1 }) // Oldest first
+      .sort({ createdAt: 1 }) // old first
       .skip(skip)
       .limit(Number.parseInt(limit))
 
@@ -405,7 +424,67 @@ const getForumReplies = async (req, res) => {
   }
 }
 
-// Update forum reply
+// Get replies of a specific reply (nested replies)
+const getReplyReplies = async (req, res) => {
+  try {
+    const replyId = req.params.replyId
+    const { page = 1, limit = 10 } = req.query
+
+    if (!isValidObjectId(replyId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reply ID format",
+      })
+    }
+
+ 
+    const parentReply = await ForumReply.findById(replyId)
+    if (!parentReply) {
+      return res.status(404).json({
+        success: false,
+        message: "Parent reply not found",
+      })
+    }
+
+    const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
+
+  
+    const nestedReplies = await ForumReply.find({ 
+      parentReply: replyId, 
+      status: "active" 
+    })
+      .populate("author", "name profileImage role")
+      .populate("parentReply", "content author")
+      .sort({ createdAt: 1 }) // oldest first
+      .skip(skip)
+      .limit(Number.parseInt(limit))
+
+    const totalCount = await ForumReply.countDocuments({ 
+      parentReply: replyId, 
+      status: "active" 
+    })
+
+    res.status(200).json({
+      success: true,
+      data: nestedReplies,
+      pagination: {
+        currentPage: Number.parseInt(page),
+        totalPages: Math.ceil(totalCount / Number.parseInt(limit)),
+        totalCount,
+        hasNext: skip + nestedReplies.length < totalCount,
+        hasPrev: Number.parseInt(page) > 1,
+      },
+    })
+  } catch (error) {
+    console.error("Get reply replies error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch nested replies",
+    })
+  }
+}
+
+
 const updateForumReply = async (req, res) => {
   try {
     const errors = validationResult(req)
@@ -421,6 +500,14 @@ const updateForumReply = async (req, res) => {
     const userId = req.userData.userId
     const { content } = req.body
 
+    
+    if (!isValidObjectId(replyId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reply ID format",
+      })
+    }
+
     const forumReply = await ForumReply.findById(replyId)
 
     if (!forumReply) {
@@ -430,7 +517,7 @@ const updateForumReply = async (req, res) => {
       })
     }
 
-    // Only author can update the reply
+    // author gareko manche le matra reply update garna milcha
     if (forumReply.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -456,11 +543,19 @@ const updateForumReply = async (req, res) => {
   }
 }
 
-// Delete forum reply
+
 const deleteForumReply = async (req, res) => {
   try {
     const replyId = req.params.replyId
     const userId = req.userData.userId
+
+   
+    if (!isValidObjectId(replyId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reply ID format",
+      })
+    }
 
     const forumReply = await ForumReply.findById(replyId)
 
@@ -471,7 +566,7 @@ const deleteForumReply = async (req, res) => {
       })
     }
 
-    // Only author can delete the reply
+  
     if (forumReply.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -479,7 +574,7 @@ const deleteForumReply = async (req, res) => {
       })
     }
 
-    // Remove reply from post's replies array
+   
     await ForumPost.findByIdAndUpdate(forumReply.post, {
       $pull: { replies: replyId },
     })
@@ -501,52 +596,7 @@ const deleteForumReply = async (req, res) => {
   }
 }
 
-// Like/Unlike forum reply
-const toggleForumReplyLike = async (req, res) => {
-  try {
-    const replyId = req.params.replyId
-    const userId = req.userData.userId
 
-    const forumReply = await ForumReply.findById(replyId)
-
-    if (!forumReply) {
-      return res.status(404).json({
-        success: false,
-        message: "Reply not found",
-      })
-    }
-
-    // Check if user already liked the reply
-    const existingLikeIndex = forumReply.likes.findIndex((like) => like.user.toString() === userId)
-
-    if (existingLikeIndex > -1) {
-      // Unlike the reply
-      forumReply.likes.splice(existingLikeIndex, 1)
-    } else {
-      // Like the reply
-      forumReply.likes.push({ user: userId })
-    }
-
-    await forumReply.save()
-
-    res.status(200).json({
-      success: true,
-      message: existingLikeIndex > -1 ? "Reply unliked" : "Reply liked",
-      data: {
-        likesCount: forumReply.likes.length,
-        isLiked: existingLikeIndex === -1,
-      },
-    })
-  } catch (error) {
-    console.error("Toggle forum reply like error:", error)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to toggle like",
-    })
-  }
-}
-
-// Get user's forum posts
 const getUserForumPosts = async (req, res) => {
   try {
     const userId = req.userData.userId
@@ -588,11 +638,10 @@ module.exports = {
   getForumPostById,
   updateForumPost,
   deleteForumPost,
-  toggleForumPostLike,
   createForumReply,
   getForumReplies,
   updateForumReply,
   deleteForumReply,
-  toggleForumReplyLike,
   getUserForumPosts,
+  getReplyReplies,
 }

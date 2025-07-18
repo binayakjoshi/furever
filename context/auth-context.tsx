@@ -34,14 +34,17 @@ export const AuthProvider = ({
     }
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", {
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
         if (res.ok) {
           const json = await res.json();
           setUser(json.data);
         } else {
           setUser(null);
         }
-      } catch {
+      } catch (error) {
+        console.error("Auth fetch error:", error);
         setUser(null);
       } finally {
         setLoading(false);

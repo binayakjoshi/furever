@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
 import Image from "next/image";
 import Input from "@/components/custom-elements/input";
+import { TogglePill } from "../custom-elements/pill-toggle";
 import Button from "../custom-elements/button";
 import { useForm } from "@/lib/use-form";
 import { useHttp } from "@/lib/request-hook";
@@ -25,15 +26,18 @@ type SignupResponse = {
   message: string;
   data?: { userId: string; email: string; name: string; role: string };
 };
+
 const SignupForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordMatchError, setPasswordMatchError] = useState("");
+  const [isPetOwnerMode, setIsPetOwnerMode] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+  const [passwordMatchError, setPasswordMatchError] = useState<string>("");
   const router = useRouter();
   const { isLoading, error, sendRequest, clearError } =
     useHttp<SignupResponse>();
 
-  const [formState, inputHandler] = useForm(
+  const [formState, inputHandler, setFormData] = useForm(
     {
       name: {
         value: "",
@@ -55,33 +59,82 @@ const SignupForm = () => {
         isValid: false,
         touched: false,
       },
-      address: {
-        value: "",
-        isValid: false,
-        touched: false,
-      },
-      phone: {
-        value: "",
-        isValid: false,
-        touched: false,
-      },
-
       profileImage: {
         value: undefined,
-        isValid: false,
-        touched: false,
-      },
-      dob: {
-        value: "",
         isValid: false,
         touched: false,
       },
     },
     false
   );
+
+  const switchRoleHandler = () => {
+    const baseInputs = {
+      name: formState.inputs.name,
+      email: formState.inputs.email,
+      password: formState.inputs.password,
+      confirmPassword: formState.inputs.confirmPassword,
+      profileImage: formState.inputs.profileImage,
+    };
+
+    if (isPetOwnerMode) {
+      // Switching to Veterinarian mode
+      const vetInputs = {
+        ...baseInputs,
+        degree: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+        experience: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+        licenseNumber: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+        availability: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+      };
+
+      setFormData(vetInputs, false);
+    } else {
+      // Switching to Pet Owner mode
+      const petOwnerInputs = {
+        ...baseInputs,
+        address: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+        phone: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+        dob: {
+          value: "",
+          isValid: false,
+          touched: false,
+        },
+      };
+
+      setFormData(petOwnerInputs, false);
+    }
+
+    setIsPetOwnerMode((prevMode) => !prevMode);
+  };
+
   const handleGoogleSignup = () => {
     window.location.href = `/api/auth/google`;
   };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -96,24 +149,62 @@ const SignupForm = () => {
     if (!formState.isValid || isLoading) {
       return;
     }
-    try {
-      const requestData = new FormData();
-      requestData.append("name", formState.inputs.name.value as string);
-      requestData.append("email", formState.inputs.email.value as string);
-      requestData.append("password", formState.inputs.password.value as string);
-      requestData.append("address", formState.inputs.address.value as string);
-      requestData.append("phone", formState.inputs.phone.value as string);
-      requestData.append("dob", formState.inputs.dob.value as string);
-      requestData.append(
-        "profileImage",
-        formState.inputs.profileImage.value as File
-      );
+    if (isPetOwnerMode) {
+      try {
+        const requestData = new FormData();
+        requestData.append("name", formState.inputs.name.value as string);
+        requestData.append("email", formState.inputs.email.value as string);
+        requestData.append(
+          "password",
+          formState.inputs.password.value as string
+        );
+        requestData.append("address", formState.inputs.address.value as string);
+        requestData.append("phone", formState.inputs.phone.value as string);
+        requestData.append("dob", formState.inputs.dob.value as string);
+        requestData.append(
+          "profileImage",
+          formState.inputs.profileImage.value as File
+        );
+        requestData.append("role", "pet-owner");
 
-      const res = await sendRequest("/api/auth/signup", "POST", requestData);
-      if (res.success && res.data) {
-        router.push("/login");
-      }
-    } catch (_) {}
+        const res = await sendRequest("/api/auth/signup", "POST", requestData);
+        if (res.success && res.data) {
+          router.push("/login");
+        }
+      } catch {}
+    } else {
+      try {
+        const requestData = new FormData();
+        requestData.append("name", formState.inputs.name.value as string);
+        requestData.append("email", formState.inputs.email.value as string);
+        requestData.append(
+          "password",
+          formState.inputs.password.value as string
+        );
+        requestData.append(
+          "profileImage",
+          formState.inputs.profileImage.value as File
+        );
+        requestData.append("degree", formState.inputs.degree.value as string);
+        requestData.append(
+          "experience",
+          formState.inputs.experience.value as string
+        );
+        requestData.append(
+          "licenseNumber",
+          formState.inputs.licenseNumber.value as string
+        );
+        requestData.append(
+          "availability",
+          formState.inputs.availability.value as string
+        );
+        requestData.append("role", "vet");
+        const res = await sendRequest("/api/auth/signup", "POST", requestData);
+        if (res.success && res.data) {
+          router.push("/login");
+        }
+      } catch {}
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -145,143 +236,221 @@ const SignupForm = () => {
 
   return (
     <>
+      <div className={styles.toggleWrapper}>
+        <TogglePill onChange={switchRoleHandler} />
+      </div>
+
       {error && <ErrorModal clearError={clearError} error={error} />}
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
-        <div className={styles.fieldGroup}>
-          <Input
-            id="name"
-            element="input"
-            type="text"
-            label="Full Name"
-            placeholder="Enter your full name"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(2)]}
-            errorText="Name must be at least 2 characters long"
-            onInput={customInputHandler}
-            className={styles.inputField}
-          />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <Input
-            id="email"
-            element="input"
-            type="email"
-            label="Email address"
-            placeholder="you@domain.com"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
-            errorText="Please enter a valid email address"
-            onInput={customInputHandler}
-            className={styles.inputField}
-          />
-        </div>
-        <div className={styles.fieldGroup}>
-          <Input
-            id="phone"
-            element="input"
-            type="number"
-            label="Phone Number"
-            placeholder="Your Phone Number"
-            validators={[
-              VALIDATOR_REQUIRE(),
-              VALIDATOR_NUMBER(),
-              VALIDATOR_MINLENGTH(10),
-            ]}
-            errorText="Please enter a valid phone number"
-            onInput={customInputHandler}
-            className={styles.inputField}
-          />
-        </div>
-        <div className={styles.fieldGroup}>
-          <Input
-            id="dob"
-            element="input"
-            type="date"
-            label="Date of Birth"
-            placeholder="date of birth"
-            validators={[VALIDATOR_REQUIRE()]}
-            errorText="Please enter a valid date"
-            onInput={customInputHandler}
-            className={styles.inputField}
-          />
-        </div>
-        <div className={styles.fieldGroup}>
-          <Input
-            id="address"
-            element="input"
-            type="text"
-            label="Address"
-            placeholder="Your Address"
-            validators={[VALIDATOR_REQUIRE()]}
-            errorText="Address is required"
-            onInput={customInputHandler}
-            className={styles.inputField}
-          />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <div className={styles.passwordContainer}>
+        <div className={styles.inputFieldsGrid}>
+          <div className={styles.fieldGroup}>
             <Input
-              id="password"
+              id="name"
               element="input"
-              type={showPassword ? "text" : "password"}
-              label="Password"
-              placeholder="Enter your password"
-              validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
-              errorText="Password must be at least 8 characters long"
+              type="text"
+              label="Full Name"
+              placeholder="Enter your full name"
+              validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(2)]}
+              errorText="Name must be at least 2 characters long"
               onInput={customInputHandler}
-              className={styles.passwordField}
+              className={styles.inputField}
             />
-            <Button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className={styles.passwordToggle}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-            </Button>
           </div>
-        </div>
 
-        <div className={styles.fieldGroup}>
-          <div className={styles.passwordContainer}>
+          <div className={styles.fieldGroup}>
             <Input
-              id="confirmPassword"
+              id="email"
               element="input"
-              type={showConfirmPassword ? "text" : "password"}
-              label="Confirm Password"
-              placeholder="Confirm your password"
-              validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
-              errorText="Please confirm your password"
+              type="email"
+              label="Email address"
+              placeholder="you@domain.com"
+              validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+              errorText="Please enter a valid email address"
               onInput={customInputHandler}
-              className={styles.passwordField}
+              className={styles.inputField}
             />
-            <Button
-              type="button"
-              onClick={toggleConfirmPasswordVisibility}
-              className={styles.passwordToggle}
-              aria-label={
-                showConfirmPassword ? "Hide password" : "Show password"
-              }
-            >
-              {showConfirmPassword ? (
-                <FaEyeSlash size={20} />
-              ) : (
-                <FaEye size={20} />
-              )}
-            </Button>
           </div>
-          {showPasswordMatchError && (
-            <p className={styles.errorText}>
-              {passwordMatchError || "Passwords do not match"}
-            </p>
+
+          <div className={styles.fieldGroup}>
+            <div className={styles.passwordContainer}>
+              <Input
+                id="password"
+                element="input"
+                type={showPassword ? "text" : "password"}
+                label="Password"
+                placeholder="Enter your password"
+                validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+                errorText="Password must be at least 8 characters long"
+                onInput={customInputHandler}
+                className={styles.inputField}
+              />
+              <Button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className={styles.passwordToggle}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </Button>
+            </div>
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <div className={styles.passwordContainer}>
+              <Input
+                id="confirmPassword"
+                element="input"
+                type={showConfirmPassword ? "text" : "password"}
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
+                errorText="Please confirm your password"
+                onInput={customInputHandler}
+                className={styles.inputField}
+              />
+              <Button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className={styles.passwordToggle}
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+              >
+                {showConfirmPassword ? (
+                  <FaEyeSlash size={20} />
+                ) : (
+                  <FaEye size={20} />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {isPetOwnerMode ? (
+            <>
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="phone"
+                  element="input"
+                  type="number"
+                  label="Phone Number"
+                  placeholder="Your Phone Number"
+                  validators={[
+                    VALIDATOR_REQUIRE(),
+                    VALIDATOR_NUMBER(),
+                    VALIDATOR_MINLENGTH(10),
+                  ]}
+                  errorText="Please enter a valid phone number"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="dob"
+                  element="input"
+                  type="date"
+                  label="Date of Birth"
+                  placeholder="date of birth"
+                  validators={[VALIDATOR_REQUIRE()]}
+                  errorText="Please enter a valid date"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="degree"
+                  element="input"
+                  type="text"
+                  label="Degree"
+                  placeholder="Your Qualification"
+                  validators={[VALIDATOR_REQUIRE()]}
+                  errorText="Degree is required"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="licenseNumber"
+                  element="input"
+                  type="text"
+                  label="License Number"
+                  placeholder="Your License Number"
+                  validators={[VALIDATOR_REQUIRE(), VALIDATOR_NUMBER()]}
+                  errorText="License Number is required and must be a number"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="experience"
+                  element="input"
+                  type="text"
+                  label="Years of Experience"
+                  placeholder="experience in years"
+                  validators={[VALIDATOR_REQUIRE(), VALIDATOR_NUMBER()]}
+                  errorText="Experience is required and must be a number"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <Input
+                  id="availability"
+                  element="input"
+                  type="text"
+                  label="Availability"
+                  placeholder="Days and Timing, Eg: Mon-Fri, 10am-6pm"
+                  validators={[VALIDATOR_REQUIRE()]}
+                  errorText="Availability is required and must be a number"
+                  onInput={customInputHandler}
+                  className={styles.inputField}
+                />
+              </div>
+            </>
           )}
         </div>
+
+        {/* Address field for pet owners spans full width */}
+        {isPetOwnerMode && (
+          <div className={styles.fieldGroup}>
+            <Input
+              id="address"
+              element="input"
+              type="text"
+              label="Address"
+              placeholder="Your Address"
+              validators={[VALIDATOR_REQUIRE()]}
+              errorText="Address is required"
+              onInput={customInputHandler}
+              className={styles.inputField}
+            />
+          </div>
+        )}
+
+        {/* Password match error outside the grid */}
+        {showPasswordMatchError && (
+          <p className={styles.errorText}>
+            {passwordMatchError || "Passwords do not match"}
+          </p>
+        )}
+
         <ImageUpload
           id="profileImage"
           center
           errorText="Please provide an image."
           onInput={inputHandler}
         />
+
         <Button
           type="submit"
           className={styles.submitButton}
@@ -304,16 +473,19 @@ const SignupForm = () => {
             "Create account"
           )}
         </Button>
-        <Button className={styles.googleBtn} onClick={handleGoogleSignup}>
-          <Image
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="google"
-            className={styles.googleIcon}
-            width={18}
-            height={18}
-          />
-          Continue with Google
-        </Button>
+
+        {isPetOwnerMode && (
+          <Button className={styles.googleBtn} onClick={handleGoogleSignup}>
+            <Image
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="google"
+              className={styles.googleIcon}
+              width={18}
+              height={18}
+            />
+            Continue with Google
+          </Button>
+        )}
       </form>
     </>
   );

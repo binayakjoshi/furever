@@ -28,7 +28,7 @@ const PetDeletePage = () => {
     try {
       const res = await sendRequest(`/api/pets/${petSlug}/delete`, "DELETE");
       if (res.success && res.data) {
-        router.push(`/user/${user?.userId}/pets`);
+        router.push('/');
       }
     } catch (_) {}
   };

@@ -13,6 +13,8 @@ const adoptionRoutes = require("./routes/adoptionRoutes")
 const vetRoutes = require("./routes/vetRoutes")
 const authRoutes = require("./routes/authRoutes")
 const forumRoutes = require("./routes/forumRoutes")
+const chatRoutes = require("./routes/chatRoutes")
+const appointmentRoutes = require("./routes/appointmentRoutes")
 const HttpError = require("./models/http-error")
 
 const app = express()
@@ -97,6 +99,7 @@ app.get("/", (req, res) => {
         searchByLocation: "GET /api/vets/search/location",
         findNearby: "GET /api/vets/nearby?latitude=LAT&longitude=LNG&radius=KM&limit=NUMBER",
         updateLocation: "PUT /api/vets/location",
+        toggleAppointmentAvailability: "PATCH /api/vets/appointment-availability",
       },
       forum: {
         base: "/api/forum",
@@ -105,22 +108,35 @@ app.get("/", (req, res) => {
         getPost: "GET /api/forum/:id",
         updatePost: "PUT /api/forum/:id",
         deletePost: "DELETE /api/forum/:id",
-        likePost: "POST /api/forum/:id/like",
         getReplies: "GET /api/forum/:id/replies",
+        getReplyReplies: "GET /api/forum/:id/replies/:replyId/replies",
         createReply: "POST /api/forum/:id/replies",
         updateReply: "PUT /api/forum/:id/replies/:replyId",
         deleteReply: "DELETE /api/forum/:id/replies/:replyId",
-        likeReply: "POST /api/forum/:id/replies/:replyId/like",
         myPosts: "GET /api/forum/user/my-posts",
+      },
+      appointments: {
+        base: "/api/appointments",
+        getAll: "GET /api/appointments",
+        create: "POST /api/appointments",
+        getById: "GET /api/appointments/:id",
+        update: "PUT /api/appointments/:id",
+        delete: "DELETE /api/appointments/:id",
+        cancel: "PATCH /api/appointments/:id/cancel",
+        myAppointments: "GET /api/appointments/my-appointments",
+        userAppointments: "GET /api/appointments/user/:userId",
+        vetAppointments: "GET /api/appointments/vet/:veterinarianId",
+        myRequests: "GET /api/appointments/vet/my-requests",
       },
     },
     features: {
       authentication: " Role-based login (pet-owner/vet)",
       locationServices: "Enhanced nearby vet search with distance sorting",
       cascadeDelete: " Complete user data cleanup on deletion",
-      communityForum: "Posts, replies, likes, and image support",
+      communityForum: "Posts, replies, and nested conversations",
       adoptionSystem: "Pet adoption with interest tracking",
       veterinarianProfiles: "Professional vet profiles with verification",
+      appointmentSystem: "Vet appointment booking and management",
     },
     locationServices: {
       status: "Available",
@@ -145,7 +161,9 @@ app.use("/api/users", userRoutes)
 app.use("/api/adoptions", adoptionRoutes)
 app.use("/api/vets", vetRoutes)
 app.use("/api/forum", forumRoutes)
+app.use("/api/appointments", appointmentRoutes)
 app.use("/auth", authRoutes)
+app.use("/api/chat", chatRoutes)
 
 // 404 handler
 app.use((req, res, next) => {

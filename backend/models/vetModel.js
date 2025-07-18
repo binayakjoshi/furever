@@ -15,26 +15,34 @@ const veterinarianSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"],
   },
+  password: {
+    type: String,
+    required: function() {
+      return !this.googleId; // Password required only if not Google OAuth user
+    },
+    minlength: [6, "Password must be at least 6 characters long"],
+  },
+  role: {
+    type: String,
+    default: "vet",
+    enum: ["vet"],
+  },
+  userId: {
+    type: String,
+    unique: true,
+  },
+
   degree: {
     type: String,
     required: [true, "Degree is required"],
     trim: true,
     maxlength: [200, "Degree cannot exceed 200 characters"],
   },
-  yearsOfExperience: {
+  experience: {
     type: Number,
-    required: [true, "Years of experience is required"],
-    min: [0, "Years of experience cannot be negative"],
-    max: [60, "Years of experience cannot exceed 60 years"],
-  },
-  location: {
-    type: String,
-    required: [true, "Location is required"],
-    trim: true,
-  },
-  contactInfo:{
-    type:String,
-    required: [true, "Contact information for office is required"],
+    default: 0,
+    min: [0, "Experience cannot be negative"],
+    max: [60, "Experience cannot exceed 60 years"],
   },
   licenseNumber: {
     type: String,
@@ -47,17 +55,25 @@ const veterinarianSchema = new mongoose.Schema({
     url: String,
     publicId: String,
   },
-  availability: {
-    days: [
-      {
-        type: String,
-        enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-      },
-    ],
-    hours: {
-      start: String, // example: "09:00"
-      end: String,
-    },
+  // availability: {
+  //   days: [
+  //     {
+  //       type: String,
+  //       enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+  //     },
+  //   ],
+  //   hours: {
+  //     start: String, // example: "09:00"
+  //     end: String,
+  //   },
+  // },
+  availability:{
+    type:String,
+    required:true
+  },
+  isAvailableForAppointments: {
+    type: Boolean,
+    default: true,
   },
   createdAt: {
     type: Date,
@@ -72,11 +88,13 @@ const veterinarianSchema = new mongoose.Schema({
 //query helpers
 veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
-veterinarianSchema.index({ status: 1, isVerified: 1 })
-// Add geospatial index
-veterinarianSchema.index({ location: "2dsphere" })
 
 veterinarianSchema.pre("save", function (next) {
+  // Set userId to be the same as _id if not already set
+  if (!this.userId) {
+    this.userId = this._id.toString()
+  }
+  
   this.updatedAt = Date.now()
   next()
 })

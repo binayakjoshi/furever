@@ -33,9 +33,7 @@ exports.createPet = async (req, res, next) => {
     console.log("req.body:", req.body);
     const petData = req.body;
 
-    // --- Parse diseases as array of strings ---
-    // Frontend should send multiple fields with key 'diseases':
-    // formData.append('diseases', 'd1'); formData.append('diseases', 'd2');
+   
     let diseases = [];
     if (petData.diseases) {
       if (Array.isArray(petData.diseases)) {
@@ -50,11 +48,7 @@ exports.createPet = async (req, res, next) => {
     }
     console.log("Parsed diseases:", diseases);
 
-    // --- Parse vaccinations as array of objects ---
-    // Frontend should send one field:
-    // formData.append('vaccinations', JSON.stringify([
-    //   { name: "...", vaccDate: "YYYY-MM-DD", nextVaccDate: "YYYY-MM-DD" }, ...
-    // ]));
+
     let vaccinations = [];
     if (petData.vaccinations) {
       if (typeof petData.vaccinations === 'string') {
@@ -83,7 +77,7 @@ exports.createPet = async (req, res, next) => {
           console.log("Failed to JSON.parse vaccinations:", e);
         }
       } else if (Array.isArray(petData.vaccinations)) {
-        // Unlikely unless frontend sends multiple fields; handle similarly
+       
         for (const v of petData.vaccinations) {
           if (v && v.name && v.vaccDate && v.nextVaccDate) {
             const vaccDateObj = new Date(v.vaccDate);
@@ -200,7 +194,7 @@ exports.getPetById = async (req, res) => {
 
 exports.updatePet = async (req, res) => {
   try {
-    // Ensure user is authenticated and userData is available
+    
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -210,24 +204,8 @@ exports.updatePet = async (req, res) => {
     
     const petData = req.body
     const existingPet = await Pet.findById(req.params.id)
-    const role= req.userData.role
-
-    const userId = req.userData.userId
-
-    if( existingPet.creatorId != userId){
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to update this pet",
-      })
-    }
-
-    if( role !== "pet-owner") {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to update this pet",
-      })
-    }
-
+    
+    // Check if pet exists first
     if (!existingPet) {
       return res.status(404).json({
         success: false,
@@ -235,61 +213,138 @@ exports.updatePet = async (req, res) => {
       })
     }
 
+    const role = req.userData.role
+    const userId = req.userData.userId
+
+    // Check permissions
+    if (existingPet.user.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
+
+    if (role !== "pet-owner") {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to update this pet",
+      })
+    }
+
+    // Handle diseases
     let diseases = []
+    if (petData.diseases) {
+      if (Array.isArray(petData.diseases)) {
+        diseases = petData.diseases.filter((d) => d && d.trim())
+      } else if (typeof petData.diseases === 'string') {
+        // Handle single disease or comma-separated diseases
+        if (petData.diseases.trim()) {
+          diseases = [petData.diseases.trim()]
+        }
+      } else {
+        // Handle form data format
+        Object.keys(petData).forEach((key) => {
+          if (key.startsWith("diseases[") && key.includes("][name]")) {
+            const indexMatch = key.match(/diseases\[(\d+)\]/)
+            if (indexMatch) {
+              const index = Number.parseInt(indexMatch[1])
+              if (!diseases[index]) diseases[index] = {}
+              diseases[index].name = petData[key]
+            }
+          }
+        })
+        diseases = diseases.filter((d) => d && d.name).map(d => d.name)
+      }
+    }
+
+  
     let vaccinations = []
-
-    if (Array.isArray(petData.diseases)) {
-      diseases = petData.diseases.filter((d) => d && d.name)
-    } else {
-      Object.keys(petData).forEach((key) => {
-        if (key.startsWith("diseases[") && key.includes("][name]")) {
-          const indexMatch = key.match(/diseases\[(\d+)\]/)
-          if (indexMatch) {
-            const index = Number.parseInt(indexMatch[1])
-            if (!diseases[index]) diseases[index] = {}
-            diseases[index].name = petData[key]
+    if (petData.vaccinations) {
+      if (typeof petData.vaccinations === 'string') {
+        try {
+          const parsed = JSON.parse(petData.vaccinations)
+          if (Array.isArray(parsed)) {
+            for (const v of parsed) {
+              if (v && v.name && v.vaccDate && v.nextVaccDate) {
+                const vaccDateObj = new Date(v.vaccDate)
+                const nextVaccDateObj = new Date(v.nextVaccDate)
+                if (!isNaN(vaccDateObj) && !isNaN(nextVaccDateObj)) {
+                  vaccinations.push({
+                    name: v.name.trim(),
+                    vaccDate: vaccDateObj,
+                    nextVaccDate: nextVaccDateObj,
+                  })
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.log("Failed to parse vaccinations JSON:", e)
+        }
+      } else if (Array.isArray(petData.vaccinations)) {
+        for (const v of petData.vaccinations) {
+          if (v && v.name && v.vaccDate && v.nextVaccDate) {
+            const vaccDateObj = new Date(v.vaccDate)
+            const nextVaccDateObj = new Date(v.nextVaccDate)
+            if (!isNaN(vaccDateObj) && !isNaN(nextVaccDateObj)) {
+              vaccinations.push({
+                name: v.name.trim(),
+                vaccDate: vaccDateObj,
+                nextVaccDate: nextVaccDateObj,
+              })
+            }
           }
         }
-      })
-      diseases = diseases.filter((d) => d && d.name)
-    }
-
-    if (Array.isArray(petData.vaccinations)) {
-      vaccinations = petData.vaccinations.filter((v) => v && v.name)
-    } else {
-      Object.keys(petData).forEach((key) => {
-        if (key.startsWith("vaccinations[")) {
-          const match = key.match(/vaccinations\[(\d+)\]\[(\w+)\]/)
-          if (match) {
-            const index = Number.parseInt(match[1])
-            const field = match[2]
-            if (!vaccinations[index]) vaccinations[index] = {}
-            vaccinations[index][field] = petData[key]
+      } else {
+        
+        Object.keys(petData).forEach((key) => {
+          if (key.startsWith("vaccinations[")) {
+            const match = key.match(/vaccinations\[(\d+)\]\[(\w+)\]/)
+            if (match) {
+              const index = Number.parseInt(match[1])
+              const field = match[2]
+              if (!vaccinations[index]) vaccinations[index] = {}
+              vaccinations[index][field] = petData[key]
+            }
           }
-        }
-      })
-      vaccinations = vaccinations.filter((v) => v && v.name)
+        })
+        vaccinations = vaccinations.filter((v) => v && v.name)
+      }
     }
 
-    //added petType to updateData
+    
+    if (petData.dob) {
+      const dobDate = new Date(petData.dob)
+      if (isNaN(dobDate) || dobDate > new Date()) {
+        return res.status(400).json({
+          success: false,
+          message: "Pet date of birth is invalid or in the future.",
+        })
+      }
+    }
 
+    // Build update data
     const updateData = {
       name: petData.name || existingPet.name,
       description: petData.description || existingPet.description,
-      petType: petData.petType || existingPet.petType || "Dog", // Default to Dog if not provided
+      petType: petData.petType || existingPet.petType || "Dog",
       breed: petData.breed || existingPet.breed,
-      dob: petData.dob || existingPet.dob,
-      user:req.userData.userId ,
+      dob: petData.dob ? new Date(petData.dob) : existingPet.dob,
+      user: req.userData.userId,
     }
 
-    if (diseases.length > 0) {
+  
+    if (petData.diseases !== undefined) {
       updateData.diseases = diseases
     }
-    if (vaccinations.length > 0) {
+
+    if (petData.vaccinations !== undefined) {
       updateData.vaccinations = vaccinations
     }
 
+    // Handle image upload
     if (req.file) {
+      // Delete old image if it exists
       if (existingPet.image && existingPet.image.publicId) {
         try {
           await deleteFromCloudinary(existingPet.image.publicId)
@@ -304,20 +359,19 @@ exports.updatePet = async (req, res) => {
       }
     }
 
-    if (updateData.dob) {
-      const dobDate = new Date(updateData.dob)
-      if (dobDate > new Date()) {
-        return res.status(400).json({
-          success: false,
-          message: "Pet date of birth cannot be in the future.",
-        })
-      }
-    }
+    console.log("Update data:", JSON.stringify(updateData, null, 2))
 
     const updatedPet = await Pet.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     }).populate("user", "name email")
+
+    if (!updatedPet) {
+      return res.status(404).json({
+        success: false,
+        message: "Pet not found after update",
+      })
+    }
 
     res.status(200).json({
       success: true,
@@ -325,9 +379,29 @@ exports.updatePet = async (req, res) => {
       data: updatedPet,
     })
   } catch (error) {
-    res.status(400).json({
+    console.error("Update pet error:", error)
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message)
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationErrors,
+      })
+    }
+    
+    // Handle cast errors (invalid ObjectId)
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pet ID format",
+      })
+    }
+    
+    res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Internal server error",
     })
   }
 }

@@ -1,0 +1,43 @@
+.vetList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.emptyList {
+  text-align: center;
+  padding: 24px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.emptyList h2 {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+}
+
+.emptyList :global(a),
+.emptyList button {
+  display: inline-block;
+  background-color: #664982;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.emptyList button:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}

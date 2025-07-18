@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (
-  request: NextRequest,
-  { params }: { params: { adoptSlug: string } }
-) => {
+type ParamType = {
+  params: Promise<{ adoptSlug: string }>;
+};
+export const GET = async (request: NextRequest, { params }: ParamType) => {
   try {
     const { adoptSlug } = await params;
 
@@ -24,10 +24,7 @@ export const GET = async (
   }
 };
 
-export const POST = async (
-  request: NextRequest,
-  { params }: { params: { adoptSlug: string } }
-) => {
+export const POST = async (request: NextRequest, { params }: ParamType) => {
   try {
     const { adoptSlug } = await params;
 

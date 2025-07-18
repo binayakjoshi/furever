@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const DELETE = async (
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) => {
+type ParamType = {
+  params: Promise<{ slug: string }>;
+};
+export const DELETE = async (request: NextRequest, { params }: ParamType) => {
   try {
     const { slug } = await params;
     const cookieHeader = request.headers.get("cookie") || "";
@@ -30,12 +30,9 @@ export const DELETE = async (
     );
   }
 };
-export const GET = async (
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) => {
+export const GET = async (request: NextRequest, { params }: ParamType) => {
   try {
-    const { slug } = params; // ← no `await`
+    const { slug } = await params;
     const cookieHeader = request.headers.get("cookie") || "";
     const backendRes = await fetch(
       `${process.env.BACKEND_URL}/api/users/${slug}`,
