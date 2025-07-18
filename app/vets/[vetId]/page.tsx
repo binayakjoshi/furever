@@ -3,60 +3,46 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import {
   FaEnvelope,
-  FaPhone,
-  FaHome,
-  FaUser,
-  FaBirthdayCake,
+  FaUniversity,
+  FaClock,
+  FaBriefcase,
+  FaIdBadge,
   FaCalendarAlt,
 } from "react-icons/fa";
 import { Vet } from "@/lib/types";
 import styles from "./page.module.css";
 import UserProfileAction from "@/components/user/user-profile-actions";
+import VetProfileAction from "@/components/vets/vet-profile-action";
 
 type VetProfilePageProps = {
   params: Promise<{ vetId: string }>;
 };
+
 const VetProfilePage = async ({ params }: VetProfilePageProps) => {
   const { vetId } = await params;
   let vet: Vet;
+
   try {
     const cookieHeader = (await cookies()).toString();
-    const res = await fetch(`${process.env.NEXT_ROUTE_URL}/api/vet/${vetId}`, {
+    const res = await fetch(`${process.env.NEXT_ROUTE_URL}/api/vets/${vetId}`, {
       headers: { Cookie: cookieHeader },
       cache: "no-store",
     });
     if (!res.ok) {
       throw new Error(
-        "Could not get the vet details for the moment. Please try again"
+        "Could not get the vet details at the moment. Please try again."
       );
     }
+
     const json = await res.json();
-    vet = json.data;
+    vet = json;
   } catch (error) {
     console.error(error);
     throw new Error(
-      "Couldn't fetch the Vet details. Please check and try again"
+      "Couldn't fetch the Vet details. Please check and try again."
     );
   }
-
   if (!vet) notFound();
-
-  const calculateAccountAge = (createdAt: string) => {
-    const created = new Date(createdAt);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - created.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 30) {
-      return `${diffDays} days`;
-    } else if (diffDays < 365) {
-      const months = Math.floor(diffDays / 30);
-      return `${months} ${months === 1 ? "month" : "months"}`;
-    } else {
-      const years = Math.floor(diffDays / 365);
-      return `${years} ${years === 1 ? "year" : "years"}`;
-    }
-  };
 
   return (
     <div className={styles.container}>
@@ -64,73 +50,77 @@ const VetProfilePage = async ({ params }: VetProfilePageProps) => {
         <div className={styles.header}>
           <div className={styles.imageContainer}>
             <Image
-              src={user.profileImage.url}
-              alt={`${user.name}'s profile`}
+              src={vet.profileImage.url}
+              alt={`${vet.name}'s profile`}
               className={styles.profileImage}
               width={200}
               height={200}
             />
           </div>
           <div className={styles.headerInfo}>
-            <h1 className={styles.name}>{user.name}</h1>
-            <span className={styles.role}>{user.role}</span>
+            <h1 className={styles.name}>{vet.name}</h1>
+            <span className={styles.role}>{vet.role}</span>
           </div>
         </div>
 
         <div className={styles.details}>
           <div className={styles.detailsGrid}>
+            {/* Email */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
                 <FaEnvelope size={24} />
               </div>
               <div className={styles.detailContent}>
                 <span className={styles.label}>Email</span>
-                <span className={styles.value}>{user.email}</span>
+                <span className={styles.value}>{vet.email}</span>
               </div>
             </div>
 
+            {/* License Number */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
-                <FaPhone size={24} />
+                <FaIdBadge size={24} />
               </div>
               <div className={styles.detailContent}>
-                <span className={styles.label}>Phone</span>
-                <span className={styles.value}>{user.phone}</span>
+                <span className={styles.label}>License No.</span>
+                <span className={styles.value}>{vet.licenseNumber}</span>
               </div>
             </div>
 
+            {/* Degree */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
-                <FaHome size={24} />
+                <FaUniversity size={24} />
               </div>
               <div className={styles.detailContent}>
-                <span className={styles.label}>Address</span>
-                <span className={styles.value}>{user.address}</span>
+                <span className={styles.label}>Degree</span>
+                <span className={styles.value}>{vet.degree}</span>
               </div>
             </div>
 
+            {/* Availability */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
-                <FaUser size={24} />
+                <FaClock size={24} />
               </div>
               <div className={styles.detailContent}>
-                <span className={styles.label}>User ID</span>
-                <span className={styles.value}>{user.userId}</span>
+                <span className={styles.label}>Availability</span>
+                <span className={styles.value}>{vet.availability}</span>
               </div>
             </div>
 
+            {/* Experience */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
-                <FaBirthdayCake size={24} />
+                <FaBriefcase size={24} />
               </div>
               <div className={styles.detailContent}>
-                <span className={styles.label}>Age</span>
-                <span className={styles.value}>
-                  {calculateAccountAge(user.dob)}
-                </span>
+                <span className={styles.label}>Experience</span>
+                <span className={styles.value}>{vet.experience} Years</span>
               </div>
             </div>
 
+            {/* Member Since */}
             <div className={styles.detailCard}>
               <div className={styles.detailIcon}>
                 <FaCalendarAlt size={24} />
@@ -138,7 +128,7 @@ const VetProfilePage = async ({ params }: VetProfilePageProps) => {
               <div className={styles.detailContent}>
                 <span className={styles.label}>Member Since</span>
                 <span className={styles.value}>
-                  {new Date(user.createdAt).toLocaleDateString("en-US", {
+                  {new Date(vet.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -148,7 +138,7 @@ const VetProfilePage = async ({ params }: VetProfilePageProps) => {
             </div>
           </div>
         </div>
-        <UserProfileAction userId={slug} />
+        <VetProfileAction userId={vet.userId} />
       </div>
     </div>
   );
