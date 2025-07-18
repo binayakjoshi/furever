@@ -55,7 +55,7 @@ router.get(
 
       
       const payload = {
-        userId: req.user._id,
+        userId: req.user.userId || req.user._id,
         email: req.user.email,
         role: req.user.role || "pet-owner", //default pet-owner cause user ko lagi matra ho google login
       }
@@ -65,11 +65,12 @@ router.get(
       res.redirect(
         `${process.env.FRONTEND_URL}/auth/success?user=${encodeURIComponent(
           JSON.stringify({
-            userId: req.user._id,
+            userId: req.user.userId || req.user._id,
             name: req.user.name,
             email: req.user.email,
             role: req.user.role || "pet-owner",
             profileImage: req.user.profileImage,
+            
             isGoogleUser: true,
           }),
         )}`,
