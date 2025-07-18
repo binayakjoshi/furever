@@ -27,6 +27,10 @@ const veterinarianSchema = new mongoose.Schema({
     default: "vet",
     enum: ["vet"],
   },
+  userId: {
+    type: String,
+    unique: true,
+  },
 
   degree: {
     type: String,
@@ -86,6 +90,11 @@ veterinarianSchema.index({ email: 1 })
 veterinarianSchema.index({ licenseNumber: 1 })
 
 veterinarianSchema.pre("save", function (next) {
+  // Set userId to be the same as _id if not already set
+  if (!this.userId) {
+    this.userId = this._id.toString()
+  }
+  
   this.updatedAt = Date.now()
   next()
 })
