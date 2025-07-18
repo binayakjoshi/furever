@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
     default: "pet-owner",
     required: true,
   },
+  userId: {
+    type: String,
+    unique: true,
+  },
   pets: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -66,12 +70,14 @@ const userSchema = new mongoose.Schema({
 
 
 // Pre-save middleware to handle OAuth users and location
-userSchema.pre("save", function (next) {
-  console.log("Pre-save middleware - User role:", this.role)
+userSchema.pre("save", async function (next) {
+ 
+  if (!this.userId) {
+    this.userId = this._id.toString()
+  }
 
-  // If this is a Google OAuth user and no password is set, generate a random one
+  // Generate a random password for Google OAuth users if they don't have one
   if (this.googleId && !this.password) {
-    const bcrypt = require("bcryptjs")
     this.password = bcrypt.hashSync(Math.random().toString(36) + Date.now().toString(), 12)
   }
 
