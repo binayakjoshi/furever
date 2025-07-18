@@ -74,3 +74,19 @@ export type ForumReply = {
   post: string;
   createdAt: string;
 };
+
+export type Vet = {
+  userId: string;
+  createdAt: string;
+  profileImage: {
+    url: string;
+    publicId: string;
+  };
+  degree: string;
+  availability: string;
+  role: string;
+  experience: string;
+  name: string;
+  email: string;
+  licenseNumber: string;
+};
