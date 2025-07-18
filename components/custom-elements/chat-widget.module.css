@@ -286,17 +286,3 @@
   transform: scale(0.95);
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .chatContainer {
-    width: calc(100vw - 40px);
-    right: 20px;
-    left: 20px;
-    height: 70vh;
-    bottom: 90px;
-  }
-  
-  .messageContent {
-    max-width: calc(100% - 60px);
-  }
-}
