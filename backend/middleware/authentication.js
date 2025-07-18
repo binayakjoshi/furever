@@ -70,11 +70,7 @@ const signup = async (req, res, next) => {
         })
       }
 
-      // Process availability data to ensure days are lowercase
-      // const processedAvailability = otherData.availability ? {
-      //   days: otherData.availability.days?.map(day => day.toLowerCase()) || [],
-      //   hours: otherData.availability.hours || { start: "", end: "" }
-      // } : { days: [], hours: { start: "", end: "" } }
+
 
       newUser = new Veterinarian({
         name,
@@ -113,6 +109,7 @@ const signup = async (req, res, next) => {
       success: true,
       message: "Account created successfully! Please login to continue.",
       data: {
+        userId: newUser.userId,
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
@@ -298,7 +295,7 @@ const getCurrentUser = async (req, res, next) => {
         profileImage: user.profileImage,
         createdAt: user.createdAt,
         isGoogleUser: !!user.googleId,
-        // Include fields that exist in both models
+        
         ...(user.dob && { dob: user.dob }),
         ...(user.phone && { phone: user.phone }),
         ...(user.address && { address: user.address }),
