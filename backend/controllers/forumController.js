@@ -437,7 +437,7 @@ const getReplyReplies = async (req, res) => {
       })
     }
 
-    // Check if the parent reply exists
+ 
     const parentReply = await ForumReply.findById(replyId)
     if (!parentReply) {
       return res.status(404).json({
@@ -448,7 +448,7 @@ const getReplyReplies = async (req, res) => {
 
     const skip = (Number.parseInt(page) - 1) * Number.parseInt(limit)
 
-    // Find all replies that have this reply as their parent
+  
     const nestedReplies = await ForumReply.find({ 
       parentReply: replyId, 
       status: "active" 
