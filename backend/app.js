@@ -13,6 +13,7 @@ const adoptionRoutes = require("./routes/adoptionRoutes")
 const vetRoutes = require("./routes/vetRoutes")
 const authRoutes = require("./routes/authRoutes")
 const forumRoutes = require("./routes/forumRoutes")
+const chatRoutes = require("./routes/chatRoutes")
 const appointmentRoutes = require("./routes/appointmentRoutes")
 const HttpError = require("./models/http-error")
 
@@ -162,6 +163,7 @@ app.use("/api/vets", vetRoutes)
 app.use("/api/forum", forumRoutes)
 app.use("/api/appointments", appointmentRoutes)
 app.use("/auth", authRoutes)
+app.use("/api/chat", chatRoutes)
 
 // 404 handler
 app.use((req, res, next) => {
