@@ -282,7 +282,7 @@ const SignupForm = () => {
                 validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
                 errorText="Password must be at least 8 characters long"
                 onInput={customInputHandler}
-                className={styles.passwordField}
+                className={styles.inputField}
               />
               <Button
                 type="button"
@@ -306,7 +306,7 @@ const SignupForm = () => {
                 validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(8)]}
                 errorText="Please confirm your password"
                 onInput={customInputHandler}
-                className={styles.passwordField}
+                className={styles.inputField}
               />
               <Button
                 type="button"
@@ -409,7 +409,7 @@ const SignupForm = () => {
                   element="input"
                   type="text"
                   label="Availability"
-                  placeholder="days and timing"
+                  placeholder="Days and Timing, Eg: Mon-Fri, 10am-6pm"
                   validators={[VALIDATOR_REQUIRE()]}
                   errorText="Availability is required and must be a number"
                   onInput={customInputHandler}

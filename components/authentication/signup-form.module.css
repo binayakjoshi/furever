@@ -208,3 +208,37 @@
   justify-content: center;
   margin-bottom: 1rem;
 }
+.inputField {
+  width: 100%;
+  position: relative;
+}
+
+.inputField input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.inputField input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.inputField input:hover:not(:focus) {
+  border-color: var(--text-muted);
+}
+
+.inputField input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.inputField input.error {
+  border-color: var(--input-border-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
