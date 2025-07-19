@@ -334,11 +334,7 @@ const SignupForm = () => {
                   type="number"
                   label="Phone Number"
                   placeholder="Your Phone Number"
-                  validators={[
-                    VALIDATOR_REQUIRE(),
-                    VALIDATOR_NUMBER(),
-                    VALIDATOR_MINLENGTH(10),
-                  ]}
+                  validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(10)]}
                   errorText="Please enter a valid phone number"
                   onInput={customInputHandler}
                   className={styles.inputField}
@@ -382,7 +378,7 @@ const SignupForm = () => {
                   type="text"
                   label="License Number"
                   placeholder="Your License Number"
-                  validators={[VALIDATOR_REQUIRE(), VALIDATOR_NUMBER()]}
+                  validators={[VALIDATOR_REQUIRE()]}
                   errorText="License Number is required and must be a number"
                   onInput={customInputHandler}
                   className={styles.inputField}
