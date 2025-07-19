@@ -75,6 +75,24 @@ const veterinarianSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  interestedUsers: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      dateExpressed: {
+        type: Date,
+        default: Date.now,
+      },
+      status: {
+        type: String,
+        enum: ["appointment_requested", "appointment_confirmed", "appointment_completed"],
+        default: "appointment_requested",
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
