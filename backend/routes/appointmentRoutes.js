@@ -25,6 +25,11 @@ router.get("/vet/:veterinarianId", appointmentController.getVeterinarianAppointm
 router.get("/vet/my-requests", appointmentController.getVeterinarianAppointments)
 
 
+
+router.get("/interested-users/:veterinarianId", appointmentController.getInterestedUsers)
+router.get("/interested-users", appointmentController.getInterestedUsers)
+
+
 router.post("/", createAppointmentValidation, appointmentController.createAppointment)
 
 router.get("/:id", appointmentController.getAppointmentById)
