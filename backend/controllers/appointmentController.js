@@ -17,7 +17,7 @@ exports.createAppointment = async (req, res, next) => {
       })
     }
 
-    // Authentication check
+    
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -29,7 +29,7 @@ exports.createAppointment = async (req, res, next) => {
 
     
 
-    // Verify veterinarian exists and is available for appointments
+    
     const veterinarian = await Veterinarian.findById(veterinarianId)
     if (!veterinarian) {
       return res.status(404).json({
@@ -45,7 +45,7 @@ exports.createAppointment = async (req, res, next) => {
       })
     }
 
-    // Verify pet belongs to user
+    
     console.log("Looking for pet with ID:", petId, "and user:", req.userData.userId)
     const pet = await Pet.findOne({ _id: petId, user: req.userData.userId })
     console.log("Found pet:", pet ? "Yes" : "No")
@@ -60,7 +60,7 @@ exports.createAppointment = async (req, res, next) => {
       })
     }
 
-    // Check if user already has a pending appointment with this vet
+    
     const existingAppointment = await Appointment.findOne({
       user: req.userData.userId,
       veterinarian: veterinarianId,
@@ -74,6 +74,25 @@ exports.createAppointment = async (req, res, next) => {
       })
     }
 
+
+    const existingInterest = veterinarian.interestedUsers.find(
+      interest => interest.user.toString() === req.userData.userId
+    )
+
+    if (!existingInterest) {
+      veterinarian.interestedUsers.push({
+        user: req.userData.userId,
+        status: "appointment_requested",
+        dateExpressed: new Date(),
+      })
+      await veterinarian.save()
+    } else {
+      
+      existingInterest.status = "appointment_requested"
+      existingInterest.dateExpressed = new Date()
+      await veterinarian.save()
+    }
+
     const appointment = new Appointment({
       user: req.userData.userId,
       veterinarian: veterinarianId,
@@ -83,7 +102,7 @@ exports.createAppointment = async (req, res, next) => {
       status: "pending", 
     })
 
-    // Save appointment
+   
     await appointment.save()
 
     await appointment.populate([
@@ -112,7 +131,7 @@ exports.createAppointment = async (req, res, next) => {
   }
 }
 
-// Get all appointments (public)
+// Get all appointments 
 exports.getAppointments = async (req, res) => {
   try {
     const { status = "pending", veterinarianId, userId, page = 1, limit = 10, sortBy = "createdAt", sortOrder = "desc" } = req.query
@@ -164,7 +183,7 @@ exports.getAppointments = async (req, res) => {
   }
 }
 
-// Get appointment by ID
+
 exports.getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id).populate([
@@ -193,10 +212,10 @@ exports.getAppointmentById = async (req, res) => {
   }
 }
 
-// Get user's appointments
+
 exports.getUserAppointments = async (req, res) => {
   try {
-    // Authentication check 
+    
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -233,7 +252,7 @@ exports.getUserAppointments = async (req, res) => {
   }
 }
 
-// Get veterinarian's appointment requests (people who want appointments with them)
+// Get veterinarian's appointment requests 
 exports.getVeterinarianAppointments = async (req, res) => {
   try {
     if (!req.userData || !req.userData.userId) {
@@ -282,7 +301,7 @@ exports.getVeterinarianAppointments = async (req, res) => {
   }
 }
 
-// Update appointment status (mainly for vets to confirm/reject)
+// VET CAN CONFIRM OR REJECT
 exports.updateAppointment = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -314,7 +333,7 @@ exports.updateAppointment = async (req, res) => {
       });
     }
 
-    // Check permissions - user can update their own appointment, vet can update appointments with them
+    
     const isOwner = appointment.user.toString() === userId
     const isVet = appointment.veterinarian.toString() === userId
     
@@ -325,7 +344,7 @@ exports.updateAppointment = async (req, res) => {
       })
     }
 
-    // Cannot update completed appointments
+    
     if (appointment.status === "completed") {
       return res.status(400).json({
         success: false,
@@ -335,15 +354,40 @@ exports.updateAppointment = async (req, res) => {
 
     const updateData = {};
 
-    // Users can update reason and urgency (only if pending)
+    
     if (isOwner && appointment.status === "pending") {
       if (reason !== undefined) updateData.reason = reason;
       if (urgency !== undefined) updateData.urgency = urgency;
     }
 
-    // Vets can update status
+  
     if (isVet) {
-      if (status !== undefined) updateData.status = status;
+      if (status !== undefined) {
+        updateData.status = status;
+        
+       
+        const veterinarian = await Veterinarian.findById(appointment.veterinarian);
+        if (veterinarian) {
+          const interestedUser = veterinarian.interestedUsers.find(
+            interest => interest.user.toString() === appointment.user.toString()
+          );
+          
+          if (interestedUser) {
+            switch (status) {
+              case "confirmed":
+                interestedUser.status = "appointment_confirmed";
+                break;
+              case "completed":
+                interestedUser.status = "appointment_completed";
+                break;
+              case "cancelled":
+                interestedUser.status = "appointment_requested"; //default nai appointment requested ho 
+                break;
+            }
+            await veterinarian.save();
+          }
+        }
+      }
     }
 
     // Update the appointment
@@ -478,6 +522,19 @@ exports.cancelAppointment = async (req, res) => {
     appointment.status = "cancelled"
     await appointment.save()
 
+    // Update the corresponding interested user status in vet model
+    const veterinarian = await Veterinarian.findById(appointment.veterinarian);
+    if (veterinarian) {
+      const interestedUser = veterinarian.interestedUsers.find(
+        interest => interest.user.toString() === appointment.user.toString()
+      );
+      
+      if (interestedUser) {
+        interestedUser.status = "appointment_requested"; // Reset to appointment_requested if cancelled
+        await veterinarian.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       message: "Appointment cancelled successfully",
@@ -488,6 +545,52 @@ exports.cancelAppointment = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Failed to cancel appointment",
+    })
+  }
+}
+
+
+// Get interested users for a veterinarian
+exports.getInterestedUsers = async (req, res) => {
+  try {
+  
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
+
+    const veterinarianId = req.params.veterinarianId || req.userData.userId
+
+   
+    if (veterinarianId !== req.userData.userId && req.userData.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own interested users",
+      })
+    }
+
+    const veterinarian = await Veterinarian.findById(veterinarianId)
+      .populate('interestedUsers.user', 'name email phone')
+
+    if (!veterinarian) {
+      return res.status(404).json({
+        success: false,
+        message: "Veterinarian not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      data: veterinarian.interestedUsers,
+      count: veterinarian.interestedUsers.length,
+    })
+  } catch (error) {
+    console.error("Get interested users error:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch interested users",
     })
   }
 }
