@@ -27,6 +27,8 @@ exports.createAppointment = async (req, res, next) => {
 
     const { veterinarianId, petId, reason, urgency } = req.body
 
+    
+
     // Verify veterinarian exists and is available for appointments
     const veterinarian = await Veterinarian.findById(veterinarianId)
     if (!veterinarian) {
@@ -44,7 +46,13 @@ exports.createAppointment = async (req, res, next) => {
     }
 
     // Verify pet belongs to user
-    const pet = await Pet.findOne({ _id: petId, owner: req.userData.userId })
+    console.log("Looking for pet with ID:", petId, "and user:", req.userData.userId)
+    const pet = await Pet.findOne({ _id: petId, user: req.userData.userId })
+    console.log("Found pet:", pet ? "Yes" : "No")
+    if (pet) {
+      console.log("Pet details:", { id: pet._id, name: pet.name, user: pet.user })
+    }
+    
     if (!pet) {
       return res.status(404).json({
         success: false,
@@ -483,3 +491,4 @@ exports.cancelAppointment = async (req, res) => {
     })
   }
 }
+
