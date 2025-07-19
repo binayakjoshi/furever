@@ -442,7 +442,7 @@ exports.updateAdoptionPost = async (req, res) => {
     const userId = req.userData.userId;
     const { name, description, breed, location, contactInfo, requirements, status, image } = req.body;
 
-    // Find the adoption 
+   
     const adoptionPost = await Adoption.findById(adoptionPostId);
     if (!adoptionPost) {
       return res.status(404).json({
@@ -451,7 +451,7 @@ exports.updateAdoptionPost = async (req, res) => {
       });
     }
 
-    // Only creator can update the post
+    
     if (adoptionPost.creator.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -477,7 +477,7 @@ exports.updateAdoptionPost = async (req, res) => {
     if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
     if (requirements !== undefined) updateData.requirements = requirements;
     
-    // Handle image update
+    
     if (image !== undefined) {
       
       if (image && typeof image === 'object' && image.url && image.publicId) {
