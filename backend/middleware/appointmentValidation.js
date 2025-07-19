@@ -47,8 +47,11 @@ const cancelAppointmentValidation = [
     .trim(),
 ]
 
+
+
 module.exports = {
   createAppointmentValidation,
   updateAppointmentValidation,
   cancelAppointmentValidation,
+ 
 }
