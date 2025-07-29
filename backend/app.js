@@ -15,6 +15,9 @@ const authRoutes = require("./routes/authRoutes")
 const forumRoutes = require("./routes/forumRoutes")
 const chatRoutes = require("./routes/chatRoutes")
 const appointmentRoutes = require("./routes/appointmentRoutes")
+const lostPetRoutes = require("./routes/lostPetRoutes")
+
+
 const HttpError = require("./models/http-error")
 
 const app = express()
@@ -40,18 +43,17 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, 
+      maxAge: 24 * 60 * 60 * 1000,
     },
   }),
 )
 
-// passport user gare
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Pet Information API with JWT Authentication, Location Services & Community Forum",
+    message: "Pet Care System API with Lost Pet Alerts & Enhanced Notifications",
     contact: {
       phone: "9860909077",
       support: "For API support and inquiries",
@@ -128,34 +130,22 @@ app.get("/", (req, res) => {
         vetAppointments: "GET /api/appointments/vet/:veterinarianId",
         myRequests: "GET /api/appointments/vet/my-requests",
       },
-    },
-    features: {
-      authentication: " Role-based login (pet-owner/vet)",
-      locationServices: "Enhanced nearby vet search with distance sorting",
-      cascadeDelete: " Complete user data cleanup on deletion",
-      communityForum: "Posts, replies, and nested conversations",
-      adoptionSystem: "Pet adoption with interest tracking",
-      veterinarianProfiles: "Professional vet profiles with verification",
-      appointmentSystem: "Vet appointment booking and management",
-    },
-    locationServices: {
-      status: "Available",
-      features: [
-        "User location tracking",
-        "Veterinarian location tracking",
-        "Enhanced nearby vet search with emergency priority",
-        "Distance-based sorting",
-        "OpenStreetMap integration",
-        "Geospatial database queries",
-      ],
-      supportedCoordinates: "WGS84 (latitude/longitude)",
-      maxSearchRadius: "100km",
-      geocodingProvider: "OpenStreetMap Nominatim",
+      
+      lostPets: {
+        base: "/api/lost-pets",
+        getAll: "GET /api/lost-pets",
+        create: "POST /api/lost-pets (with image upload)",
+        getById: "GET /api/lost-pets/:id",
+        reportFound: "POST /api/lost-pets/:id/found (with image upload)",
+        updateStatus: "PATCH /api/lost-pets/:id/status",
+        myAlerts: "GET /api/lost-pets/user/my-alerts",
+        delete: "DELETE /api/lost-pets/:id",
+      },
     },
   })
 })
 
-// Main API routes
+
 app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/adoptions", adoptionRoutes)
@@ -164,6 +154,7 @@ app.use("/api/forum", forumRoutes)
 app.use("/api/appointments", appointmentRoutes)
 app.use("/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
+app.use("/api/lost-pets", lostPetRoutes)
 
 // 404 handler
 app.use((req, res, next) => {
@@ -171,7 +162,7 @@ app.use((req, res, next) => {
   next(error)
 })
 
-
+// Error handler
 app.use((error, req, res, next) => {
   if (res.headersSent) {
     return next(error)
@@ -190,7 +181,6 @@ app.use((error, req, res, next) => {
   })
 })
 
-
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
@@ -198,7 +188,9 @@ mongoose
     app.listen(PORT, () => {
       console.log(`Server is running on: http://localhost:${PORT}`)
       console.log(`Google OAuth URL: http://localhost:${PORT}/auth/google`)
-      
+     
+  
+
     })
   })
   .catch((err) => {
