@@ -337,12 +337,12 @@ exports.reportFoundPet = async (req, res) => {
 
     lostPet.foundReports.push(foundReport)
 
-    // Mark alert as sent
+   
     lostPet.alertSent = true
 
     await lostPet.save()
 
-    // Send email notification to pet owner
+    //send the fucking email to the owner 
     try {
       await emailService.sendFoundPetNotification({
         ownerEmail: lostPet.owner.email,

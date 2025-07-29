@@ -19,7 +19,7 @@ const createStorage = (folder = "pets") => {
   })
 }
 
-// Default upload middleware
+
 const upload = multer({
   storage: createStorage("pets"),
 })

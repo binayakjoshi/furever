@@ -99,7 +99,7 @@ const lostPetSchema = new mongoose.Schema(
   },
 )
 
-// Index for better search performance
+
 lostPetSchema.index({ status: 1, createdAt: -1 })
 lostPetSchema.index({ owner: 1 })
 
