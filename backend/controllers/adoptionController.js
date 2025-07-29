@@ -486,7 +486,7 @@ exports.updateAdoptionPost = async (req, res) => {
           publicId: image.publicId
         };
       } else if (image === null || image === '') {
-        // cannot remove image, it must be provided
+        
         return res.status(400).json({
           success: false,
           message: "Image is required. Please provide a valid image with url and publicId",
@@ -499,7 +499,7 @@ exports.updateAdoptionPost = async (req, res) => {
       }
     }
     
-    // Only allow status updates to specific values
+    
     if (status !== undefined) {
       const allowedStatusUpdates = ["active", "pending", "cancelled"];
       if (allowedStatusUpdates.includes(status)) {
@@ -512,7 +512,7 @@ exports.updateAdoptionPost = async (req, res) => {
       }
     }
 
-    // Update the adoption post
+  
     const updatedAdoptionPost = await Adoption.findByIdAndUpdate(
       adoptionPostId,
       updateData,
