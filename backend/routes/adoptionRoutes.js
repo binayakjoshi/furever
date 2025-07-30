@@ -15,6 +15,7 @@ router.use(authenticate)
 
 // fix routing 
 router.get("/available", adoptionController.getAvailableAdoptionPosts)
+router.get("/my-posts", adoptionController.getAdoptionPostsByCreator)
 router.get("/creator/:creatorId", adoptionController.getAdoptionPostsByCreator)
 
 
