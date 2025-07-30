@@ -178,7 +178,7 @@ const EditPetForm = () => {
     <div className={styles.formContainer}>
       {error && <ErrorModal error={error} clearError={clearError} />}
       <SuccessPopup
-        message="✅ Changes saved successfully!"
+        message="Changes saved successfully!"
         isVisible={showSuccessPopup}
         onClose={() => setShowSuccessPopup(false)}
         duration={3000}
