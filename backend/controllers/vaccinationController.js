@@ -18,18 +18,6 @@ const getUpcomingVaccinations = async (req, res) => {
   }
 }
 
-const sendTestReminder = async (req, res) => {
-  try {
-    const result = await vaccinationReminderService.sendTestReminder(req.params.petId)
-    res.json(result)
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    })
-  }
-}
-
 const triggerReminders = async (req, res) => {
   try {
     await vaccinationReminderService.checkAndSendReminders()
@@ -71,7 +59,6 @@ const getVaccinationStats = async (req, res) => {
 
 module.exports = {
   getUpcomingVaccinations,
-  sendTestReminder,
   triggerReminders,
   getVaccinationStats,
 }
