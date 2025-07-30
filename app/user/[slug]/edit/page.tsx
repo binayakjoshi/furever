@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useForm } from "@/lib/use-form";
@@ -11,6 +11,7 @@ import Button from "@/components/custom-elements/button";
 import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "@/components/ui/error";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import SuccessPopup from "@/components/ui/success-popup";
 import styles from "./page.module.css";
 import Modal from "@/components/ui/modal";
 import { PetOwner } from "@/lib/types";
@@ -39,15 +40,16 @@ const EditUserForm = () => {
 
   const { isLoading, sendRequest, clearError, error } =
     useHttp<UserDetailResponse>();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    const dobValue = formatDateForInput(user.dob);
+    const dobValue = formatDateForInput((user as PetOwner).dob);
     setFormData(
       {
         name: { value: user?.name, isValid: true, touched: true },
-        phone: { value: user?.phone, isValid: true, touched: true },
-        address: { value: user?.address, isValid: true, touched: true },
+        phone: { value: (user as PetOwner)?.phone, isValid: true, touched: true },
+        address: { value: (user as PetOwner)?.address, isValid: true, touched: true },
         dob: { value: dobValue, isValid: true, touched: true },
       },
       true
@@ -80,7 +82,10 @@ const EditUserForm = () => {
         }),
         { "Content-Type": "application/json" }
       );
-      router.push(`/user/${user?.userId}`);
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push(`/user/${user?.userId}`);
+      }, 2000);
     } catch (err) {
       console.error("Error submitting form:", err);
     }
@@ -92,6 +97,12 @@ const EditUserForm = () => {
       ) : (
         <div className={styles.formContainer}>
           {error && <ErrorModal error={error} clearError={clearError} />}
+          <SuccessPopup
+            message="Changes saved successfully!"
+            isVisible={showSuccessPopup}
+            onClose={() => setShowSuccessPopup(false)}
+            duration={3000}
+          />
 
           <div className={styles.header}>
             <h1 className={styles.title}>Edit your Pet data</h1>
@@ -130,7 +141,7 @@ const EditUserForm = () => {
                   errorText="DOB is Required"
                   onInput={inputHandler}
                   className={styles.Input}
-                  initialValue={formatDateForInput(user?.dob) || ""}
+                  initialValue={formatDateForInput((user as PetOwner)?.dob) || ""}
                   initialValid={true}
                 />
               </div>
@@ -146,7 +157,7 @@ const EditUserForm = () => {
                 errorText="Phone number is required"
                 onInput={inputHandler}
                 validators={[VALIDATOR_REQUIRE()]}
-                initialValue={user?.phone || ""}
+                initialValue={(user as PetOwner)?.phone || ""}
                 initialValid={true}
               />
             </div>
@@ -161,7 +172,7 @@ const EditUserForm = () => {
                 errorText="Address is Required"
                 onInput={inputHandler}
                 validators={[VALIDATOR_REQUIRE()]}
-                initialValue={user?.address || ""}
+                initialValue={(user as PetOwner)?.address || ""}
                 initialValid={true}
               />
             </div>
