@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { useForm } from "@/lib/use-form";
 import { useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -14,6 +14,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useHttp } from "@/lib/request-hook";
 import styles from "./page.module.css";
 import ErrorModal from "@/components/ui/error";
+import SuccessPopup from "@/components/ui/success-popup";
 
 type AddPetResponse = {
   success: boolean;
@@ -45,6 +46,7 @@ const AddPetPage = () => {
   const router = useRouter();
   const { isLoading, sendRequest, error, clearError } =
     useHttp<AddPetResponse>();
+  const [showSuccessPopup, setShowSuccessPopup] = React.useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -75,7 +77,10 @@ const AddPetPage = () => {
       requestData.append("petType", formState.inputs.petType.value as string);
 
       await sendRequest("/api/pets", "POST", requestData);
-      router.push('/');
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     } catch (_) {}
   };
 
@@ -90,6 +95,12 @@ const AddPetPage = () => {
   return (
     <>
       {error && <ErrorModal error={error} clearError={clearError} />}
+      <SuccessPopup
+        message="Pet added successfully"
+        isVisible={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        duration={3000}
+      />
       <div className={styles.container}>
         <form onSubmit={handleSubmit} noValidate>
           <h2 className={styles.title}>Add a New Pet</h2>
