@@ -88,7 +88,7 @@ const EditForumPost = () => {
     try {
       await sendRequest(
         `/api/forum/${postId}`,
-        "PATCH",
+        "PUT",
         JSON.stringify({
           title: formState.inputs.title.value,
           content: formState.inputs.content.value,

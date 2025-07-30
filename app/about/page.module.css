@@ -20,7 +20,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   opacity: 0.05;
   z-index: 0;
 }
@@ -35,7 +35,7 @@
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 1.5rem;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -57,7 +57,7 @@
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: var(--gradient-secondary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   border-radius: 2px;
 }
 
@@ -92,7 +92,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   border-radius: 2px;
 }
 
@@ -121,7 +121,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -129,21 +129,17 @@
 .featureCard:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-xl);
-  border-color: var(--accent-primary);
+  border-color: #664982;
 }
 
 .featureCard:hover::before {
   transform: scaleX(1);
 }
 
-.featureCard:nth-child(even)::before {
-  background: var(--gradient-secondary);
-}
-
 .featureIcon {
   width: 4rem;
   height: 4rem;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -153,10 +149,6 @@
   font-size: 1.25rem;
   box-shadow: var(--shadow-lg);
   transition: transform 0.3s ease;
-}
-
-.featureCard:nth-child(even) .featureIcon {
-  background: var(--gradient-secondary);
 }
 
 .featureCard:hover .featureIcon {
@@ -177,7 +169,7 @@
 
 /* CTA Section */
 .cta {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #664982, #8a6ba8);
   padding: 4rem 2rem;
   border-radius: var(--border-radius);
   text-align: center;
@@ -222,7 +214,7 @@
 
 .ctaButton {
   background: white;
-  color: var(--accent-primary);
+  color: #664982;
   padding: 1rem 2.5rem;
   border-radius: 50px;
   font-weight: 700;
@@ -238,7 +230,7 @@
 .ctaButton:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: var(--shadow-xl);
-  color: var(--accent-hover);
+  color: #4d3861;
 }
 
 /* Animations */

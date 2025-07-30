@@ -7,19 +7,21 @@ import {
 } from "react-icons/fa";
 import ContactForm from "@/components/forms/contact-form";
 import styles from "./page.module.css";
+
 const ContactPage = () => {
   const handleSubmit = async (event: FormEvent) => {
     "use server";
     event.preventDefault();
     console.log("submitting form....");
   };
+
   return (
     <div className={styles.container}>
       <section className={styles.introSection}>
         <h1 className={styles.introTitle}>Contact Us</h1>
         <p className={styles.introContent}>
           Get in touch with our support team. We&apos;re here to help pet
-          owners, veterinarians, and people interest in adopting, connect and
+          owners, veterinarians, and people interested in adopting, connect and
           thrive as a community.
         </p>
       </section>
@@ -41,7 +43,9 @@ const ContactPage = () => {
                 </a>
                 <br />
                 Adoption:{" "}
-                <a href="pahadipragyan@gmail.com">pahadipragyan@gmail.com</a>
+                <a href="mailto:pahadipragyan@gmail.com">
+                  pahadipragyan@gmail.com
+                </a>
               </p>
             </div>
           </div>
@@ -87,4 +91,5 @@ const ContactPage = () => {
     </div>
   );
 };
+
 export default ContactPage;

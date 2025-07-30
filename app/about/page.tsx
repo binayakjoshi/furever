@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 
 import styles from "./page.module.css";
+
 const AboutUsPage = () => {
   return (
     <>
@@ -104,10 +105,9 @@ const AboutUsPage = () => {
             <div className={styles.featureIcon}>
               <FaShieldAlt />
             </div>
-            <h3 className={styles.featureTitle}>Login with Goolge</h3>
+            <h3 className={styles.featureTitle}>Login with Google</h3>
             <p className={styles.featureDescription}>
-              {" "}
-              No Signup hassle,safe and convenient access to your account with
+              No Signup hassle, safe and convenient access to your account with
               Google authentication for enhanced security.
             </p>
           </div>
@@ -126,4 +126,5 @@ const AboutUsPage = () => {
     </>
   );
 };
+
 export default AboutUsPage;
