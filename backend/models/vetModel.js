@@ -91,6 +91,11 @@ const veterinarianSchema = new mongoose.Schema({
         enum: ["appointment_requested", "appointment_confirmed", "appointment_completed"],
         default: "appointment_requested",
       },
+      message: {
+        type: String,
+        trim: true,
+        maxlength: [300, "Message cannot exceed 300 characters"],
+      },
     },
   ],
   createdAt: {
