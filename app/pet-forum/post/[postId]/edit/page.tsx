@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { useForm } from "@/lib/use-form";
 import { useRouter, useParams } from "next/navigation";
 import Input from "@/components/custom-elements/input";
@@ -11,6 +11,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useHttp } from "@/lib/request-hook";
 import styles from "./page.module.css";
 import ErrorModal from "@/components/ui/error";
+import SuccessPopup from "@/components/ui/success-popup";
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/modal";
 
@@ -45,6 +46,7 @@ const EditForumPost = () => {
   const router = useRouter();
   const { isLoading, sendRequest, error, clearError } =
     useHttp<ForumPosResponse>();
+  const [showSuccessPopup, setShowSuccessPopup] = React.useState(false);
 
   useEffect(() => {
     try {
@@ -96,13 +98,22 @@ const EditForumPost = () => {
         }),
         { "Content-Type": "application/json" }
       );
-      router.push(`/pet-forum/post/${postId}`);
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push(`/pet-forum/post/${postId}`);
+      }, 2000);
     } catch {}
   };
 
   return (
     <>
       {error && <ErrorModal error={error} clearError={clearError} />}
+      <SuccessPopup
+        message="Post updated successfully!"
+        isVisible={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        duration={3000}
+      />
       <Modal>
         {isLoading ? (
           <LoadingSpinner text="Fetching Post data..." />
