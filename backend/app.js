@@ -7,9 +7,8 @@ const cookieParser = require("cookie-parser")
 const session = require("express-session")
 const passport = require("./config/passport")
 
-// Import vaccination reminder service
-const vaccinationReminderService = require("./services/vaccinationReminderService")
 
+const vaccinationReminderService = require("./services/vaccinationReminderService")
 const petRoutes = require("./routes/petRoutes")
 const userRoutes = require("./routes/userRoutes")
 const adoptionRoutes = require("./routes/adoptionRoutes")
@@ -56,7 +55,7 @@ app.use(passport.session())
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Pet Care System API with Enhanced Vaccination Reminders & Notifications",
+    message: "Pet Care System API ",
     contact: {
       phone: "9860909077",
       support: "For API support and inquiries",
