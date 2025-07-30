@@ -7,8 +7,6 @@ router.use(authenticate)
 
 router.get("/upcoming", vaccinationController.getUpcomingVaccinations)
 
-router.post("/test-reminder/:petId", vaccinationController.sendTestReminder)
-
 router.post("/trigger-reminders", vaccinationController.triggerReminders)
 
 router.get("/stats", vaccinationController.getVaccinationStats)
