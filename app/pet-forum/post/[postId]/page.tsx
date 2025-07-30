@@ -44,7 +44,10 @@ const ForumPostDetailPage = async ({ params }: ForumPostDetailProps) => {
             ← Back to Forum
           </Link>
           <div className={styles.category}>
-            <span className={styles.categoryTag}>{forumPost.category}</span>
+            <span className={styles.categoryTag}>
+              {forumPost.category.charAt(0).toUpperCase() +
+                forumPost.category.slice(1)}
+            </span>
           </div>
         </div>
 
