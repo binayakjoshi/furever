@@ -24,6 +24,10 @@ exports.createAdoptionPost = async (req, res, next) => {
     }
 
     const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
+    
+    // Normalize petType to lowercase
+    const normalizedPetType = petType ? petType.toLowerCase() : 'dog'
+    
     const adoptionPost = new Adoption({
     
       creator: req.userData.userId,
@@ -35,9 +39,9 @@ exports.createAdoptionPost = async (req, res, next) => {
         publicId:req.file.filename,
       },
       location,
-      contactInfo: contactInfo || {},
+      contactInfo: contactInfo || "",
       requirements: requirements || "",
-      petType,
+      petType: normalizedPetType,
       status: "active", 
     })
 
@@ -440,7 +444,7 @@ exports.updateAdoptionPost = async (req, res) => {
 
     const adoptionPostId = req.params.id;
     const userId = req.userData.userId;
-    const { name, description, breed, location, contactInfo, requirements, status, image } = req.body;
+    const { name, description, breed, location, contactInfo, requirements, status, image, petType } = req.body;
 
    
     const adoptionPost = await Adoption.findById(adoptionPostId);
@@ -476,6 +480,7 @@ exports.updateAdoptionPost = async (req, res) => {
     if (location !== undefined) updateData.location = location;
     if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
     if (requirements !== undefined) updateData.requirements = requirements;
+    if (petType !== undefined) updateData.petType = petType.toLowerCase();
     
     
     if (image !== undefined) {
