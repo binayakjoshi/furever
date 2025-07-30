@@ -7,6 +7,9 @@ const cookieParser = require("cookie-parser")
 const session = require("express-session")
 const passport = require("./config/passport")
 
+// Import vaccination reminder service
+const vaccinationReminderService = require("./services/vaccinationReminderService")
+
 const petRoutes = require("./routes/petRoutes")
 const userRoutes = require("./routes/userRoutes")
 const adoptionRoutes = require("./routes/adoptionRoutes")
@@ -16,7 +19,7 @@ const forumRoutes = require("./routes/forumRoutes")
 const chatRoutes = require("./routes/chatRoutes")
 const appointmentRoutes = require("./routes/appointmentRoutes")
 const lostPetRoutes = require("./routes/lostPetRoutes")
-
+const vaccinationRoutes = require("./routes/vaccinationRoutes")
 
 const HttpError = require("./models/http-error")
 
@@ -53,7 +56,7 @@ app.use(passport.session())
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Pet Care System API with Lost Pet Alerts & Enhanced Notifications",
+    message: "Pet Care System API with Enhanced Vaccination Reminders & Notifications",
     contact: {
       phone: "9860909077",
       support: "For API support and inquiries",
@@ -72,9 +75,6 @@ app.get("/", (req, res) => {
         me: "GET /api/users/me",
         updateProfile: "PUT /api/users/me",
         updatePassword: "PUT /api/users/me/password",
-        updateLocation: "PUT /api/users/location",
-        updateLocationByAddress: "PUT /api/users/location/address",
-        findNearbyVets: "GET /api/users/nearby-vets?radius=KM&limit=NUMBER",
       },
       adoptions: {
         base: "/api/adoptions",
@@ -119,18 +119,12 @@ app.get("/", (req, res) => {
       },
       appointments: {
         base: "/api/appointments",
-        getAll: "GET /api/appointments",
-        create: "POST /api/appointments",
-        getById: "GET /api/appointments/:id",
-        update: "PUT /api/appointments/:id",
-        delete: "DELETE /api/appointments/:id",
-        cancel: "PATCH /api/appointments/:id/cancel",
-        myAppointments: "GET /api/appointments/my-appointments",
-        userAppointments: "GET /api/appointments/user/:userId",
-        vetAppointments: "GET /api/appointments/vet/:veterinarianId",
-        myRequests: "GET /api/appointments/vet/my-requests",
+        expressInterest: "POST /api/appointments/interest",
+        removeInterest: "DELETE /api/appointments/interest/:veterinarianId",
+        updateStatus: "PUT /api/appointments/status (vets only)",
+        getInterestedUsers: "GET /api/appointments/interested-users/:veterinarianId (vets only)",
+        myAppointments: "GET /api/appointments/my-appointments (users only)",
       },
-      
       lostPets: {
         base: "/api/lost-pets",
         getAll: "GET /api/lost-pets",
@@ -141,10 +135,16 @@ app.get("/", (req, res) => {
         myAlerts: "GET /api/lost-pets/user/my-alerts",
         delete: "DELETE /api/lost-pets/:id",
       },
+      vaccinations: {
+        base: "/api/vaccinations",
+        upcoming: "GET /api/vaccinations/upcoming?days=30",
+        stats: "GET /api/vaccinations/stats",
+        testReminder: "POST /api/vaccinations/test-reminder/:petId",
+        triggerReminders: "POST /api/vaccinations/trigger-reminders",
+      },
     },
   })
 })
-
 
 app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
@@ -155,14 +155,15 @@ app.use("/api/appointments", appointmentRoutes)
 app.use("/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/lost-pets", lostPetRoutes)
+app.use("/api/vaccinations", vaccinationRoutes)
 
-// 404 handler
+
 app.use((req, res, next) => {
   const error = new HttpError(`Route ${req.originalUrl} not found`, 404)
   next(error)
 })
 
-// Error handler
+
 app.use((error, req, res, next) => {
   if (res.headersSent) {
     return next(error)
@@ -185,14 +186,13 @@ mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Connected to MongoDB Atlas")
+    vaccinationReminderService.initializeCronJob()
     app.listen(PORT, () => {
-      console.log(`Server is running on: http://localhost:${PORT}`)
-      console.log(`Google OAuth URL: http://localhost:${PORT}/auth/google`)
-     
-  
-
+      console.log(` Server is running on: http://localhost:${PORT}`)
+      console.log(` Google OAuth URL: http://localhost:${PORT}/auth/google`)
+      console.log(` Vaccination reminders will run daily at 9:00 AM`)
     })
   })
   .catch((err) => {
-    console.error("MongoDB connection error:", err)
+    console.error(" MongoDB connection error:", err)
   })
