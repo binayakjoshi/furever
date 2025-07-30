@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "next": "15.3.3",
+    "node-cron": "^4.2.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "react": "^19.0.0",
