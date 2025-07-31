@@ -17,7 +17,7 @@
   transition: background 0.3s;
 }
 .dasActionsBtn:hover {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+   background-color: #764ba2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }

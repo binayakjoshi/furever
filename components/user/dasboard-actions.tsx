@@ -8,9 +8,9 @@ const DashboardAction = () => {
       <Button href="/pets/addpet" className={styles.dasActionsBtn}>
         <FaPlusCircle /> Add New Pet
       </Button>
-      <button className={styles.dasActionsBtn}>
+      <Button className={styles.dasActionsBtn} href="/vets">
         <FaCalendarAlt /> Book Appointment
-      </button>
+      </Button>
       <Button href="/adoption/add" className={styles.dasActionsBtn}>
         <FaHeart /> Post for Adoption
       </Button>
