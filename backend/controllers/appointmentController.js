@@ -4,15 +4,6 @@ const { validationResult } = require("express-validator")
 
 exports.expressInterest = async (req, res, next) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
-
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
@@ -20,10 +11,9 @@ exports.expressInterest = async (req, res, next) => {
       })
     }
 
-    const { veterinarianId, message } = req.body
-
+    const { vetId} = req.params;
     
-    const veterinarian = await Veterinarian.findById(veterinarianId)
+    const veterinarian = await Veterinarian.findById(vetId);
     if (!veterinarian) {
       return res.status(404).json({
         success: false,
@@ -54,7 +44,6 @@ exports.expressInterest = async (req, res, next) => {
       user: req.userData.userId,
       status: "appointment_requested",
       dateExpressed: new Date(),
-      message: message || "" 
     })
     
     await veterinarian.save()
@@ -290,7 +279,7 @@ exports.getInterestedUsers = async (req, res) => {
     }
 
     const veterinarian = await Veterinarian.findById(veterinarianId)
-      .populate('interestedUsers.user', 'name email phone')
+      .populate('interestedUsers.user', 'name email phone profileImage')
 
     if (!veterinarian) {
       return res.status(404).json({
