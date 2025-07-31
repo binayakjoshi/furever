@@ -1,20 +1,6 @@
 const { body } = require("express-validator")
 
 
-const expressInterestValidation = [
-  body("veterinarianId")
-    .notEmpty()
-    .withMessage("Veterinarian ID is required")
-    .isMongoId()
-    .withMessage("Invalid veterinarian ID format"),
-  body("message")
-    .optional()
-    .isLength({ max: 300 })
-    .withMessage("Message cannot exceed 300 characters")
-    .trim(),
-]
-
-
 const updateInterestStatusValidation = [
   body("userId")
     .notEmpty()
@@ -29,6 +15,5 @@ const updateInterestStatusValidation = [
 ]
 
 module.exports = {
-  expressInterestValidation,
   updateInterestStatusValidation,
 }
