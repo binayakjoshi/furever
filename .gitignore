@@ -45,3 +45,4 @@ next-env.d.ts
 /temp
 
 /backend/config/*.json
+/backend/package-lock.json
