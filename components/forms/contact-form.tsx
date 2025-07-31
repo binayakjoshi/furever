@@ -10,10 +10,11 @@ import {
 import styles from "./contact-form.module.css";
 import Button from "../custom-elements/button";
 
-type contactFomrProps = {
+type ContactFormProps = {
   handleSubmit: (event: FormEvent) => void;
 };
-const ContactForm = ({ handleSubmit }: contactFomrProps) => {
+
+const ContactForm = ({ handleSubmit }: ContactFormProps) => {
   const [formState, inputHandler] = useForm(
     {
       name: { value: "", isValid: false, touched: false },
@@ -38,7 +39,7 @@ const ContactForm = ({ handleSubmit }: contactFomrProps) => {
             validators={[VALIDATOR_REQUIRE()]}
             errorText="Name is Required"
             onInput={inputHandler}
-            className={styles.Input}
+            className={styles.input}
           />
         </div>
         <div className={styles.formField}>
@@ -47,10 +48,11 @@ const ContactForm = ({ handleSubmit }: contactFomrProps) => {
             element="input"
             type="email"
             label="Email"
+            placeholder="your.email@example.com"
             validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
             errorText="Please enter a valid email"
             onInput={inputHandler}
-            className={styles.Input}
+            className={styles.input}
           />
         </div>
         <div className={styles.formField}>
@@ -59,32 +61,36 @@ const ContactForm = ({ handleSubmit }: contactFomrProps) => {
             element="input"
             type="text"
             label="Subject"
-            placeholder="your email"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(25)]}
-            errorText="Subject is required & must be under 50 Char"
+            placeholder="Subject of your message"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(50)]}
+            errorText="Subject is required & must be under 50 characters"
             onInput={inputHandler}
-            className={styles.Input}
+            className={styles.input}
           />
         </div>
         <div className={styles.formField}>
           <Input
             id="message"
-            element="input"
+            element="textarea"
             type="text"
             label="Message"
             placeholder="Please describe your inquiry in detail"
-            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(150)]}
-            errorText="message is required & must be under 150 Char"
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(500)]}
+            errorText="Message is required & must be under 500 characters"
             onInput={inputHandler}
-            className={styles.Input}
+            className={styles.input}
           />
         </div>
-
-        <Button type="submit" className={styles.submitButton}>
+        <Button
+          type="submit"
+          className={styles.submitButton}
+          disabled={!formState.isValid}
+        >
           Submit
         </Button>
       </form>
     </div>
   );
 };
+
 export default ContactForm;
