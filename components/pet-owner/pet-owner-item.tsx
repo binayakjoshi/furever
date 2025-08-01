@@ -98,7 +98,7 @@ const PetOwnerItem: React.FC<PetOwnerItemProps> = ({ interestedUser }) => {
       <div className={styles.actions}>
         <Button
           className={styles.viewProfileButton}
-          href={`/pet-owner/${interestedUser.user._id}`}
+          href={`/pet-owners/${interestedUser.user._id}`}
         >
           View Profile
         </Button>

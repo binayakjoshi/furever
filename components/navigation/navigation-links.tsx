@@ -35,7 +35,10 @@ export const NavigationLinks = () => {
               <NavLink href="/adoption">Adoption</NavLink>
             </li>
             <li>
-              <NavLink href="/vets/nearby">Nearby Vets</NavLink>
+              <NavLink href="/vets/nearby">Nearby Hospitals</NavLink>
+            </li>
+            <li>
+              <NavLink href="/vets">Available Doctors</NavLink>
             </li>
             <li>
               <NavLink href="/pet-forum">Pet Forum</NavLink>
@@ -58,7 +61,10 @@ export const NavigationLinks = () => {
         <NavLink href="/adoption">Adoption</NavLink>
       </li>
       <li className={classes.navItem}>
-        <NavLink href="/vets/nearby">Nearby Vets</NavLink>
+        <NavLink href="/vets/nearby">Nearby Hospitals</NavLink>
+      </li>
+      <li className={classes.navItem}>
+        <NavLink href="/vets/">Available Doctors</NavLink>
       </li>
       <li className={classes.navItem}>
         <NavLink href="/pet-forum">Pet Forum</NavLink>
