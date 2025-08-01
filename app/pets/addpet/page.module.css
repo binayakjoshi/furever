@@ -160,12 +160,12 @@
 }
 
 .submitButtonEnabled {
-  background-color:black;
+  background-color:#664982;
   color: white;
 }
 
 .submitButtonEnabled:hover {
-  background-color: #181a1e;
+  background-color:#764ba2;
 }
 
 .submitButtonDisabled {
