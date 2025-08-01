@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 import { Vet } from "@/lib/types";
 import styles from "./page.module.css";
-import UserProfileAction from "@/components/user/user-profile-actions";
 import VetProfileAction from "@/components/vets/vet-profile-action";
 
 type VetProfilePageProps = {

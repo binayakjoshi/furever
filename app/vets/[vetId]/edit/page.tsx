@@ -68,7 +68,7 @@ const EditVetForm = () => {
 
     try {
       await sendRequest(
-        "/api/user/",
+        "/api/vet/",
         "PUT",
         JSON.stringify({
           name: formState.inputs.name.value,
