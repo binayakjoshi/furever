@@ -4,27 +4,22 @@ const lostPetController = require("../controllers/lostPetController")
 const { authenticate } = require("../middleware/authentication")
 const lostPetValidation = require("../middleware/lostPetValidation")
 
+const imageUpload = require("../middleware/imageUpload")
 
-const multer = require("multer")
-const { createStorage } = require("../config/cloudinary")
-
-const upload = multer({ storage: createStorage("lost-pets") })
 
 router.get("/", lostPetController.getAllLostPets)
 router.get("/:id", lostPetController.getLostPetById)
 router.post(
   "/:id/found",
-  upload.array("images", 3),
-  lostPetValidation.reportFoundPetValidation,
   lostPetController.reportFoundPet,
 )
 
 router.use(authenticate)
 
-router.post("/", upload.array("images", 5), lostPetValidation.createLostPetValidation, lostPetController.createLostPet)
+router.post("/", imageUpload.single("image"), lostPetValidation.createLostPetValidation, lostPetController.createLostPet)
 router.put(
   "/:id",
-  upload.array("images", 3),
+  imageUpload.single('image'),
   lostPetValidation.updateLostPetValidation,
   lostPetController.updateLostPet,
 )

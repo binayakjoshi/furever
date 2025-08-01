@@ -2,6 +2,10 @@ const mongoose = require("mongoose")
 
 const lostPetSchema = new mongoose.Schema(
   {
+    name:{  
+      type:String,
+      required:true
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -33,7 +37,7 @@ const lostPetSchema = new mongoose.Schema(
       type: String,
       required:true
     },
-    images: [
+    image: 
       {
         url: {
           type: String,
@@ -44,7 +48,7 @@ const lostPetSchema = new mongoose.Schema(
           required: true,
         },
       },
-    ],
+  
     status: {
       type: String,
       enum: ["active", "cancelled", "found"],
@@ -54,35 +58,16 @@ const lostPetSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    foundReports: [
+    foundAlerts: [
       {
-        reporterName: {
-          type: String,
-          required: true,
-        },
-        reporterContact: {
-          type: String,
-          required: true,
-        },
-        message: {
-          type: String,
-          maxlength: 500,
-        },
-        location: {
-          type: String,
-          required: true,
-        },
-        reportedAt: {
-          type: Date,
-          default: Date.now,
-        },
-        images: [
-          {
-            url: String,
-            publicId: String,
+            user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+              required: true,
+            },
+           
           },
-        ],
-      },
+      
     ],
   },
   {

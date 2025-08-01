@@ -27,26 +27,7 @@ exports.createLostPet = async (req, res) => {
     const {breed, description, petType, contactInfo,location,name } = req.body
 
   
-   
-
   
-    const images = []
-    if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        images.push({
-          url: file.path,
-          publicId: file.filename,
-        })
-      })
-    }
-
-    if (images.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one image is required",
-      })
-    }
-
     const lostPet = new LostPet({
       name,
       owner: req.userData.userId,
@@ -54,7 +35,10 @@ exports.createLostPet = async (req, res) => {
       description,
       petType: petType || "Dog",
       contactInfo,
-      images,
+      image:{
+        url:req.file.path,
+        publicId:req.file.filename,
+      },
       location,
       status: "active",
       alertSent: false,
@@ -65,7 +49,20 @@ exports.createLostPet = async (req, res) => {
       { path: "owner", select: "name email" }
     ])
 
-    //email pathaune hataide maile
+    try {
+      await emailService.sendLostPetAlert({
+        ownerEmail: lostPet.owner.email,
+        ownerName: lostPet.owner.name,
+        petName: name,
+        petDescription: description,
+        contactInfo: contactInfo,
+        location: "Please check your post for location details",
+      })
+      console.log("Lost pet alert email sent successfully")
+    } catch (emailError) {
+      console.error("Failed to send lost pet alert:", emailError)
+     
+    }
 
     res.status(201).json({
       success: true,
@@ -97,7 +94,7 @@ exports.getAllLostPets = async (req, res) => {
 
     const lostPets = await LostPet.find(filter)
       .populate("owner", "name email phone")
-      .populate("pet", "name")
+      
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number.parseInt(limit))
@@ -127,9 +124,8 @@ exports.getAllLostPets = async (req, res) => {
 
 exports.getLostPetById = async (req, res) => {
   try {
-    const lostPet = await LostPet.findById(req.params.id).populate("owner", "name email phone").populate("pet", "name")
-
-    if (!lostPet) {
+    const lostPet = await LostPet.findById(req.params.id).populate("owner", "name email phone")
+        if (!lostPet) {
       return res.status(404).json({
         success: false,
         message: "Lost pet post not found",
@@ -206,8 +202,7 @@ exports.updateLostPet = async (req, res) => {
 
     await lostPet.save()
     await lostPet.populate([
-      { path: "owner", select: "name email" },
-      { path: "pet", select: "name" },
+      { path: "owner", select: "name email" }
     ])
 
     res.status(200).json({
@@ -277,10 +272,15 @@ exports.reportFoundPet = async (req, res) => {
       })
     }
 
-    const { reporterName, reporterContact, message, location } = req.body
+    if (!req.userData || !req.userData.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      })
+    }
     const lostPetId = req.params.id
 
-    const lostPet = await LostPet.findById(lostPetId).populate("owner", "name email").populate("pet", "name")
+    const lostPet = await LostPet.findById(lostPetId).populate("owner", "name email")
 
     if (!lostPet) {
       return res.status(404).json({
@@ -296,27 +296,9 @@ exports.reportFoundPet = async (req, res) => {
       })
     }
 
-   
-    const images = []
-    if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        images.push({
-          url: file.path,
-          publicId: file.filename,
-        })
-      })
-    }
+       const userId = req.userData.userId;
 
-    const foundReport = {
-      reporterName,
-      reporterContact,
-      message: message || "",
-      location,
-      images,
-      reportedAt: new Date(),
-    }
-
-    lostPet.foundReports.push(foundReport)
+    lostPet.foundAlert.push({user:userId})
 
    
     lostPet.alertSent = true
@@ -371,7 +353,7 @@ exports.getUserLostPets = async (req, res) => {
       filter.status = status
     }
 
-    const lostPets = await LostPet.find(filter).populate("pet", "name").sort({ createdAt: -1 })
+    const lostPets = await LostPet.find(filter).sort({ createdAt: -1 })
 
     res.status(200).json({
       success: true,
