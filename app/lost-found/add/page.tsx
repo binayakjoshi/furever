@@ -21,7 +21,7 @@ type AddLostPetResponse = {
     breed: string;
     description: string;
     petType: string;
-    images: {
+    image: {
       url: string;
     };
     location: string;
@@ -51,7 +51,7 @@ const PostLostPet = () => {
         touched: false,
         value: "",
       },
-      images: {
+      image: {
         isValid: false,
         touched: false,
         value: undefined,
@@ -91,7 +91,7 @@ const PostLostPet = () => {
 
       requestData.append("breed", formState.inputs.breed.value as string);
 
-      requestData.append("images", formState.inputs.images.value as File);
+      requestData.append("image", formState.inputs.image.value as File);
 
       requestData.append("petType", formState.inputs.petType.value as string);
       requestData.append("location", formState.inputs.location.value as string);
@@ -190,7 +190,7 @@ const PostLostPet = () => {
 
             <div className={styles.imageSection}>
               <ImageUpload
-                id="images"
+                id="image"
                 center
                 errorText="Please provide an image."
                 onInput={inputHandler}
