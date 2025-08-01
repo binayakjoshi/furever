@@ -9,6 +9,7 @@ import Button from "@/components/custom-elements/button";
 import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "@/components/ui/error";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import SuccessPopup from "@/components/ui/success-popup";
 import styles from "./page.module.css";
 import Modal from "@/components/ui/modal";
 import { AdoptionPet } from "@/lib/types";
@@ -32,6 +33,7 @@ const EditAdoptionForm = () => {
   const [fetchedAdoptionPost, setFetchedAdoptionPost] =
     useState<AdoptionPet | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const formKey = useUniqueKey([fetchedAdoptionPost, isDataLoaded]);
 
   const [formState, inputHandler, setFormData] = useForm(
@@ -121,7 +123,10 @@ const EditAdoptionForm = () => {
         }),
         { "Content-Type": "application/json" }
       );
-      router.push(`/adoption/my-post`);
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push(`/adoption/my-post`);
+      }, 2000);
     } catch (err) {
       console.error("Error submitting form:", err);
     }
@@ -133,6 +138,12 @@ const EditAdoptionForm = () => {
       ) : (
         <div className={styles.formContainer}>
           {error && <ErrorModal error={error} clearError={clearError} />}
+          <SuccessPopup
+            message="Adoption post updated successfully!"
+            isVisible={showSuccessPopup}
+            onClose={() => setShowSuccessPopup(false)}
+            duration={2000}
+          />
 
           <div className={styles.header}>
             <h1 className={styles.title}>Edit your Adoption Post</h1>
