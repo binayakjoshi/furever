@@ -11,8 +11,10 @@ import { useHttp } from "@/lib/request-hook";
 import ImageUpload from "@/components/custom-elements/image-upload";
 import ErrorModal from "@/components/ui/error";
 import Button from "@/components/custom-elements/button";
+import SuccessPopup from "@/components/ui/success-popup";
 import styles from "./page.module.css";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { useState } from "react";
 
 type AddAdoptionResponse = {
   success: boolean;
@@ -35,6 +37,7 @@ const PostAdoption = () => {
   const router = useRouter();
   const { isLoading, error, clearError, sendRequest } =
     useHttp<AddAdoptionResponse>();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const [formState, inputHandler] = useForm(
     {
@@ -107,13 +110,22 @@ const PostAdoption = () => {
       console.log("request data");
       console.log(requestData);
       await sendRequest("/api/adoption/add", "POST", requestData);
-      router.push("/adoption");
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push("/adoption");
+      }, 2000);
     } catch (_) {}
   };
   return (
     <>
       {" "}
       {error && <ErrorModal error={error} clearError={clearError} />}
+      <SuccessPopup
+        message="Adoption post created successfully!"
+        isVisible={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        duration={2000}
+      />
       <div className={styles.container}>
         <form onSubmit={handleSubmit} noValidate>
           <h2 className={styles.title}>Post for Adoption</h2>
@@ -231,7 +243,7 @@ const PostAdoption = () => {
                 Submit
               </Button>
             )}
-          </div>
+          </div> 
         </form>
       </div>
     </>
