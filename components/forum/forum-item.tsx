@@ -58,7 +58,7 @@ const ForumPostItem = ({ post, onClick }: ForumPostItemProps) => {
             />
           </div>
           <div className={styles.authorDetails}>
-            <Link href={`/user/${post.author._id}`}>
+            <Link href={`/pet-owners/${post.author._id}`}>
               <h3>{post.author.name}</h3>
             </Link>
             <div className={styles.authorMeta}>

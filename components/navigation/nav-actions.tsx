@@ -83,7 +83,7 @@ const NavActions = () => {
                 href={
                   user.role === "vet"
                     ? `/vets/${user.userId}`
-                    : `/user/${user.userId}`
+                    : `/pet-owners/${user.userId}`
                 }
                 onClick={toggleDrawer}
                 title="View your profile"

@@ -2,23 +2,29 @@
 import { FaTrash, FaPen } from "react-icons/fa";
 import { useAuth } from "@/context/auth-context";
 import Button from "../custom-elements/button";
-import styles from "./user-profile-action.module.css";
+import styles from "./pet-owner-profile-action.module.css";
 
-type UserProfileActionProps = {
+type PetOwnerProfileActionProps = {
   userId: string;
 };
-const UserProfileAction = ({ userId }: UserProfileActionProps) => {
+const PetOwnerProfileAction = ({ userId }: PetOwnerProfileActionProps) => {
   const { user } = useAuth();
   if (userId === user?.userId)
     return (
       <div className={styles.actions}>
-        <Button className={styles.editButton} href={`/user/${userId}/edit`}>
+        <Button
+          className={styles.editButton}
+          href={`/pet-owners/${userId}/edit`}
+        >
           <span className={styles.buttonIcon}>
             <FaPen />
           </span>
           Edit Profile
         </Button>
-        <Button className={styles.deleteButton} href={`/user/${userId}/delete`}>
+        <Button
+          className={styles.deleteButton}
+          href={`/pet-owners/${userId}/delete`}
+        >
           <span className={styles.buttonIcon}>
             <FaTrash />
           </span>
@@ -28,4 +34,4 @@ const UserProfileAction = ({ userId }: UserProfileActionProps) => {
     );
   return null;
 };
-export default UserProfileAction;
+export default PetOwnerProfileAction;
