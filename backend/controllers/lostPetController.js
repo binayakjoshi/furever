@@ -9,6 +9,7 @@ exports.createLostPet = async (req, res) => {
   try {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
+      console.log(errors.array())
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -23,16 +24,10 @@ exports.createLostPet = async (req, res) => {
       })
     }
 
-    const { petId, breed, description, petType, contactInfo } = req.body
+    const {breed, description, petType, contactInfo,location,name } = req.body
 
   
-    const pet = await Pet.findOne({ _id: petId, user: req.userData.userId })
-    if (!pet) {
-      return res.status(404).json({
-        success: false,
-        message: "Pet not found or you don't have permission",
-      })
-    }
+   
 
   
     const images = []
@@ -53,21 +48,21 @@ exports.createLostPet = async (req, res) => {
     }
 
     const lostPet = new LostPet({
+      name,
       owner: req.userData.userId,
-      pet: petId,
       breed,
       description,
       petType: petType || "Dog",
       contactInfo,
       images,
+      location,
       status: "active",
       alertSent: false,
     })
 
     await lostPet.save()
     await lostPet.populate([
-      { path: "owner", select: "name email" },
-      { path: "pet", select: "name" },
+      { path: "owner", select: "name email" }
     ])
 
     // Send lost pet alert email to owner
@@ -75,7 +70,7 @@ exports.createLostPet = async (req, res) => {
       await emailService.sendLostPetAlert({
         ownerEmail: lostPet.owner.email,
         ownerName: lostPet.owner.name,
-        petName: lostPet.pet.name,
+        petName: name,
         petDescription: description,
         contactInfo: contactInfo,
         location: "Please check your post for location details",

@@ -386,7 +386,7 @@ exports.getInterestedUsers = async (req, res) => {
 
     const adoptionPost = await Adoption.findById(adoptionPostId).populate({
       path: "interestedUsers.user",
-      select: "name email phone",
+      select: "name email phone profileImage address",
     })
 
     if (!adoptionPost) {

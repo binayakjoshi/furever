@@ -1,7 +1,6 @@
 const { body } = require("express-validator")
 
 const createLostPetValidation = [
-  body("petId").notEmpty().withMessage("Pet ID is required").isMongoId().withMessage("Invalid pet ID format"),
   body("breed")
     .notEmpty()
     .withMessage("Breed is required")
@@ -15,9 +14,6 @@ const createLostPetValidation = [
     .withMessage("Description must be between 10 and 1000 characters")
     .trim(),
   body("petType").optional().isIn(["Dog", "Cat"]).withMessage("Pet type must be either Dog or Cat"),
-  body("contactInfo.phone").notEmpty().withMessage("Phone number is required").trim(),
-  body("contactInfo.email").notEmpty().withMessage("Email is required").isEmail().withMessage("Invalid email format"),
-  body("contactInfo.alternateContact").optional().trim(),
 ]
 
 const updateLostPetValidation = [

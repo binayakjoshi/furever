@@ -7,12 +7,12 @@ const lostPetSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    pet: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Pet",
-      required: true,
-    },
     breed: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    location: {
       type: String,
       required: true,
       trim: true,
@@ -30,17 +30,8 @@ const lostPetSchema = new mongoose.Schema(
       required: true,
     },
     contactInfo: {
-      phone: {
-        type: String,
-        required: true,
-      },
-      email: {
-        type: String,
-        required: true,
-      },
-      alternateContact: {
-        type: String,
-      },
+      type: String,
+      required:true
     },
     images: [
       {
