@@ -65,21 +65,7 @@ exports.createLostPet = async (req, res) => {
       { path: "owner", select: "name email" }
     ])
 
-    // Send lost pet alert email to owner
-    try {
-      await emailService.sendLostPetAlert({
-        ownerEmail: lostPet.owner.email,
-        ownerName: lostPet.owner.name,
-        petName: name,
-        petDescription: description,
-        contactInfo: contactInfo,
-        location: "Please check your post for location details",
-      })
-      console.log("Lost pet alert email sent successfully")
-    } catch (emailError) {
-      console.error("Failed to send lost pet alert:", emailError)
-     
-    }
+    //email pathaune hataide maile
 
     res.status(201).json({
       success: true,
