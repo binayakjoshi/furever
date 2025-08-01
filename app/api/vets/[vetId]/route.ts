@@ -50,12 +50,12 @@ export const DELETE = async (request: NextRequest, { params }: ParamType) => {
   }
 };
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (request: NextRequest, { params }: ParamType) => {
+  const { vetId } = await params;
   try {
     const cookieHeader = request.headers.get("cookie") || "";
-
     const backendRes = await fetch(
-      `${process.env.BACKEND_URL}/api/appointments`,
+      `${process.env.BACKEND_URL}/api/appointments/${vetId}/interest`,
       {
         method: "POST",
         headers: {
