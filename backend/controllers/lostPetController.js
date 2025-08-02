@@ -49,8 +49,7 @@ exports.createLostPet = async (req, res) => {
       { path: "owner", select: "name email" }
     ])
 
-    // Note: No email sent to owner when they create their own lost pet post
-    // Email notifications are only sent when someone reports finding the pet
+
 
     res.status(201).json({
       success: true,
@@ -251,14 +250,14 @@ exports.deleteLostPet = async (req, res) => {
 
 exports.reportFoundPet = async (req, res) => {
   try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      })
-    }
+    // const errors = validationResult(req)
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Validation failed",
+    //     errors: errors.array(),
+    //   })
+    // }
 
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
@@ -267,7 +266,7 @@ exports.reportFoundPet = async (req, res) => {
       })
     }
 
-    const { reporterName, reporterContact, message, location } = req.body
+    // const { reporterName, reporterContact, message, location } = req.body
     const lostPetId = req.params.id
 
     const lostPet = await LostPet.findById(lostPetId).populate("owner", "name email")
@@ -286,27 +285,22 @@ exports.reportFoundPet = async (req, res) => {
       })
     }
 
-    // Handle image uploads if any
-    const images = []
-    if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        images.push({
-          url: file.path,
-          publicId: file.filename,
-        })
-      })
-    }
+    // // Handle image uploads if any
+    // const images = []
+    // if (req.files && req.files.length > 0) {
+    //   req.files.forEach((file) => {
+    //     images.push({
+    //       url: file.path,
+    //       publicId: file.filename,
+    //     })
+    //   })
+    // }
 
     const foundReport = {
-      reporterName,
-      reporterContact,
-      message: message || "",
-      location,
-      images,
-      reportedAt: new Date(),
+      user: req.userData.userId, 
     }
 
-    lostPet.foundReports.push(foundReport)
+    lostPet.foundAlerts.push(foundReport)
     lostPet.alertSent = true
 
     await lostPet.save()
@@ -316,16 +310,12 @@ exports.reportFoundPet = async (req, res) => {
       await emailService.sendFoundPetNotification({
         ownerEmail: lostPet.owner.email,
         ownerName: lostPet.owner.name,
-        petName: lostPet.name, // Use lostPet.name instead of lostPet.pet.name
-        finderName: reporterName,
-        finderContact: reporterContact,
-        message: message,
-        location: location,
+        petName: lostPet.name, 
       })
       console.log("Found pet notification email sent successfully")
     } catch (emailError) {
       console.error("Failed to send found pet notification:", emailError)
-      // Don't fail the request if email fails
+      
     }
 
     res.status(201).json({
