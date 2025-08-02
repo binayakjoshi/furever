@@ -4,6 +4,6 @@ const { contactFormValidation, handleValidationErrors } = require("../middleware
 
 const router = express.Router()
 
-router.post("/", contactFormValidation, handleValidationErrors, sendContactMessage)
+router.post("/", handleValidationErrors, sendContactMessage)
 
 module.exports = router

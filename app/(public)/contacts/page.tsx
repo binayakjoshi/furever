@@ -9,12 +9,6 @@ import ContactForm from "@/components/forms/contact-form";
 import styles from "./page.module.css";
 
 const ContactPage = () => {
-  const handleSubmit = async (event: FormEvent) => {
-    "use server";
-    event.preventDefault();
-    console.log("submitting form....");
-  };
-
   return (
     <div className={styles.container}>
       <section className={styles.introSection}>
@@ -86,7 +80,7 @@ const ContactPage = () => {
             </div>
           </div>
         </div>
-        <ContactForm handleSubmit={handleSubmit} />
+        <ContactForm />
       </section>
     </div>
   );

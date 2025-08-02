@@ -11,12 +11,6 @@ const sendContactMessage = async (req, res, next) => {
     }
 
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return next(new HttpError("Please provide a valid email address", 400))
-    }
-
-    // Send email notification
     await emailService.sendContactFormEmail({
       name: name.trim(),
       email: email.trim(),

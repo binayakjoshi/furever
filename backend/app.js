@@ -19,6 +19,8 @@ const chatRoutes = require("./routes/chatRoutes")
 const appointmentRoutes = require("./routes/appointmentRoutes")
 const lostPetRoutes = require("./routes/lostPetRoutes")
 const vaccinationRoutes = require("./routes/vaccinationRoutes")
+const contactRoutes = require("./routes/contactRoutes")
+
 
 const HttpError = require("./models/http-error")
 
@@ -155,6 +157,7 @@ app.use("/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/lost-pets", lostPetRoutes)
 app.use("/api/vaccinations", vaccinationRoutes)
+app.use("/api/contact",contactRoutes)
 
 
 app.use((req, res, next) => {

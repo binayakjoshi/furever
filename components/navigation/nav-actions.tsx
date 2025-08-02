@@ -137,6 +137,16 @@ const NavActions = () => {
                 Post in Forum
               </Link>
             </li>
+            <li>
+              <Link
+                href="/lost-found//add"
+                onClick={toggleDrawer}
+                title="add a post"
+              >
+                <FaPlus size={16} />
+                Post for Lost Pet
+              </Link>
+            </li>
           </ul>
         </nav>
 
