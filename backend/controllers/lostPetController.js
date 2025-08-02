@@ -49,20 +49,8 @@ exports.createLostPet = async (req, res) => {
       { path: "owner", select: "name email" }
     ])
 
-    try {
-      await emailService.sendLostPetAlert({
-        ownerEmail: lostPet.owner.email,
-        ownerName: lostPet.owner.name,
-        petName: name,
-        petDescription: description,
-        contactInfo: contactInfo,
-        location: "Please check your post for location details",
-      })
-      console.log("Lost pet alert email sent successfully")
-    } catch (emailError) {
-      console.error("Failed to send lost pet alert:", emailError)
-     
-    }
+    // Note: No email sent to owner when they create their own lost pet post
+    // Email notifications are only sent when someone reports finding the pet
 
     res.status(201).json({
       success: true,
@@ -275,9 +263,11 @@ exports.reportFoundPet = async (req, res) => {
     if (!req.userData || !req.userData.userId) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: "Authentication required to report found pets",
       })
     }
+
+    const { reporterName, reporterContact, message, location } = req.body
     const lostPetId = req.params.id
 
     const lostPet = await LostPet.findById(lostPetId).populate("owner", "name email")
@@ -296,21 +286,37 @@ exports.reportFoundPet = async (req, res) => {
       })
     }
 
-       const userId = req.userData.userId;
+    // Handle image uploads if any
+    const images = []
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((file) => {
+        images.push({
+          url: file.path,
+          publicId: file.filename,
+        })
+      })
+    }
 
-    lostPet.foundAlert.push({user:userId})
+    const foundReport = {
+      reporterName,
+      reporterContact,
+      message: message || "",
+      location,
+      images,
+      reportedAt: new Date(),
+    }
 
-   
+    lostPet.foundReports.push(foundReport)
     lostPet.alertSent = true
 
     await lostPet.save()
 
-    //send the fucking email to the owner 
+    // Send email notification to the owner
     try {
       await emailService.sendFoundPetNotification({
         ownerEmail: lostPet.owner.email,
         ownerName: lostPet.owner.name,
-        petName: lostPet.pet.name,
+        petName: lostPet.name, // Use lostPet.name instead of lostPet.pet.name
         finderName: reporterName,
         finderContact: reporterContact,
         message: message,
