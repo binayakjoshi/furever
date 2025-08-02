@@ -43,6 +43,9 @@ export const NavigationLinks = () => {
             <li>
               <NavLink href="/pet-forum">Pet Forum</NavLink>
             </li>
+            <li>
+              <NavLink href="/lost-found">Lost and Found</NavLink>
+            </li>
           </ul>
         </nav>
       </SideDrawer>
@@ -68,6 +71,9 @@ export const NavigationLinks = () => {
       </li>
       <li className={classes.navItem}>
         <NavLink href="/pet-forum">Pet Forum</NavLink>
+      </li>
+      <li className={classes.navItem}>
+        <NavLink href="/lost-found">Lost/Found</NavLink>
       </li>
     </>
   );
