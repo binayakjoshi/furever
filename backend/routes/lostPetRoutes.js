@@ -15,7 +15,7 @@ router.use(authenticate)
 router.post(
   "/:id/found",
   imageUpload.array("images", 5),
-  lostPetValidation.reportFoundPetValidation,
+  // lostPetValidation.reportFoundPetValidation,
   lostPetController.reportFoundPet,
 )
 
