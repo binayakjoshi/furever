@@ -36,30 +36,30 @@ const updateLostPetValidation = [
     .withMessage("Status must be: active, cancelled, or found"),
 ]
 
-const reportFoundPetValidation = [
-  body("reporterName")
-    .notEmpty()
-    .withMessage("Reporter name is required")
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters")
-    .trim(),
-  body("reporterContact")
-    .notEmpty()
-    .withMessage("Contact information is required")
-    .isLength({ min: 5, max: 100 })
-    .withMessage("Contact must be between 5 and 100 characters")
-    .trim(),
-  body("message").optional().isLength({ max: 500 }).withMessage("Message must not exceed 500 characters").trim(),
-  body("location")
-    .notEmpty()
-    .withMessage("Location where pet was found is required")
-    .isLength({ min: 5, max: 200 })
-    .withMessage("Location must be between 5 and 200 characters")
-    .trim(),
-]
+// const reportFoundPetValidation = [
+//   body("reporterName")
+//     .notEmpty()
+//     .withMessage("Reporter name is required")
+//     .isLength({ min: 2, max: 50 })
+//     .withMessage("Name must be between 2 and 50 characters")
+//     .trim(),
+//   body("reporterContact")
+//     .notEmpty()
+//     .withMessage("Contact information is required")
+//     .isLength({ min: 5, max: 100 })
+//     .withMessage("Contact must be between 5 and 100 characters")
+//     .trim(),
+//   body("message").optional().isLength({ max: 500 }).withMessage("Message must not exceed 500 characters").trim(),
+//   body("location")
+//     .notEmpty()
+//     .withMessage("Location where pet was found is required")
+//     .isLength({ min: 5, max: 200 })
+//     .withMessage("Location must be between 5 and 200 characters")
+//     .trim(),
+// ]
 
 module.exports = {
   createLostPetValidation,
   updateLostPetValidation,
-  reportFoundPetValidation,
+  // reportFoundPetValidation,
 }
