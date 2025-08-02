@@ -9,12 +9,15 @@ const imageUpload = require("../middleware/imageUpload")
 
 router.get("/", lostPetController.getAllLostPets)
 router.get("/:id", lostPetController.getLostPetById)
-router.post(
-  "/:id/found",
-  lostPetController.reportFoundPet,
-)
 
 router.use(authenticate)
+
+router.post(
+  "/:id/found",
+  imageUpload.array("images", 5),
+  lostPetValidation.reportFoundPetValidation,
+  lostPetController.reportFoundPet,
+)
 
 router.post("/", imageUpload.single("image"), lostPetValidation.createLostPetValidation, lostPetController.createLostPet)
 router.put(
