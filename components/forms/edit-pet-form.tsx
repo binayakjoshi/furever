@@ -15,14 +15,6 @@ import SuccessPopup from "../ui/success-popup";
 import type { Pet } from "@/lib/types";
 import styles from "./edit-pet-form.module.css";
 
-const useUniqueKey = (deps: unknown[]) => {
-  const [key, setKey] = useState(0);
-  useEffect(() => {
-    setKey((prev) => prev + 1);
-  }, deps);
-  return key;
-};
-
 type PetDetailResponse = {
   success: boolean;
   message: string;
@@ -35,7 +27,7 @@ const EditPetForm = () => {
   const [fetchedPet, setFetchedPet] = useState<Pet | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  const formKey = useUniqueKey([fetchedPet, isDataLoaded]);
+  const [formKey, setFormKey] = useState(0);
 
   const [
     formState,
@@ -164,7 +156,9 @@ const EditPetForm = () => {
       console.error("Error submitting form:", err);
     }
   };
-
+  useEffect(() => {
+    setFormKey((prev) => prev + 1);
+  }, [fetchedPet, isDataLoaded]);
   const handleVaccinationChange = (
     id: string,
     field: keyof Omit<import("@/lib/use-form").VaccinationRecord, "id">,

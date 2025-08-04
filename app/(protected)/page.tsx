@@ -21,7 +21,7 @@ type UpcomingEvents = {
   date: string;
 };
 
-export const Dashboard = async () => {
+const HomePage = async () => {
   const cookieHeader = (await cookies()).toString();
   let user: Vet | PetOwner;
 
@@ -256,5 +256,4 @@ export const Dashboard = async () => {
     </div>
   );
 };
-
-export default Dashboard;
+export default HomePage;

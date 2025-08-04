@@ -1,33 +1,34 @@
 "use client";
 
-import React from "react";
-import { useForm } from "@/lib/use-form";
+import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Input from "@/components/custom-elements/input";
-import { ForumPost } from "@/lib/types";
-import Button from "@/components/custom-elements/button";
-import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
-import LoadingSpinner from "@/components/ui/loading-spinner";
+import { useForm } from "@/lib/use-form";
 import { useHttp } from "@/lib/request-hook";
-import styles from "./page.module.css";
+import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
+
+import Input from "@/components/custom-elements/input";
+import Button from "@/components/custom-elements/button";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import ErrorModal from "@/components/ui/error";
 import SuccessPopup from "@/components/ui/success-popup";
-import { useEffect, useState } from "react";
 import Modal from "@/components/ui/modal";
 
-const useUniqueKey = (deps: unknown[]) => {
-  const [key, setKey] = useState(0);
-  useEffect(() => {
-    setKey((prev) => prev + 1);
-  }, deps);
-  return key;
-};
-type ForumPosResponse = {
+import styles from "./page.module.css";
+import type { ForumPost } from "@/lib/types";
+
+interface ForumPostResponse {
   success: boolean;
   message: string;
   data: ForumPost;
-};
+}
+
 const EditForumPost = () => {
+  const { postId } = useParams() as { postId: string };
+  const router = useRouter();
+
+  const [fetchedPost, setFetchedPost] = useState<ForumPost | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
   const [formState, inputHandler, setFormData] = useForm(
     {
       title: { value: "", isValid: false, touched: false },
@@ -37,43 +38,39 @@ const EditForumPost = () => {
     false
   );
 
-  const { postId } = useParams();
-  const [fetchedForumPost, setFetchedForumPost] = useState<ForumPost | null>(
-    null
-  );
-  const formKey = useUniqueKey([fetchedForumPost]);
-
-  const router = useRouter();
   const { isLoading, sendRequest, error, clearError } =
-    useHttp<ForumPosResponse>();
-  const [showSuccessPopup, setShowSuccessPopup] = React.useState(false);
+    useHttp<ForumPostResponse>();
 
+  // Fetch forum post data
   useEffect(() => {
-    try {
-      const fetchForumPost = async () => {
+    const fetchPost = async () => {
+      try {
         const res = await sendRequest(`/api/forum/${postId}`);
-        setFetchedForumPost(res.data);
-      };
-      fetchForumPost();
-    } catch {}
+        setFetchedPost(res.data);
+      } catch (err) {
+        console.error("Failed to fetch post:", err);
+      }
+    };
+    fetchPost();
   }, [sendRequest, postId]);
 
+  // Populate form when post is loaded
   useEffect(() => {
-    if (fetchedForumPost && !isLoading) {
+    if (fetchedPost) {
       setFormData(
         {
           title: {
-            value: fetchedForumPost?.title,
+            value: fetchedPost.title,
             isValid: true,
             touched: true,
           },
           content: {
-            value: fetchedForumPost?.content,
+            value: fetchedPost.content,
             isValid: true,
             touched: true,
           },
           category: {
-            value: fetchedForumPost?.category,
+            value: fetchedPost.category,
             isValid: true,
             touched: true,
           },
@@ -81,10 +78,11 @@ const EditForumPost = () => {
         true
       );
     }
-  }, [setFormData, fetchedForumPost, isLoading]);
+  }, [fetchedPost, setFormData]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  // Form submit handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formState.isValid) return;
 
     try {
@@ -98,11 +96,14 @@ const EditForumPost = () => {
         }),
         { "Content-Type": "application/json" }
       );
+
       setShowSuccessPopup(true);
       setTimeout(() => {
         router.push(`/pet-forum/post/${postId}`);
       }, 2000);
-    } catch {}
+    } catch (err) {
+      console.error("Error updating post:", err);
+    }
   };
 
   return (
@@ -115,7 +116,7 @@ const EditForumPost = () => {
         duration={3000}
       />
       <Modal>
-        {isLoading ? (
+        {isLoading && !fetchedPost ? (
           <LoadingSpinner text="Fetching Post data..." />
         ) : (
           <div className={styles.formContainer}>
@@ -129,12 +130,7 @@ const EditForumPost = () => {
                 ×
               </Button>
             </div>
-            <form
-              key={formKey}
-              onSubmit={handleSubmit}
-              noValidate
-              className={styles.form}
-            >
+            <form onSubmit={handleSubmit} noValidate className={styles.form}>
               <div className={styles.formGroup}>
                 <Input
                   id="title"
@@ -143,24 +139,24 @@ const EditForumPost = () => {
                   label="Title"
                   placeholder="Title of the post"
                   className={styles.Input}
-                  errorText="Title is required and must not exceed 100 Characters"
+                  errorText="Title is required and must not exceed 50 characters"
                   onInput={inputHandler}
-                  initialValue={fetchedForumPost?.title}
-                  initialValid={true}
                   validators={[VALIDATOR_REQUIRE(), VALIDATOR_MAXLENGTH(50)]}
+                  initialValue={fetchedPost?.title || ""}
+                  initialValid={true}
                 />
               </div>
+
               <div className={styles.fieldWrapper}>
                 <Input
                   id="content"
                   element="textarea"
-                  type="text"
                   label="Description"
-                  placeholder=" Details of the post...."
+                  placeholder="Details of the post..."
                   errorText="Description is required"
                   onInput={inputHandler}
                   validators={[VALIDATOR_REQUIRE()]}
-                  initialValue={fetchedForumPost?.content}
+                  initialValue={fetchedPost?.content || ""}
                   initialValid={true}
                   rows={8}
                   className={styles.Input}
@@ -171,7 +167,7 @@ const EditForumPost = () => {
                 <Input
                   id="category"
                   element="radio"
-                  label="Please pick an option:"
+                  label="Please pick a category:"
                   errorText="Please select one option"
                   initialValid={true}
                   options={[
@@ -185,7 +181,7 @@ const EditForumPost = () => {
                   ]}
                   onInput={inputHandler}
                   validators={[VALIDATOR_REQUIRE()]}
-                  initialValue={fetchedForumPost?.category}
+                  initialValue={fetchedPost?.category || ""}
                 />
               </div>
 
@@ -193,7 +189,7 @@ const EditForumPost = () => {
                 <LoadingSpinner
                   variant="orbit"
                   size="small"
-                  text="Posting...."
+                  text="Posting..."
                 />
               ) : (
                 <div className={styles.buttonGroup}>
@@ -206,8 +202,8 @@ const EditForumPost = () => {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!formState.isValid}
                     className={styles.saveButton}
+                    disabled={!formState.isValid}
                   >
                     Save Changes
                   </Button>
