@@ -1,5 +1,5 @@
 "use client";
-import type React from "react";
+
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "@/lib/use-form";
@@ -10,31 +10,25 @@ import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "@/components/ui/error";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import SuccessPopup from "@/components/ui/success-popup";
-import styles from "./page.module.css";
 import Modal from "@/components/ui/modal";
-import { AdoptionPet } from "@/lib/types";
+import styles from "./page.module.css";
+import type { AdoptionPet } from "@/lib/types";
 
-const useUniqueKey = (deps: unknown[]) => {
-  const [key, setKey] = useState(0);
-  useEffect(() => {
-    setKey((prev) => prev + 1);
-  }, deps);
-  return key;
-};
-
-type AdoptionResponse = {
+interface AdoptionResponse {
   success: boolean;
   message: string;
   data: AdoptionPet;
-};
+}
+
 const EditAdoptionForm = () => {
   const router = useRouter();
-  const { adoptSlug } = useParams();
+  const { adoptSlug } = useParams() as { adoptSlug: string };
+
   const [fetchedAdoptionPost, setFetchedAdoptionPost] =
     useState<AdoptionPet | null>(null);
-  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const formKey = useUniqueKey([fetchedAdoptionPost, isDataLoaded]);
+  const [formKey, setFormKey] = useState(0);
 
   const [formState, inputHandler, setFormData] = useForm(
     {
@@ -48,62 +42,75 @@ const EditAdoptionForm = () => {
     },
     false
   );
+
   const { isLoading, sendRequest, clearError, error } =
     useHttp<AdoptionResponse>();
 
+  // Fetch adoption post
   useEffect(() => {
     (async () => {
       try {
         const res = await sendRequest(`/api/adoption/${adoptSlug}`);
         setFetchedAdoptionPost(res.data);
         setIsDataLoaded(true);
-      } catch {}
+      } catch (err) {
+        console.error("Failed to fetch adoption post:", err);
+      }
     })();
   }, [sendRequest, adoptSlug]);
 
+  // Set form data once fetched
   useEffect(() => {
-    setFormData(
-      {
-        name: {
-          value: fetchedAdoptionPost?.name,
-          isValid: true,
-          touched: true,
+    if (fetchedAdoptionPost) {
+      setFormData(
+        {
+          name: {
+            value: fetchedAdoptionPost.name,
+            isValid: true,
+            touched: true,
+          },
+          description: {
+            value: fetchedAdoptionPost.description,
+            isValid: true,
+            touched: true,
+          },
+          breed: {
+            value: fetchedAdoptionPost.breed,
+            isValid: true,
+            touched: true,
+          },
+          petType: {
+            value: fetchedAdoptionPost.petType,
+            isValid: true,
+            touched: true,
+          },
+          location: {
+            value: fetchedAdoptionPost.location,
+            isValid: true,
+            touched: true,
+          },
+          contactInfo: {
+            value: fetchedAdoptionPost.contactInfo,
+            isValid: true,
+            touched: true,
+          },
+          requirements: {
+            value: fetchedAdoptionPost.requirements,
+            isValid: true,
+            touched: true,
+          },
         },
-        description: {
-          value: fetchedAdoptionPost?.description,
-          isValid: true,
-          touched: true,
-        },
-        breed: {
-          value: fetchedAdoptionPost?.breed,
-          isValid: true,
-          touched: true,
-        },
-        petType: {
-          value: fetchedAdoptionPost?.petType,
-          isValid: true,
-          touched: true,
-        },
-        location: {
-          value: fetchedAdoptionPost?.location,
-          isValid: true,
-          touched: true,
-        },
-        contactInfo: {
-          value: fetchedAdoptionPost?.contactInfo,
-          isValid: true,
-          touched: true,
-        },
-        requirements: {
-          value: fetchedAdoptionPost?.requirements,
-          isValid: true,
-          touched: true,
-        },
-      },
-      true
-    );
-  }, [setFormData, isDataLoaded, fetchedAdoptionPost]);
+        true
+      );
+    }
+  }, [fetchedAdoptionPost, setFormData]);
 
+  // Regenerate form key when data is loaded
+  useEffect(() => {
+    setFormKey((prev) => prev + 1);
+  }, [fetchedAdoptionPost, isDataLoaded]);
+
+  // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.isValid) return;
@@ -123,18 +130,20 @@ const EditAdoptionForm = () => {
         }),
         { "Content-Type": "application/json" }
       );
+
       setShowSuccessPopup(true);
       setTimeout(() => {
-        router.push(`/adoption/my-post`);
+        router.push("/adoption/my-post");
       }, 2000);
     } catch (err) {
       console.error("Error submitting form:", err);
     }
   };
+
   return (
     <Modal>
       {!isDataLoaded ? (
-        <LoadingSpinner text="Fetching User Data...." />
+        <LoadingSpinner text="Fetching User Data..." />
       ) : (
         <div className={styles.formContainer}>
           {error && <ErrorModal error={error} clearError={clearError} />}
@@ -155,6 +164,7 @@ const EditAdoptionForm = () => {
               ×
             </Button>
           </div>
+
           <form
             key={formKey}
             onSubmit={handleSubmit}
@@ -168,7 +178,7 @@ const EditAdoptionForm = () => {
                 type="text"
                 label="Name"
                 validators={[VALIDATOR_REQUIRE()]}
-                errorText="Name is Required"
+                errorText="Name is required"
                 onInput={inputHandler}
                 className={styles.Input}
                 initialValue={fetchedAdoptionPost?.name || ""}
@@ -176,22 +186,21 @@ const EditAdoptionForm = () => {
               />
             </div>
 
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <Input
-                  id="description"
-                  element="input"
-                  type="text"
-                  label="Description of the pet"
-                  validators={[VALIDATOR_REQUIRE()]}
-                  errorText="Description is Required"
-                  onInput={inputHandler}
-                  className={styles.Input}
-                  initialValue={fetchedAdoptionPost?.description}
-                  initialValid={true}
-                />
-              </div>
+            <div className={styles.formGroup}>
+              <Input
+                id="description"
+                element="input"
+                type="text"
+                label="Description of the pet"
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Description is required"
+                onInput={inputHandler}
+                className={styles.Input}
+                initialValue={fetchedAdoptionPost?.description || ""}
+                initialValid={true}
+              />
             </div>
+
             <div className={styles.formGroup}>
               <Input
                 id="petType"
@@ -214,15 +223,16 @@ const EditAdoptionForm = () => {
                 id="contactInfo"
                 element="input"
                 type="text"
-                label="Contact Inof"
-                placeholder="Your Phone number"
-                errorText="Contact Info is required"
-                onInput={inputHandler}
+                label="Contact Info"
+                placeholder="Your phone number"
                 validators={[VALIDATOR_REQUIRE()]}
+                errorText="Contact info is required"
+                onInput={inputHandler}
                 initialValue={fetchedAdoptionPost?.contactInfo || ""}
                 initialValid={true}
               />
             </div>
+
             <div className={styles.formGroup}>
               <Input
                 id="breed"
@@ -230,38 +240,40 @@ const EditAdoptionForm = () => {
                 type="text"
                 label="Breed"
                 placeholder="Breed of your pet (or enter None)"
+                validators={[VALIDATOR_REQUIRE()]}
                 errorText="Breed is required"
                 onInput={inputHandler}
-                validators={[VALIDATOR_REQUIRE()]}
                 initialValue={fetchedAdoptionPost?.breed || ""}
                 initialValid={true}
               />
             </div>
+
             <div className={styles.formGroup}>
               <Input
                 id="location"
                 element="input"
                 type="text"
                 label="Location"
-                placeholder="location"
-                errorText="Location is Required"
-                onInput={inputHandler}
+                placeholder="Location"
                 validators={[VALIDATOR_REQUIRE()]}
+                errorText="Location is required"
+                onInput={inputHandler}
                 initialValue={fetchedAdoptionPost?.location || ""}
                 initialValid={true}
               />
             </div>
+
             <div className={styles.formGroup}>
               <Input
                 id="requirements"
                 element="input"
                 type="text"
                 label="Requirements"
-                placeholder="Requirements"
-                errorText="Field is required"
-                onInput={inputHandler}
+                placeholder="Requirements for adopting this pet"
                 validators={[VALIDATOR_REQUIRE()]}
-                initialValue={fetchedAdoptionPost?.breed || ""}
+                errorText="Requirements are required"
+                onInput={inputHandler}
+                initialValue={fetchedAdoptionPost?.requirements || ""}
                 initialValid={true}
               />
             </div>
@@ -279,8 +291,8 @@ const EditAdoptionForm = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={!formState.isValid}
                   className={styles.saveButton}
+                  disabled={!formState.isValid}
                 >
                   Save Changes
                 </Button>

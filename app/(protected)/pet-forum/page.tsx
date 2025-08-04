@@ -15,6 +15,7 @@ const ForumPage = async () => {
     const resData = await res.json();
     forumPosts = resData.data;
   } catch (error) {
+    console.log(error);
     throw new Error("Error while fetching the forum list");
   }
 

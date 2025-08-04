@@ -1,4 +1,3 @@
-import { FormEvent } from "react";
 import {
   FaEnvelope,
   FaCommentDots,

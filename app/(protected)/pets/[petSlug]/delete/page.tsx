@@ -6,7 +6,6 @@ import { type Pet } from "@/lib/types";
 import Modal from "@/components/ui/modal";
 import Button from "@/components/custom-elements/button";
 import styles from "./page.module.css";
-import { useAuth } from "@/context/auth-context";
 import ErrorModal from "@/components/ui/error";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -19,7 +18,6 @@ type petDetailResponse = {
 const PetDeletePage = () => {
   const router = useRouter();
   const params = useParams();
-  const { user } = useAuth();
   const petSlug = params.petSlug;
   const { isLoading, sendRequest, error, clearError } =
     useHttp<petDetailResponse>();
@@ -28,9 +26,9 @@ const PetDeletePage = () => {
     try {
       const res = await sendRequest(`/api/pets/${petSlug}/delete`, "DELETE");
       if (res.success && res.data) {
-        router.push('/');
+        router.push("/");
       }
-    } catch (_) {}
+    } catch {}
   };
 
   return (

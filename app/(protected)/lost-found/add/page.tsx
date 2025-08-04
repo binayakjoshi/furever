@@ -2,11 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "@/lib/use-form";
 import Input from "@/components/custom-elements/input";
-import {
-  VALIDATOR_REQUIRE,
-  VALIDATOR_MAXLENGTH,
-  VALIDATOR_NUMBER,
-} from "@/lib/validators";
+import { VALIDATOR_REQUIRE, VALIDATOR_NUMBER } from "@/lib/validators";
 import { useHttp } from "@/lib/request-hook";
 import ImageUpload from "@/components/custom-elements/image-upload";
 import ErrorModal from "@/components/ui/error";
@@ -103,7 +99,7 @@ const PostLostPet = () => {
       await sendRequest("/api/lost-found", "POST", requestData);
       console.log("clicked try again");
       router.push("/lost-found");
-    } catch (_) {}
+    } catch {}
   };
   return (
     <>

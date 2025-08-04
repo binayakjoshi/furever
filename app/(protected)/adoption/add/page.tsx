@@ -114,7 +114,7 @@ const PostAdoption = () => {
       setTimeout(() => {
         router.push("/adoption");
       }, 2000);
-    } catch (_) {}
+    } catch {}
   };
   return (
     <>
@@ -243,7 +243,7 @@ const PostAdoption = () => {
                 Submit
               </Button>
             )}
-          </div> 
+          </div>
         </form>
       </div>
     </>

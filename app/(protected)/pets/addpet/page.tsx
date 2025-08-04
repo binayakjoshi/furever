@@ -8,7 +8,6 @@ import Input from "@/components/custom-elements/input";
 import { type Pet } from "@/lib/types";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
 import ImageUpload from "@/components/custom-elements/image-upload";
-import { useAuth } from "@/context/auth-context";
 import Button from "@/components/custom-elements/button";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useHttp } from "@/lib/request-hook";
@@ -42,7 +41,6 @@ const AddPetPage = () => {
     },
     false
   );
-  const { user } = useAuth();
   const router = useRouter();
   const { isLoading, sendRequest, error, clearError } =
     useHttp<AddPetResponse>();
@@ -79,9 +77,9 @@ const AddPetPage = () => {
       await sendRequest("/api/pets", "POST", requestData);
       setShowSuccessPopup(true);
       setTimeout(() => {
-        router.push('/');
+        router.push("/");
       }, 2000);
-    } catch (_) {}
+    } catch {}
   };
 
   const handleVaccinationChange = (

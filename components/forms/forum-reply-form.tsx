@@ -29,7 +29,7 @@ const ForumReplyForm = ({ postId, addReply }: ForumReplyFormProps) => {
 
     try {
       const content = formState.inputs.content.value;
-      const res = await sendRequest(
+      await sendRequest(
         `/api/forum/${postId}`,
         "POST",
         JSON.stringify({ content }),

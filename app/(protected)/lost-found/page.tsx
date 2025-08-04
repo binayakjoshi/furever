@@ -17,6 +17,7 @@ const ViewLostPetList = async () => {
     const resData = await response.json();
     pets = resData.data;
   } catch (error) {
+    console.log(error);
     throw new Error("Error while fetching the adoption list");
   }
   return (

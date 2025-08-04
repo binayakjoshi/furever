@@ -8,7 +8,6 @@ import Input from "@/components/custom-elements/input";
 import { ForumPost } from "@/lib/types";
 import Button from "@/components/custom-elements/button";
 import { VALIDATOR_REQUIRE, VALIDATOR_MAXLENGTH } from "@/lib/validators";
-import { useAuth } from "@/context/auth-context";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useHttp } from "@/lib/request-hook";
 import styles from "./page.module.css";
@@ -29,7 +28,6 @@ const AddForumPost = () => {
     },
     false
   );
-  const { user } = useAuth();
   const router = useRouter();
   const { isLoading, sendRequest, error, clearError } =
     useHttp<AddForumPosResponse>();
