@@ -1,9 +1,27 @@
 const cloudinary = require("cloudinary").v2
+const multer = require("multer")
+const { CloudinaryStorage } = require("multer-storage-cloudinary")
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+// Create storage for different folders
+const createStorage = (folder = "pets") => {
+  return new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: folder,
+      transformation: [{ width: 800, height: 600, crop: "limit" }, { quality: "auto" }, { fetch_format: "auto" }],
+    },
+  })
+}
+
+
+const upload = multer({
+  storage: createStorage("pets"),
 })
 
 const uploadImage = async (image) => {
@@ -12,7 +30,6 @@ const uploadImage = async (image) => {
   const encoding = "base64"
   const base64Data = Buffer.from(imageData).toString("base64")
   const fileUri = "data:" + mime + ";" + encoding + "," + base64Data
-
   const result = await cloudinary.uploader.upload(fileUri, {
     folder: "pets",
   })
@@ -26,12 +43,10 @@ const uploadToFolder = async (image, folder = "pets") => {
     const encoding = "base64"
     const base64Data = Buffer.from(imageData).toString("base64")
     const fileUri = "data:" + mime + ";" + encoding + "," + base64Data
-
     const result = await cloudinary.uploader.upload(fileUri, {
       folder: folder,
       transformation: [{ width: 800, height: 600, crop: "limit" }, { quality: "auto" }, { fetch_format: "auto" }],
     })
-
     return {
       url: result.secure_url,
       publicId: result.public_id,
@@ -57,6 +72,8 @@ const deleteFromCloudinary = async (publicId) => {
 
 module.exports = {
   cloudinary,
+  upload,
+  createStorage,
   uploadImage,
   uploadToFolder,
   deleteFromCloudinary,

@@ -24,6 +24,10 @@ exports.createAdoptionPost = async (req, res, next) => {
     }
 
     const { name, description, breed, location, contactInfo, requirements ,petType} = req.body
+    
+    // Normalize petType to lowercase
+    const normalizedPetType = petType ? petType.toLowerCase() : 'dog'
+    
     const adoptionPost = new Adoption({
     
       creator: req.userData.userId,
@@ -35,9 +39,9 @@ exports.createAdoptionPost = async (req, res, next) => {
         publicId:req.file.filename,
       },
       location,
-      contactInfo: contactInfo || {},
+      contactInfo: contactInfo || "",
       requirements: requirements || "",
-      petType,
+      petType: normalizedPetType,
       status: "active", 
     })
 
@@ -382,7 +386,7 @@ exports.getInterestedUsers = async (req, res) => {
 
     const adoptionPost = await Adoption.findById(adoptionPostId).populate({
       path: "interestedUsers.user",
-      select: "name email phone",
+      select: "name email phone profileImage address",
     })
 
     if (!adoptionPost) {
@@ -440,9 +444,9 @@ exports.updateAdoptionPost = async (req, res) => {
 
     const adoptionPostId = req.params.id;
     const userId = req.userData.userId;
-    const { name, description, breed, location, contactInfo, requirements, status, image } = req.body;
+    const { name, description, breed, location, contactInfo, requirements, status, image, petType } = req.body;
 
-    // Find the adoption 
+   
     const adoptionPost = await Adoption.findById(adoptionPostId);
     if (!adoptionPost) {
       return res.status(404).json({
@@ -451,7 +455,7 @@ exports.updateAdoptionPost = async (req, res) => {
       });
     }
 
-    // Only creator can update the post
+    
     if (adoptionPost.creator.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -476,8 +480,9 @@ exports.updateAdoptionPost = async (req, res) => {
     if (location !== undefined) updateData.location = location;
     if (contactInfo !== undefined) updateData.contactInfo = contactInfo;
     if (requirements !== undefined) updateData.requirements = requirements;
+    if (petType !== undefined) updateData.petType = petType.toLowerCase();
     
-    // Handle image update
+    
     if (image !== undefined) {
       
       if (image && typeof image === 'object' && image.url && image.publicId) {
@@ -486,7 +491,7 @@ exports.updateAdoptionPost = async (req, res) => {
           publicId: image.publicId
         };
       } else if (image === null || image === '') {
-        // cannot remove image, it must be provided
+        
         return res.status(400).json({
           success: false,
           message: "Image is required. Please provide a valid image with url and publicId",
@@ -499,7 +504,7 @@ exports.updateAdoptionPost = async (req, res) => {
       }
     }
     
-    // Only allow status updates to specific values
+    
     if (status !== undefined) {
       const allowedStatusUpdates = ["active", "pending", "cancelled"];
       if (allowedStatusUpdates.includes(status)) {
@@ -512,7 +517,7 @@ exports.updateAdoptionPost = async (req, res) => {
       }
     }
 
-    // Update the adoption post
+  
     const updatedAdoptionPost = await Adoption.findByIdAndUpdate(
       adoptionPostId,
       updateData,

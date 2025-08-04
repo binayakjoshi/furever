@@ -21,3 +21,59 @@ export const GET = async (request: NextRequest, { params }: ParamType) => {
     );
   }
 };
+
+export const DELETE = async (request: NextRequest, { params }: ParamType) => {
+  try {
+    const { vetId } = await params;
+    const cookieHeader = request.headers.get("cookie") || "";
+
+    const backendRes = await fetch(
+      `${process.env.BACKEND_URL}/api/users/${vetId}`,
+      {
+        method: "DELETE",
+        headers: { Cookie: cookieHeader },
+      }
+    );
+    const data = await backendRes.json();
+    const nextRes = NextResponse.json(data, { status: backendRes.status });
+
+    const setCookie = backendRes.headers.get("set-cookie");
+    if (setCookie) nextRes.headers.set("set-cookie", setCookie);
+
+    return nextRes;
+  } catch (err) {
+    console.error("user delete proxy error:", err);
+    return NextResponse.json(
+      { success: false, message: "Proxy error" },
+      { status: 500 }
+    );
+  }
+};
+
+export const POST = async (request: NextRequest, { params }: ParamType) => {
+  const { vetId } = await params;
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const backendRes = await fetch(
+      `${process.env.BACKEND_URL}/api/appointments/${vetId}/interest`,
+      {
+        method: "POST",
+        headers: {
+          Cookie: cookieHeader,
+        },
+        body: null,
+      }
+    );
+
+    const data = await backendRes.json();
+    const nextRes = NextResponse.json(data, { status: backendRes.status });
+
+    return nextRes;
+  } catch (err) {
+    console.error("Add Pet proxy error:", err);
+    return NextResponse.json(
+      { success: false, message: "Proxy error" },
+      { status: 500 }
+    );
+  }
+};

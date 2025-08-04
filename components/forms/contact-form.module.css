@@ -1,33 +1,35 @@
 .form {
-	margin-top: 2rem;
-	background-color: white;
-	padding: 2rem;
-	border-radius: 1rem;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 2rem;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+
 .formTitle {
-	font-size: 1.5rem;
-	font-weight: bold;
-	color: rgb(94, 79, 184);;
-	margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #664982;
+  margin-bottom: 2rem;
 }
 
-.formGroup {
-	margin-bottom: 1.5rem;
+.formField {
+  margin-bottom: 1.5rem;
 }
-.submitButton{
-	background-color: rgb(94, 79, 184);
-	color: white;
-	padding: 0.75rem 1.5rem;
-	border: none;
-	border-radius: 0.5rem;
-	font-size: 1rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: background-color 0.2s, transform 0.2s;
 
+.submitButton {
+  background-color: #664982;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
 }
+
 .submitButton:hover {
-	background-color:  rgb(73, 57, 163);
-	transform: translateY(-1px);
-	}
+  background-color: #4d3861;
+  transform: translateY(-1px);
+}

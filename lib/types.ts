@@ -90,3 +90,18 @@ export type Vet = {
   email: string;
   licenseNumber: string;
 };
+export type LostPet = {
+  _id: string;
+  name: string;
+  description: string;
+  breed: string;
+  petType: string;
+  image: {
+    url: string;
+  };
+  owner: {
+    _id: string;
+  };
+  location: string;
+  contactInfo: string;
+};

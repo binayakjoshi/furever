@@ -83,7 +83,7 @@ const NavActions = () => {
                 href={
                   user.role === "vet"
                     ? `/vets/${user.userId}`
-                    : `/user/${user.userId}`
+                    : `/pet-owners/${user.userId}`
                 }
                 onClick={toggleDrawer}
                 title="View your profile"
@@ -135,6 +135,16 @@ const NavActions = () => {
               >
                 <FaPlus size={16} />
                 Post in Forum
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/lost-found//add"
+                onClick={toggleDrawer}
+                title="add a post"
+              >
+                <FaPlus size={16} />
+                Post for Lost Pet
               </Link>
             </li>
           </ul>

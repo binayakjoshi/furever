@@ -1,6 +1,6 @@
 const express = require('express');
 const { SessionsClient } = require('@google-cloud/dialogflow');
-
+const { authenticate } = require("../middleware/authentication")
 const router = express.Router();
 
 const sessionClient = new SessionsClient({
@@ -9,6 +9,7 @@ const sessionClient = new SessionsClient({
 
 const projectId = process.env.DIALOGFLOW_PROJECT_ID || 'your-dialogflow-project-id';
 
+router.use(authenticate);
 router.post('/', async (req, res) => {
   try {
     const { message, sessionId } = req.body;

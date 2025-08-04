@@ -1,0 +1,62 @@
+.petOwnerList {
+  width: 100%;
+}
+
+.listHeader {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.count {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.emptyMessage {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.emptySubtext {
+  font-size: 14px;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .listHeader {
+    margin-bottom: 16px;
+  }
+  
+  .emptyState {
+    padding: 40px 20px;
+  }
+  
+  .emptyMessage {
+    font-size: 16px;
+  }
+  
+  .emptySubtext {
+    font-size: 13px;
+  }
+}

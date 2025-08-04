@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser")
 const session = require("express-session")
 const passport = require("./config/passport")
 
+
+const vaccinationReminderService = require("./services/vaccinationReminderService")
 const petRoutes = require("./routes/petRoutes")
 const userRoutes = require("./routes/userRoutes")
 const adoptionRoutes = require("./routes/adoptionRoutes")
@@ -15,6 +17,11 @@ const authRoutes = require("./routes/authRoutes")
 const forumRoutes = require("./routes/forumRoutes")
 const chatRoutes = require("./routes/chatRoutes")
 const appointmentRoutes = require("./routes/appointmentRoutes")
+const lostPetRoutes = require("./routes/lostPetRoutes")
+const vaccinationRoutes = require("./routes/vaccinationRoutes")
+const contactRoutes = require("./routes/contactRoutes")
+
+
 const HttpError = require("./models/http-error")
 
 const app = express()
@@ -22,7 +29,7 @@ const PORT = process.env.PORT || 5000
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
     credentials: true,
@@ -40,18 +47,17 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, 
+      maxAge: 24 * 60 * 60 * 1000,
     },
   }),
 )
 
-// passport user gare
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Pet Information API with JWT Authentication, Location Services & Community Forum",
+    message: "Pet Care System API ",
     contact: {
       phone: "9860909077",
       support: "For API support and inquiries",
@@ -70,9 +76,6 @@ app.get("/", (req, res) => {
         me: "GET /api/users/me",
         updateProfile: "PUT /api/users/me",
         updatePassword: "PUT /api/users/me/password",
-        updateLocation: "PUT /api/users/location",
-        updateLocationByAddress: "PUT /api/users/location/address",
-        findNearbyVets: "GET /api/users/nearby-vets?radius=KM&limit=NUMBER",
       },
       adoptions: {
         base: "/api/adoptions",
@@ -117,45 +120,33 @@ app.get("/", (req, res) => {
       },
       appointments: {
         base: "/api/appointments",
-        getAll: "GET /api/appointments",
-        create: "POST /api/appointments",
-        getById: "GET /api/appointments/:id",
-        update: "PUT /api/appointments/:id",
-        delete: "DELETE /api/appointments/:id",
-        cancel: "PATCH /api/appointments/:id/cancel",
-        myAppointments: "GET /api/appointments/my-appointments",
-        userAppointments: "GET /api/appointments/user/:userId",
-        vetAppointments: "GET /api/appointments/vet/:veterinarianId",
-        myRequests: "GET /api/appointments/vet/my-requests",
+        expressInterest: "POST /api/appointments/interest",
+        removeInterest: "DELETE /api/appointments/interest/:veterinarianId",
+        updateStatus: "PUT /api/appointments/status (vets only)",
+        getInterestedUsers: "GET /api/appointments/interested-users/:veterinarianId (vets only)",
+        myAppointments: "GET /api/appointments/my-appointments (users only)",
       },
-    },
-    features: {
-      authentication: " Role-based login (pet-owner/vet)",
-      locationServices: "Enhanced nearby vet search with distance sorting",
-      cascadeDelete: " Complete user data cleanup on deletion",
-      communityForum: "Posts, replies, and nested conversations",
-      adoptionSystem: "Pet adoption with interest tracking",
-      veterinarianProfiles: "Professional vet profiles with verification",
-      appointmentSystem: "Vet appointment booking and management",
-    },
-    locationServices: {
-      status: "Available",
-      features: [
-        "User location tracking",
-        "Veterinarian location tracking",
-        "Enhanced nearby vet search with emergency priority",
-        "Distance-based sorting",
-        "OpenStreetMap integration",
-        "Geospatial database queries",
-      ],
-      supportedCoordinates: "WGS84 (latitude/longitude)",
-      maxSearchRadius: "100km",
-      geocodingProvider: "OpenStreetMap Nominatim",
+      lostPets: {
+        base: "/api/lost-pets",
+        getAll: "GET /api/lost-pets",
+        create: "POST /api/lost-pets (with image upload)",
+        getById: "GET /api/lost-pets/:id",
+        reportFound: "POST /api/lost-pets/:id/found (with image upload)",
+        updateStatus: "PATCH /api/lost-pets/:id/status",
+        myAlerts: "GET /api/lost-pets/user/my-alerts",
+        delete: "DELETE /api/lost-pets/:id",
+      },
+      vaccinations: {
+        base: "/api/vaccinations",
+        upcoming: "GET /api/vaccinations/upcoming?days=30",
+        stats: "GET /api/vaccinations/stats",
+        testReminder: "POST /api/vaccinations/test-reminder/:petId",
+        triggerReminders: "POST /api/vaccinations/trigger-reminders",
+      },
     },
   })
 })
 
-// Main API routes
 app.use("/api/pets", petRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/adoptions", adoptionRoutes)
@@ -164,8 +155,11 @@ app.use("/api/forum", forumRoutes)
 app.use("/api/appointments", appointmentRoutes)
 app.use("/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
+app.use("/api/lost-pets", lostPetRoutes)
+app.use("/api/vaccinations", vaccinationRoutes)
+app.use("/api/contact",contactRoutes)
 
-// 404 handler
+
 app.use((req, res, next) => {
   const error = new HttpError(`Route ${req.originalUrl} not found`, 404)
   next(error)
@@ -190,17 +184,17 @@ app.use((error, req, res, next) => {
   })
 })
 
-
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Connected to MongoDB Atlas")
+    vaccinationReminderService.initializeCronJob()
     app.listen(PORT, () => {
-      console.log(`Server is running on: http://localhost:${PORT}`)
-      console.log(`Google OAuth URL: http://localhost:${PORT}/auth/google`)
-      
+      console.log(` Server is running on: http://localhost:${PORT}`)
+      console.log(` Google OAuth URL: http://localhost:${PORT}/auth/google`)
+      console.log(` Vaccination reminders will run daily at 9:00 AM`)
     })
   })
   .catch((err) => {
-    console.error("MongoDB connection error:", err)
+    console.error(" MongoDB connection error:", err)
   })

@@ -30,7 +30,7 @@ const ReplyItem = ({ reply }: ReplyItemProps) => {
   return (
     <div className={styles.replyItem}>
       <div className={styles.replyHeader}>
-        <Link href={`/user/${reply.author._id}`}>
+        <Link href={`/pet-owner/${reply.author._id}`}>
           <div className={styles.replyAuthorInfo}>
             <div className={styles.replyAvatar}>
               <Image

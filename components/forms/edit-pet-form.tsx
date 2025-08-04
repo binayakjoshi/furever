@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -11,6 +11,7 @@ import Button from "../custom-elements/button";
 import { VALIDATOR_REQUIRE } from "@/lib/validators";
 import ErrorModal from "../ui/error";
 import LoadingSpinner from "../ui/loading-spinner";
+import SuccessPopup from "../ui/success-popup";
 import type { Pet } from "@/lib/types";
 import styles from "./edit-pet-form.module.css";
 
@@ -59,6 +60,7 @@ const EditPetForm = () => {
 
   const { isLoading, sendRequest, clearError, error } =
     useHttp<PetDetailResponse>();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -154,7 +156,10 @@ const EditPetForm = () => {
       }
 
       await sendRequest(`/api/pets/${petSlug}/edit`, "PUT", requestData);
-      router.push(`/pets/${petSlug}`);
+      setShowSuccessPopup(true);
+      setTimeout(() => {
+        router.push(`/pets/${petSlug}`);
+      }, 2000);
     } catch (err) {
       console.error("Error submitting form:", err);
     }
@@ -172,6 +177,12 @@ const EditPetForm = () => {
   return (
     <div className={styles.formContainer}>
       {error && <ErrorModal error={error} clearError={clearError} />}
+      <SuccessPopup
+        message="Changes saved successfully!"
+        isVisible={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        duration={3000}
+      />
       <div className={styles.header}>
         <h1 className={styles.title}>Edit your Pet data</h1>
         <Button

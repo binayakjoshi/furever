@@ -195,6 +195,28 @@
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   
 }
+.vetCardAction{
+  margin-top: auto;       /* push it to the bottom of the column */
+  align-self: flex-end;   /* right‑align in the flex container */
+}
+
+.bookAppointment:enabled{
+  padding: 0.3rem 1.2rem;
+  background-color:  #664982;
+  color: white;
+  border: 1px solid  #664982;
+  border-radius: 0.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 0.3rem;
+}
+.bookAppointment:Enabled:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
 
 /* Responsive design */
 @media (max-width: 768px) {

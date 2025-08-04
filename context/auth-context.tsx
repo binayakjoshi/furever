@@ -1,10 +1,10 @@
 "use client";
 
-import { PetOwner } from "@/lib/types";
+import { PetOwner, Vet } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useState, useEffect } from "react";
 
-type User = PetOwner;
+type User = PetOwner | Vet;
 
 type AuthContextValue = {
   user: User | null;

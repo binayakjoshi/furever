@@ -27,7 +27,12 @@ const adoptionSchema = new mongoose.Schema({
   },
   petType:{
     type:String,
-    required : true
+    required: [true, "Pet type is required"],
+    enum: {
+      values: ["dog", "cat"],
+      message: "Pet type must be either dog or cat"
+    },
+    default: "dog"
   },
   image: {
     url: {

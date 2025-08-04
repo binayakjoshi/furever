@@ -142,6 +142,13 @@ const AdoptionItem = ({ pet }: AdoptionItemProps) => {
                     >
                       Delete
                     </Button>
+                    <Button
+                      onClick={() =>
+                        router.push(`/adoption/my-post/${pet._id}`)
+                      }
+                    >
+                      View Interested User
+                    </Button>
                   </>
                 ) : (
                   <Button

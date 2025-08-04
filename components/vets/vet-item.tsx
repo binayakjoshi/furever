@@ -6,7 +6,6 @@ import styles from "./vet-item.module.css";
 type VetItemProps = {
   vet: Vet;
 };
-
 const VetItem = ({ vet }: VetItemProps) => {
   return (
     <>
